@@ -1,7 +1,7 @@
 FROM debian:jessie
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
-RUN groupadd postgres && useradd -r -g postgres postgres
+RUN groupadd -r postgres && useradd -r -g postgres postgres
 
 RUN apt-get update && apt-get install -y \
 		bison \
