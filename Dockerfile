@@ -1,5 +1,8 @@
 FROM debian:jessie
 
+# add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
+RUN groupadd postgres && useradd -r -g postgres postgres
+
 RUN apt-get update && apt-get install -y \
 		bison \
 		build-essential \
@@ -8,7 +11,6 @@ RUN apt-get update && apt-get install -y \
 		libreadline-dev \
 		zlib1g-dev
 
-RUN groupadd postgres && useradd -r -g postgres postgres
 RUN curl -o /usr/local/bin/gosu -SL 'https://github.com/tianon/gosu/releases/download/1.0/gosu' \
 	&& chmod +x /usr/local/bin/gosu
 
