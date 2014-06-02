@@ -3,13 +3,14 @@ FROM debian:jessie
 RUN apt-get update && apt-get install -y \
 		bison \
 		build-essential \
+		curl \
 		flex \
 		libreadline-dev \
-		sudo \
 		zlib1g-dev
 
 RUN groupadd postgres && useradd -r -g postgres postgres
-RUN sed -ri 's/^Defaults\s+secure_path/#&/' /etc/sudoers
+RUN curl -o /usr/local/bin/gosu -SL 'https://github.com/tianon/gosu/releases/download/1.0/gosu' \
+	&& chmod +x /usr/local/bin/gosu
 
 ADD . /usr/src/postgres
 WORKDIR /usr/src/postgres
@@ -17,7 +18,7 @@ WORKDIR /usr/src/postgres
 RUN ./configure
 RUN make -j"$(nproc)"
 RUN chown -R postgres src/test/regress \
-	&& sudo -u postgres make check \
+	&& gosu postgres make check \
 	|| { cat >&2 /usr/src/postgres/src/test/regress/log/initdb.log; false; }
 RUN make install
 
