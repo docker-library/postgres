@@ -15,15 +15,24 @@ RUN curl -o /usr/local/bin/gosu -SL 'https://github.com/tianon/gosu/releases/dow
 	&& chmod +x /usr/local/bin/gosu
 
 ADD . /usr/src/postgres
-WORKDIR /usr/src/postgres
 
-RUN ./configure
-RUN make -j"$(nproc)"
-RUN chown -R postgres src/test/regress \
-	&& gosu postgres make check \
-	|| { cat >&2 /usr/src/postgres/src/test/regress/log/initdb.log; false; }
-RUN make install
+RUN cd /usr/src \
+	&& cp -a postgres postgres-build \
+	&& cd postgres-build \
+	&& ./configure \
+	&& make -j"$(nproc)" \
+	&& chown -R postgres src/test/regress \
+	&& (gosu postgres make check \
+		|| { cat >&2 /usr/src/postgres/src/test/regress/log/initdb.log; false; }) \
+	&& make install \
+	&& cd .. \
+	&& rm -rf postgres-build \
+	&& find /usr/local/pgsql -type f -name "*.a" -delete \
+	&& ((find /usr/local/pgsql -type f -print | xargs strip --strip-all) || true) \
+	&& rm -rf /usr/local/pgsql/include \
+	&& rm -rf /usr/local/pgsql/lib/pgxs
 
+WORKDIR /usr/local/pgsql
 ENV PATH $PATH:/usr/local/pgsql/bin:/usr/local/mysql/scripts
 
 ENV PGDATA /var/lib/postgresql/data
