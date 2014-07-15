@@ -12,12 +12,15 @@ RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main' > /etc/
 	&& curl -sSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
 		| apt-key add - ED6D65271AACF0FF15D123036FB2A1C265FFB764
 
+ENV PG_MAJOR 9.3
+ENV PG_VERSION 9.3.4-1.pgdg70+1
+
 RUN apt-get update \
 	&& apt-get install -y postgresql-common \
 	&& sed -ri 's/#(create_main_cluster) .*$/\1 = false/' /etc/postgresql-common/createcluster.conf \
-	&& apt-get install -y postgresql-9.3
+	&& apt-get install -y postgresql-$PG_MAJOR=$PG_VERSION
 
-ENV PATH /usr/lib/postgresql/9.3/bin:$PATH
+ENV PATH /usr/lib/postgresql/$PG_MAJOR/bin:$PATH
 ENV PGDATA /var/lib/postgresql/data
 VOLUME /var/lib/postgresql/data
 
