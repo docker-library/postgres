@@ -5,7 +5,7 @@ RUN groupadd -r postgres && useradd -r -g postgres postgres
 
 RUN apt-get update && apt-get install -y curl
 
-RUN curl -o /usr/local/bin/gosu -SL 'https://github.com/tianon/gosu/releases/download/1.0/gosu' \
+RUN curl -o /usr/local/bin/gosu -SL 'https://github.com/tianon/gosu/releases/download/1.1/gosu' \
 	&& chmod +x /usr/local/bin/gosu
 
 RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main' > /etc/apt/sources.list.d/pgdg.list \
