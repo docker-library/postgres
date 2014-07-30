@@ -9,7 +9,7 @@ RUN curl -o /usr/local/bin/gosu -SL 'https://github.com/tianon/gosu/releases/dow
 	&& chmod +x /usr/local/bin/gosu
 
 ENV PG_MAJOR 9.1
-ENV PG_VERSION 9.1.13-1.pgdg70+1
+ENV PG_VERSION 9.1.14-1.pgdg70+1
 
 RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main' $PG_MAJOR > /etc/apt/sources.list.d/pgdg.list \
 	&& curl -sSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
