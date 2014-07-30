@@ -18,7 +18,9 @@ RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main' $PG_MAJ
 RUN apt-get update \
 	&& apt-get install -y postgresql-common \
 	&& sed -ri 's/#(create_main_cluster) .*$/\1 = false/' /etc/postgresql-common/createcluster.conf \
-	&& apt-get install -y postgresql-$PG_MAJOR=$PG_VERSION
+	&& apt-get install -y \
+		postgresql-$PG_MAJOR=$PG_VERSION \
+		postgresql-contrib-$PG_MAJOR=$PG_VERSION
 
 ENV PATH /usr/lib/postgresql/$PG_MAJOR/bin:$PATH
 ENV PGDATA /var/lib/postgresql/data
