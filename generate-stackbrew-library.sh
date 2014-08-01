@@ -3,7 +3,7 @@ set -e
 
 declare -A aliases
 aliases=(
-	[9.3]='latest 9'
+	[9.3]='9 latest'
 	[8.4]='8'
 )
 
@@ -18,7 +18,7 @@ echo '# maintainer: InfoSiftr <github@infosiftr.com> (@infosiftr)'
 for version in "${versions[@]}"; do
 	commit="$(git log -1 --format='format:%H' "$version")"
 	fullVersion="$(grep -m1 'ENV PG_VERSION ' "$version/Dockerfile" | cut -d' ' -f3 | cut -d- -f1 | sed 's/~/-/g')"
-	versionAliases=( ${aliases[$version]} $version $fullVersion )
+	versionAliases=( $fullVersion $version ${aliases[$version]} )
 	
 	echo
 	for va in "${versionAliases[@]}"; do
