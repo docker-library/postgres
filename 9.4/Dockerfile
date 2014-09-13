@@ -18,7 +18,7 @@ ENV LANG en_US.utf8
 RUN apt-key adv --keyserver pgp.mit.edu --recv-keys B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8
 
 ENV PG_MAJOR 9.4
-ENV PG_VERSION 9.4~beta2-1.pgdg70+1
+ENV PG_VERSION 9.4~beta2-2~129.bzr487.pgdg70+1
 
 RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main' $PG_MAJOR > /etc/apt/sources.list.d/pgdg.list
 
