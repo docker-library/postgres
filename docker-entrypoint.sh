@@ -4,7 +4,7 @@ set -e
 if [ "$1" = 'postgres' ]; then
 	chown -R postgres "$PGDATA"
 	
-	if [ -z "$(ls -A "$PGDATA")" ]; then
+	if [ -z "$(ls -A "$PGDATA" | grep -v ^.gitkeep$)" ]; then
 		gosu postgres initdb
 		
 		sed -ri "s/^#(listen_addresses\s*=\s*)\S+/\1'*'/" "$PGDATA"/postgresql.conf
