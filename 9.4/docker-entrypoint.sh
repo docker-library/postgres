@@ -15,7 +15,7 @@ if [ "$1" = 'postgres' ]; then
 			pass="PASSWORD '$POSTGRES_PASSWORD'"
 			authMethod=md5
 		else
-			# The - option  suppresses leading tabs but *not* spaces. :)
+			# The - option suppresses leading tabs but *not* spaces. :)
 			cat >&2 <<-'EOWARN'
 				****************************************************
 				WARNING: No password has been set for the database.
@@ -33,14 +33,17 @@ if [ "$1" = 'postgres' ]; then
 			op='ALTER'
 		else
 			op='CREATE'
-			gosu postgres postgres --single -E <<-EOSQL
-				CREATE DATABASE "$POSTGRES_USER"
+			gosu postgres postgres --single -jE <<-EOSQL
+				CREATE DATABASE "$POSTGRES_USER" ;
 			EOSQL
+			echo
 		fi
 		
-		gosu postgres postgres --single <<-EOSQL
-			$op USER "$POSTGRES_USER" WITH SUPERUSER $pass
+		gosu postgres postgres --single -jE <<-EOSQL
+			$op USER "$POSTGRES_USER" WITH SUPERUSER $pass ;
 		EOSQL
+		echo
+		
 		{ echo; echo "host all \"$POSTGRES_USER\" 0.0.0.0/0 $authMethod"; } >> "$PGDATA"/pg_hba.conf
 		
 		if [ -d /docker-entrypoint-initdb.d ]; then
