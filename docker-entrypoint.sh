@@ -19,6 +19,12 @@ if [ "$1" = 'postgres' ]; then
 			cat >&2 <<-'EOWARN'
 				****************************************************
 				WARNING: No password has been set for the database.
+				         This will allow anyone with access to the
+				         Postgres port to access your database. In
+				         Docker's default configuration, this is
+				         effectively any other container on the same
+				         system.
+				         
 				         Use "-e POSTGRES_PASSWORD=password" to set
 				         it in "docker run".
 				****************************************************
@@ -44,7 +50,7 @@ if [ "$1" = 'postgres' ]; then
 		EOSQL
 		echo
 		
-		{ echo; echo "host all \"$POSTGRES_USER\" 0.0.0.0/0 $authMethod"; } >> "$PGDATA"/pg_hba.conf
+		{ echo; echo "host all all 0.0.0.0/0 $authMethod"; } >> "$PGDATA"/pg_hba.conf
 		
 		if [ -d /docker-entrypoint-initdb.d ]; then
 			for f in /docker-entrypoint-initdb.d/*.sh; do
