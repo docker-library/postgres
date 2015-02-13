@@ -29,7 +29,7 @@ if [ "$1" = 'postgres' ]; then
 		fi
 		
 		: ${POSTGRES_USER:=postgres}
-    : ${POSTGRES_DB:=$POSTGRES_USER}
+		: ${POSTGRES_DB:=$POSTGRES_USER}
 		if [ "$POSTGRES_DB" = 'postgres' ]; then
 			op='ALTER'
 		else
