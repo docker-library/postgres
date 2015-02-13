@@ -30,7 +30,7 @@ if [ "$1" = 'postgres' ]; then
 		
 		: ${POSTGRES_USER:=postgres}
 		: ${POSTGRES_DB:=$POSTGRES_USER}
-		if [ "$POSTGRES_USER" = 'postgres' ]; then
+		if [ "$POSTGRES_DB" = 'postgres' ]; then
 			op='ALTER'
 		else
 			op='CREATE'
