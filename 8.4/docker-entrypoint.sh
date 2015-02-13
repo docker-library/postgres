@@ -29,12 +29,13 @@ if [ "$1" = 'postgres' ]; then
 		fi
 		
 		: ${POSTGRES_USER:=postgres}
-		if [ "$POSTGRES_USER" = 'postgres' ]; then
+		: ${POSTGRES_DB:=$POSTGRES_USER}
+		if [ "$POSTGRES_DB" = 'postgres' ]; then
 			op='ALTER'
 		else
 			op='CREATE'
 			gosu postgres postgres --single -jE <<-EOSQL
-				CREATE DATABASE "$POSTGRES_USER" ;
+				CREATE DATABASE "$POSTGRES_DB" ;
 			EOSQL
 			echo
 		fi
