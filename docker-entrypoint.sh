@@ -35,7 +35,7 @@ if [ "$1" = 'postgres' ]; then
 		else
 			op='CREATE'
 			gosu postgres postgres --single -jE <<-EOSQL
-				CREATE DATABASE "$POSTGRES_USER" ;
+				CREATE DATABASE "$POSTGRES_DB" ;
 			EOSQL
 			echo
 		fi
