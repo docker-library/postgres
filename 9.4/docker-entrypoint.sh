@@ -17,12 +17,14 @@ if [ "$1" = 'postgres' ]; then
 		gosu postgres initdb
 
         alter_system "listen_addresses" "*"
-        alter_system "shared_buffers" $POSTGRES_SHARED_BUFFERS
-        alter_system "max_connections" $POSTGRES_MAX_CONNECTIONS
-        alter_system "wal_level" $POSTGRES_WAL_LEVEL
-        alter_system "work_mem" $POSTGRES_WORK_MEM
-        alter_system "effective_cache_size" $POSTGRES_EFFECTIVE_CACHE_SIZE
-        alter_system "wal_buffers" $POSTGRES_WAL_BUFFERS
+
+        conf_prefix="POSTGRES_CONF_"
+        for env_name in $(env | cut -d= -f1 | grep "$conf_prefix.*"); do
+            value=$env_name
+            setting_name=${env_name#$conf_prefix}
+            setting_name=${setting_name,,}
+            alter_system $setting_name ${!value}
+        done
 
 		# check password first so we can ouptut the warning before postgres
 		# messes it up
