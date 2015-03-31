@@ -1,6 +1,12 @@
 #!/bin/bash
 set -e
 
+function alter_system {
+    if [ ! -z "$2" -a "$2" != " " ]; then
+        sed -ri "s/^#?($1\s*=\s*)\S+/\1'$2'/" "$PGDATA"/postgresql.conf
+    fi
+}
+
 if [ "$1" = 'postgres' ]; then
 	chown -R postgres "$PGDATA"
 	
@@ -9,9 +15,15 @@ if [ "$1" = 'postgres' ]; then
 	
 	if [ -z "$(ls -A "$PGDATA")" ]; then
 		gosu postgres initdb
-		
-		sed -ri "s/^#(listen_addresses\s*=\s*)\S+/\1'*'/" "$PGDATA"/postgresql.conf
-		
+
+        alter_system "listen_addresses" "*"
+        alter_system "shared_buffers" $POSTGRES_SHARED_BUFFERS
+        alter_system "max_connections" $POSTGRES_MAX_CONNECTIONS
+        alter_system "wal_level" $POSTGRES_WAL_LEVEL
+        alter_system "work_mem" $POSTGRES_WORK_MEM
+        alter_system "effective_cache_size" $POSTGRES_EFFECTIVE_CACHE_SIZE
+        alter_system "wal_buffers" $POSTGRES_WAL_BUFFERS
+
 		# check password first so we can ouptut the warning before postgres
 		# messes it up
 		if [ "$POSTGRES_PASSWORD" ]; then
