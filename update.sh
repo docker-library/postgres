@@ -9,7 +9,7 @@ if [ ${#versions[@]} -eq 0 ]; then
 fi
 versions=( "${versions[@]%/}" )
 
-packagesUrl='http://apt.postgresql.org/pub/repos/apt/dists/wheezy-pgdg/main/binary-amd64/Packages'
+packagesUrl='http://apt.postgresql.org/pub/repos/apt/dists/jessie-pgdg/main/binary-amd64/Packages'
 packages="$(echo "$packagesUrl" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 curl -sSL "${packagesUrl}.bz2" | bunzip2 > "$packages"
 
