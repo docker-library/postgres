@@ -1,6 +1,12 @@
 #!/bin/bash
 set -e
 
+function alter_system {
+	if [ ! -z "$2" -a "$2" != " " ]; then
+		sed -ri "s/^#?($1\s*=\s*)\S+/\1'$2'/" "$PGDATA"/postgresql.conf
+	fi
+}
+
 if [ "$1" = 'postgres' ]; then
 	chown -R postgres "$PGDATA"
 	
@@ -9,9 +15,16 @@ if [ "$1" = 'postgres' ]; then
 	
 	if [ -z "$(ls -A "$PGDATA")" ]; then
 		gosu postgres initdb
-		
-		sed -ri "s/^#(listen_addresses\s*=\s*)\S+/\1'*'/" "$PGDATA"/postgresql.conf
-		
+
+		alter_system "listen_addresses" "*"
+
+		for env_name in ${!POSTGRES_CONF_*}; do
+			value=$env_name
+			setting_name=${env_name#"POSTGRES_CONF_"}
+			setting_name=${setting_name,,}
+			alter_system $setting_name ${!value}
+		done
+
 		# check password first so we can ouptut the warning before postgres
 		# messes it up
 		if [ "$POSTGRES_PASSWORD" ]; then
