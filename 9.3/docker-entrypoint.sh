@@ -66,6 +66,12 @@ if [ "$1" = 'postgres' ]; then
 			done
 		fi
 	fi
+
+        if [ -n "$PG_LOCALE" ]; then
+            echo "$PG_LOCALE" >> /etc/locale.conf
+            echo "$PG_LOCALE" >> /etc/locale.gen
+            locale-gen
+        fi
 	
 	exec gosu postgres "$@"
 fi
