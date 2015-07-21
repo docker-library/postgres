@@ -9,7 +9,7 @@ if [ "$1" = 'postgres' ]; then
 	chown -R postgres:postgres /run/postgresql
 
 	# look specifically for PG_VERSION, as it is expected in the DB dir
-	if [ -s "$PGDATA/PG_VERSION" ]; then
+	if [ ! -s "$PGDATA/PG_VERSION" ]; then
 		gosu postgres initdb
 
 		sed -ri "s/^#(listen_addresses\s*=\s*)\S+/\1'*'/" "$PGDATA"/postgresql.conf
