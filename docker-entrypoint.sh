@@ -45,10 +45,10 @@ if [ "$1" = 'postgres' ]; then
 		{ echo; echo "host all all 0.0.0.0/0 $authMethod"; } >> "$PGDATA/pg_hba.conf"
 
 		# internal start of server in order to allow set-up using psql-client		
+		# does not listen on TCP/IP and waits until start finishes
 		gosu postgres pg_ctl -D "$PGDATA" \
-		     -o "-c listen_addresses=''" \
-		     -w start # does not listen on TCP/IP and waits
-			      # until start finishes
+			-o "-c listen_addresses=''" \
+			-w start
 
 		: ${POSTGRES_USER:=postgres}
 		: ${POSTGRES_DB:=$POSTGRES_USER}

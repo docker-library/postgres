@@ -44,21 +44,11 @@ if [ "$1" = 'postgres' ]; then
 
 		{ echo; echo "host all all 0.0.0.0/0 $authMethod"; } >> "$PGDATA/pg_hba.conf"
 
-		set_listen_addresses '' # we're going to start up postgres, but it's not ready for use yet (this is initialization), so don't listen to the outside world yet
-
-		gosu postgres "$@" &
-		pid="$!"
-		for i in {30..0}; do
-			if echo 'SELECT 1' | psql --username postgres &> /dev/null; then
-				break
-			fi
-			echo 'PostgreSQL init process in progress...'
-			sleep 1
-		done
-		if [ "$i" = 0 ]; then
-			echo >&2 'PostgreSQL init process failed'
-			exit 1
-		fi
+		# internal start of server in order to allow set-up using psql-client		
+		# does not listen on TCP/IP and waits until start finishes
+		gosu postgres pg_ctl -D "$PGDATA" \
+			-o "-c listen_addresses=''" \
+			-w start
 
 		: ${POSTGRES_USER:=postgres}
 		: ${POSTGRES_DB:=$POSTGRES_USER}
@@ -91,11 +81,7 @@ if [ "$1" = 'postgres' ]; then
 			echo
 		done
 
-		if ! kill -s TERM "$pid" || ! wait "$pid"; then
-			echo >&2 'PostgreSQL init process failed'
-			exit 1
-		fi
-
+		gosu postgres pg_ctl -D "$PGDATA" -m fast -w stop
 		set_listen_addresses '*'
 
 		echo
