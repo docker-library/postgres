@@ -7,8 +7,8 @@ set_listen_addresses() {
 }
 
 if [ "$1" = 'postgres' ]; then
-	mkdir -p "${PGDATA}"
-	chown -R postgres "${PGDATA}"
+	mkdir -p "$PGDATA"
+	chown -R postgres "$PGDATA"
 
 	chmod g+s /run/postgresql
 	chown -R postgres /run/postgresql
@@ -45,10 +45,10 @@ if [ "$1" = 'postgres' ]; then
 		{ echo; echo "host all all 0.0.0.0/0 $authMethod"; } >> "$PGDATA/pg_hba.conf"
 
 		# internal start of server in order to allow set-up using psql-client		
-		gosu postgres pg_ctl -D ${PGDATA} \
+		gosu postgres pg_ctl -D "$PGDATA" \
 		     -o "-c listen_addresses=''" \
-		     -w start # does not listen on TCP/IP and wait
-				# until start finished
+		     -w start # does not listen on TCP/IP and waits
+			      # until start finishes
 
 		: ${POSTGRES_USER:=postgres}
 		: ${POSTGRES_DB:=$POSTGRES_USER}
@@ -81,7 +81,7 @@ if [ "$1" = 'postgres' ]; then
 			echo
 		done
 
-		gosu postgres pg_ctl -D ${PGDATA} -m fast -w stop
+		gosu postgres pg_ctl -D "$PGDATA" -m fast -w stop
 		set_listen_addresses '*'
 
 		echo
