@@ -1,0 +1,29 @@
+language: bash
+
+# for secret experimental features ;)
+sudo: 9000
+
+env:
+  - VERSION=9.5
+  - VERSION=9.4
+  - VERSION=9.3
+  - VERSION=9.2
+  - VERSION=9.1
+  - VERSION=9.0
+
+install:
+  - git clone https://github.com/docker-library/official-images.git ~/official-images
+
+before_script:
+  - env | sort
+  - cd "$VERSION"
+  - image="postgres:$VERSION"
+
+script:
+  - docker build -t "$image" .
+  - ~/official-images/test/run.sh "$image"
+
+after_script:
+  - docker images
+
+# vim:set et ts=2 sw=2:
