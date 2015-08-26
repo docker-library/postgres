@@ -52,6 +52,7 @@ if [ "$1" = 'postgres' ]; then
 
 		: ${POSTGRES_USER:=postgres}
 		: ${POSTGRES_DB:=$POSTGRES_USER}
+		export POSTGRES_USER POSTGRES_DB
 
 		if [ "$POSTGRES_DB" != 'postgres' ]; then
 			psql --username postgres <<-EOSQL
