@@ -83,7 +83,7 @@ if [ "$1" = 'postgres' ]; then
 		done
 
 		gosu postgres pg_ctl -D "$PGDATA" -m fast -w stop
-		set_listen_addresses '*'
+		set_listen_addresses '\*'
 
 		echo
 		echo 'PostgreSQL init process complete; ready for start up.'
