@@ -9,13 +9,13 @@ if [ ${#versions[@]} -eq 0 ]; then
 fi
 versions=( "${versions[@]%/}" )
 
-packagesUrl='http://apt.postgresql.org/pub/repos/apt/dists/jessie-pgdg/main/binary-amd64/Packages'
-packages="$(echo "$packagesUrl" | sed -r 's/[^a-zA-Z.-]+/-/g')"
-curl -sSL "${packagesUrl}.bz2" | bunzip2 > "$packages"
+packagesBase='http://apt.postgresql.org/pub/repos/apt/dists/jessie-pgdg'
+mainList="$(curl -fsSL "$packagesBase/main/binary-amd64/Packages.bz2" | bunzip2)"
 
 travisEnv=
 for version in "${versions[@]}"; do
-	fullVersion="$(grep -m1 -A10 "^Package: postgresql-$version\$" "$packages" | grep -m1 '^Version: ' | cut -d' ' -f2)"
+	versionList="$(echo "$mainList"; curl -fsSL "$packagesBase/$version/binary-amd64/Packages.bz2" | bunzip2)"
+	fullVersion="$(echo "$versionList" | awk -F ': ' '$1 == "Package" { pkg = $2 } $1 == "Version" && pkg == "postgresql-'"$version"'" { print $2 }')"
 	(
 		set -x
 		cp docker-entrypoint.sh "$version/"
@@ -27,5 +27,3 @@ done
 
 travis="$(awk -v 'RS=\n\n' '$1 == "env:" { $0 = "env:'"$travisEnv"'" } { printf "%s%s", $0, RS }' .travis.yml)"
 echo "$travis" > .travis.yml
-
-rm "$packages"
