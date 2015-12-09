@@ -6,6 +6,10 @@ set_listen_addresses() {
 	sed -ri "s/^#?(listen_addresses\s*=\s*)\S+/\1'$sedEscapedValue'/" "$PGDATA/postgresql.conf"
 }
 
+pg_ctl_wrapper() {
+	gosu postgres pg_ctl -D "$PGDATA" -w -t 2147483647 "$@"
+}
+
 if [ "$1" = 'postgres' ]; then
 	mkdir -p "$PGDATA"
 	chown -R postgres "$PGDATA"
@@ -46,9 +50,7 @@ if [ "$1" = 'postgres' ]; then
 
 		# internal start of server in order to allow set-up using psql-client		
 		# does not listen on TCP/IP and waits until start finishes
-		gosu postgres pg_ctl -D "$PGDATA" \
-			-o "-c listen_addresses=''" \
-			-w start
+		pg_ctl_wrapper -o "-c listen_addresses=''" start
 
 		: ${POSTGRES_USER:=postgres}
 		: ${POSTGRES_DB:=$POSTGRES_USER}
@@ -82,7 +84,7 @@ if [ "$1" = 'postgres' ]; then
 			echo
 		done
 
-		gosu postgres pg_ctl -D "$PGDATA" -m fast -w stop
+		pg_ctl_wrapper -m fast stop
 		set_listen_addresses '*'
 
 		echo
