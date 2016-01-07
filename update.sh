@@ -15,11 +15,11 @@ mainList="$(curl -fsSL "$packagesBase/main/binary-amd64/Packages.bz2" | bunzip2)
 travisEnv=
 for version in "${versions[@]}"; do
 	versionList="$(echo "$mainList"; curl -fsSL "$packagesBase/$version/binary-amd64/Packages.bz2" | bunzip2)"
-	fullVersion="$(echo "$versionList" | awk -F ': ' '$1 == "Package" { pkg = $2 } $1 == "Version" && pkg == "postgresql-'"$version"'" { print $2 }')"
+	fullVersion="$(echo "$versionList" | awk -F ': ' '$1 == "Package" { pkg = $2 } $1 == "Version" && pkg == "postgresql-'"$version"'" { print $2; exit }' || true)"
 	(
 		set -x
 		cp docker-entrypoint.sh "$version/"
-		sed 's/%%PG_MAJOR%%/'$version'/g; s/%%PG_VERSION%%/'$fullVersion'/g' Dockerfile.template > "$version/Dockerfile"
+		sed 's/%%PG_MAJOR%%/'"$version"'/g; s/%%PG_VERSION%%/'"$fullVersion"'/g' Dockerfile.template > "$version/Dockerfile"
 	)
 	
 	travisEnv='\n  - VERSION='"$version$travisEnv"
