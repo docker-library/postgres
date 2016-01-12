@@ -34,6 +34,9 @@ RUN apt-get update \
 	&& apt-get install -y \
 		postgresql-$PG_MAJOR=$PG_VERSION \
 		postgresql-contrib-$PG_MAJOR=$PG_VERSION \
+		postgresql-plperl-$PG_MAJOR=$PG_VERSION \
+		postgresql-plpython-$PG_MAJOR=$PG_VERSION \
+		postgresql-pltcl-$PG_MAJOR=$PG_VERSION \
 	&& rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /var/run/postgresql && chown -R postgres /var/run/postgresql
