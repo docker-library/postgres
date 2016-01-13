@@ -36,6 +36,7 @@ RUN apt-get update \
 		postgresql-contrib-$PG_MAJOR=$PG_VERSION \
 		postgresql-plperl-$PG_MAJOR=$PG_VERSION \
 		postgresql-plpython-$PG_MAJOR=$PG_VERSION \
+		postgresql-plpython3-$PG_MAJOR=$PG_VERSION \
 		postgresql-pltcl-$PG_MAJOR=$PG_VERSION \
 	&& rm -rf /var/lib/apt/lists/*
 
