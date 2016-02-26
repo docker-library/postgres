@@ -1,10 +1,9 @@
 #!/bin/bash
 set -e
 
-set_listen_addresses() {
-	sedEscapedValue="$(echo "$1" | sed 's/[\/&]/\\&/g')"
-	sed -ri "s/^#?(listen_addresses\s*=\s*)\S+/\1'$sedEscapedValue'/" "$PGDATA/postgresql.conf"
-}
+if [ "${1:0:1}" = '-' ]; then
+	set -- postgres "$@"
+fi
 
 if [ "$1" = 'postgres' ]; then
 	mkdir -p "$PGDATA"
@@ -88,7 +87,6 @@ if [ "$1" = 'postgres' ]; then
 		done
 
 		gosu postgres pg_ctl -D "$PGDATA" -m fast -w stop
-		set_listen_addresses '*'
 
 		echo
 		echo 'PostgreSQL init process complete; ready for start up.'

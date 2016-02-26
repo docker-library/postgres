@@ -36,6 +36,11 @@ RUN apt-get update \
 		postgresql-contrib-$PG_MAJOR=$PG_VERSION \
 	&& rm -rf /var/lib/apt/lists/*
 
+# make the sample config easier to munge (and "correct by default")
+RUN mv -v /usr/share/postgresql/$PG_MAJOR/postgresql.conf.sample /usr/share/postgresql/ \
+	&& ln -sv ../postgresql.conf.sample /usr/share/postgresql/$PG_MAJOR/ \
+	&& sed -ri "s!^#?(listen_addresses)\s*=\s*\S+.*!\1 = '*'!" /usr/share/postgresql/postgresql.conf.sample
+
 RUN mkdir -p /var/run/postgresql && chown -R postgres /var/run/postgresql
 
 ENV PATH /usr/lib/postgresql/$PG_MAJOR/bin:$PATH
