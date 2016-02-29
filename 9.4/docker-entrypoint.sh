@@ -17,6 +17,7 @@ if [ "$1" = 'postgres' ]; then
 	# look specifically for PG_VERSION, as it is expected in the DB dir
 	if [ ! -s "$PGDATA/PG_VERSION" ]; then
 		gosu postgres initdb
+		sed -i "s|^#include_if_exists = 'exists.conf'|include_if_exists = '/etc/postgres/postgresql.conf'|" "$PGDATA/postgresql.conf"
 
 		# check password first so we can output the warning before postgres
 		# messes it up
