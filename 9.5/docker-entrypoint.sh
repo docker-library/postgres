@@ -55,8 +55,10 @@ if [ "$1" = 'postgres' ]; then
 		: ${POSTGRES_DB:=$POSTGRES_USER}
 		export POSTGRES_USER POSTGRES_DB
 
+		psql=( psql -v ON_ERROR_STOP=1 )
+
 		if [ "$POSTGRES_DB" != 'postgres' ]; then
-			psql --username postgres <<-EOSQL
+			"${psql[@]}" --username postgres <<-EOSQL
 				CREATE DATABASE "$POSTGRES_DB" ;
 			EOSQL
 			echo
@@ -67,22 +69,20 @@ if [ "$1" = 'postgres' ]; then
 		else
 			op='CREATE'
 		fi
-
-		psql --username postgres <<-EOSQL
+		"${psql[@]}" --username postgres <<-EOSQL
 			$op USER "$POSTGRES_USER" WITH SUPERUSER $pass ;
 		EOSQL
 		echo
 
+		psql+=( --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" )
+
 		echo
 		for f in /docker-entrypoint-initdb.d/*; do
 			case "$f" in
-				*.sh)  echo "$0: running $f"; . "$f" ;;
-				*.sql) 
-					echo "$0: running $f"; 
-					psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" < "$f"
-					echo 
-					;;
-				*)     echo "$0: ignoring $f" ;;
+				*.sh)     echo "$0: running $f"; . "$f" ;;
+				*.sql)    echo "$0: running $f"; "${psql[@]}" < "$f"; echo ;;
+				*.sql.gz) echo "$0: running $f"; gunzip -c "$f" | "${psql[@]}"; echo ;;
+				*)        echo "$0: ignoring $f" ;;
 			esac
 			echo
 		done
