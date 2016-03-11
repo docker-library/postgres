@@ -53,6 +53,7 @@ VOLUME /var/lib/postgresql/data
 
 COPY docker-entrypoint.sh /
 
+VOLUME /docker-entrypoint-initdb.d
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
 EXPOSE 5432
