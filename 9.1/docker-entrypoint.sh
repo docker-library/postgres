@@ -58,20 +58,18 @@ if [ "$1" = 'postgres' ]; then
 
 		if [ "$POSTGRES_DB" != 'postgres' ]; then
 			"${psql[@]}" --username postgres <<-EOSQL
-				CREATE DATABASE "$POSTGRES_DB" ;
+				CREATE USER "$POSTGRES_USER" $pass ;
+				CREATE DATABASE "$POSTGRES_DB" OWNER "$POSTGRES_USER" ;
 			EOSQL
 			echo
 		fi
 
 		if [ "$POSTGRES_USER" = 'postgres' ]; then
-			op='ALTER'
-		else
-			op='CREATE'
+			"${psql[@]}" --username postgres <<-EOSQL
+				ALTER USER "$POSTGRES_USER" WITH SUPERUSER $pass ;
+			EOSQL
+			echo
 		fi
-		"${psql[@]}" --username postgres <<-EOSQL
-			$op USER "$POSTGRES_USER" WITH SUPERUSER $pass ;
-		EOSQL
-		echo
 
 		psql+=( --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" )
 
