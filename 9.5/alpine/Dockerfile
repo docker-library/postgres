@@ -10,8 +10,8 @@ ENV LANG en_US.utf8
 RUN mkdir /docker-entrypoint-initdb.d
 
 ENV PG_MAJOR 9.5
-ENV PG_VERSION 9.5.0
-ENV PG_SHA256 f1c0d3a1a8aa8c92738cab0153fbfffcc4d4158b3fee84f7aa6bfea8283978bc
+ENV PG_VERSION 9.5.2
+ENV PG_SHA256 f8d132e464506b551ef498719f18cfe9d777709c7a1589dc360afc0b20e47c41
 
 
 # configure options taken from:
