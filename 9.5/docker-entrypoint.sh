@@ -45,14 +45,12 @@ if [ "$1" = 'postgres' ]; then
 		if [[ ! -z "$POSTGRES_ENABLE_SSL" && ! $POSTGRES_ENABLE_SSL =~ ^([nN][oO]|[nN]|[fF][aA][lL][sS][eE]|[fF]|0)$ ]] ; then
 			{ echo; echo "hostssl all all 0.0.0.0/0 $authMethod"; } >> "$PGDATA/pg_hba.conf"
 
-			mkdir -p "$PGDATA/ssl"
-			openssl req -new -newkey rsa:1024 -days 365000 -nodes -x509 -keyout "$PGDATA/ssl/server.key" -subj "/CN=PostgreSQL" -out "$PGDATA/ssl/server.crt"
-			chmod og-rwx "$PGDATA/ssl/server.key"
-			chown -R postgres "$PGDATA/ssl"
+			openssl req -new -newkey rsa:1024 -days 365000 -nodes -x509 -keyout "$PGDATA/server.key" -subj "/CN=PostgreSQL" -out "$PGDATA/server.crt"
+			chown -R postgres "$PGDATA/server.crt"
+			chown -R postgres "$PGDATA/server.key"
+			chmod og-rwx "$PGDATA/server.key"
 
 			sed -i "s|#\?ssl \?=.*|ssl = on|g" "$PGDATA/postgresql.conf"
-			sed -i "s|#\?ssl_cert_file \?=.*|ssl_cert_file = '$PGDATA/ssl/server.crt'|g" "$PGDATA/postgresql.conf"
-			sed -i "s|#\?ssl_key_file \?=.*|ssl_key_file = '$PGDATA/ssl/server.key'|g" "$PGDATA/postgresql.conf"
 		else
 			{ echo; echo "host all all 0.0.0.0/0 $authMethod"; } >> "$PGDATA/pg_hba.conf"
 		fi
