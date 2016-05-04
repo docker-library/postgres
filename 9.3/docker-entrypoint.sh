@@ -46,8 +46,8 @@ if [ "$1" = 'postgres' ]; then
 			{ echo; echo "hostssl all all 0.0.0.0/0 $authMethod"; } >> "$PGDATA/pg_hba.conf"
 
 			openssl req -new -newkey rsa:1024 -days 365000 -nodes -x509 -keyout "$PGDATA/server.key" -subj "/CN=PostgreSQL" -out "$PGDATA/server.crt"
-			chown -R postgres "$PGDATA/server.crt"
-			chown -R postgres "$PGDATA/server.key"
+			chown postgres "$PGDATA/server.crt"
+			chown postgres "$PGDATA/server.key"
 			chmod og-rwx "$PGDATA/server.key"
 
 			sed -i "s|#\?ssl \?=.*|ssl = on|g" "$PGDATA/postgresql.conf"
