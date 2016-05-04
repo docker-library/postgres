@@ -42,7 +42,7 @@ if [ "$1" = 'postgres' ]; then
 			authMethod=trust
 		fi
 
-		if [[ ! $POSTGRES_ENABLE_SSL =~ ^([nN][oO]|[nN]|[fF][aA][lL][sS][eE]|[fF]|0)$ ]] ; then
+		if [[ ! -z "$POSTGRES_ENABLE_SSL" || ! $POSTGRES_ENABLE_SSL =~ ^([nN][oO]|[nN]|[fF][aA][lL][sS][eE]|[fF]|0)$ ]] ; then
 			{ echo; echo "hostssl all all 0.0.0.0/0 $authMethod"; } >> "$PGDATA/pg_hba.conf"
 
 			mkdir -p "$PGDATA/ssl"
