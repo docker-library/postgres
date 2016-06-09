@@ -1,8 +1,7 @@
 #!/bin/bash
 set -e
 
-declare -A aliases
-aliases=(
+declare -A aliases=(
 	[9.5]='9 latest'
 )
 
