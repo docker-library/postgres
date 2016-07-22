@@ -56,6 +56,7 @@ if [ "$1" = 'postgres' ]; then
 					         to mount your own certificate as a volume.
 					****************************************************
 				EOWARN
+				DEBIAN_FRONTEND=noninteractive make-ssl-cert generate-default-snakeoil --force-overwrite
 				cp /etc/ssl/certs/ssl-cert-snakeoil.pem /etc/ssl/certs/postgresql.crt
 				cp /etc/ssl/private/ssl-cert-snakeoil.key /etc/ssl/private/postgresql.key
 			fi
