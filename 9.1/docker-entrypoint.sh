@@ -76,6 +76,7 @@ if [ "$1" = 'postgres' ]; then
 		psql+=( --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" )
 
 		echo
+		cd /docker-entrypoint-initdb.d
 		for f in /docker-entrypoint-initdb.d/*; do
 			case "$f" in
 				*.sh)     echo "$0: running $f"; . "$f" ;;
@@ -84,6 +85,7 @@ if [ "$1" = 'postgres' ]; then
 				*)        echo "$0: ignoring $f" ;;
 			esac
 			echo
+			cd /docker-entrypoint-initdb.d
 		done
 
 		gosu postgres pg_ctl -D "$PGDATA" -m fast -w stop
