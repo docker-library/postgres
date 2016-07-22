@@ -42,9 +42,8 @@ if [ "$1" = 'postgres' ]; then
 			authMethod=trust
 		fi
 
+		hostMethod=host
 		if [[ ! -z "$POSTGRES_ENABLE_SSL" && ! $POSTGRES_ENABLE_SSL =~ ^([nN][oO]|[nN]|[fF][aA][lL][sS][eE]|[fF]|0)$ ]] ; then
-			{ echo; echo "hostssl all all 0.0.0.0/0 $authMethod"; } >> "$PGDATA/pg_hba.conf"
-
 			if [ ! -f "/etc/ssl/certs/postgresql.crt" ]; then
 				cat >&2 <<-'EOWARN'
 					****************************************************
@@ -68,9 +67,10 @@ if [ "$1" = 'postgres' ]; then
 			chmod og-rwx "$PGDATA/server.key"
 
 			sed -i "s|#\?ssl \?=.*|ssl = on|g" "$PGDATA/postgresql.conf"
-		else
-			{ echo; echo "host all all 0.0.0.0/0 $authMethod"; } >> "$PGDATA/pg_hba.conf"
+			hostMethod=hostssl
 		fi
+
+		{ echo; echo "$hostMethod all all 0.0.0.0/0 $authMethod"; } >> "$PGDATA/pg_hba.conf"
 
 		# internal start of server in order to allow set-up using psql-client
 		# does not listen on external TCP/IP and waits until start finishes
