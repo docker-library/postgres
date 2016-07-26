@@ -1,4 +1,17 @@
 #!/bin/bash
+modify_param() {
+	param_name=$1
+	value=$2
+	if [ -z "$value" ]; then
+		enabled_or_not='# '
+	else
+		enabled_or_not=''
+        echo "$0: ${param_name} set to ${value}" 2>&1
+	fi
+	sed -i -E "s/^#?[[:space:]]*(${param_name})([[:space:]]*=[[:space:]]*).*/${enabled_or_not}\\1\\2${value}/" "$PGDATA/postgresql.conf"
+}
+
+
 set -e
 
 if [ "${1:0:1}" = '-' ]; then
@@ -92,6 +105,15 @@ if [ "$1" = 'postgres' ]; then
 		echo 'PostgreSQL init process complete; ready for start up.'
 		echo
 	fi
+
+	# Changing parameters that cannot be set on runtime
+	while read param_name env_name; do
+		eval "value=\$${env_name}"
+		modify_param "$param_name" "$value"
+	done <<HERE
+max_connections			POSTGRES_MAX_CONNECTIONS
+max_prepared_transactions	POSTGRES_MAX_PREPARED_TRANSACTIONS
+HERE
 
 	exec gosu postgres "$@"
 fi
