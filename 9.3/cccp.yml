@@ -1,0 +1,4 @@
+# This is for the purpose of building the postgresql containers through the 
+# Centos Community Container Pipeline https://wiki.centos.org/ContainerPipeline
+
+job-id: postgresql-9.3
