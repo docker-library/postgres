@@ -42,9 +42,38 @@ if [ "$1" = 'postgres' ]; then
 			authMethod=trust
 		fi
 
-		{ echo; echo "host all all 0.0.0.0/0 $authMethod"; } >> "$PGDATA/pg_hba.conf"
+		hostMethod=host
+		if [[ ! -z "$POSTGRES_ENABLE_SSL" && ! $POSTGRES_ENABLE_SSL =~ ^([nN][oO]|[nN]|[fF][aA][lL][sS][eE]|[fF]|0)$ ]] ; then
+			if [ ! -f "/etc/ssl/certs/postgresql.crt" ]; then
+				cat >&2 <<-'EOWARN'
+					****************************************************
+					WARNING: Using an auto-generated certificate for SSL.
+					         Please consider using your own certificate
+					         in production environments.
 
-		# internal start of server in order to allow set-up using psql-client		
+					         Use "-v /my/cert.crt:/etc/ssl/certs/postgresql.crt"
+					         and "-v /my/cert.key:/etc/ssl/private/postgresql.key"
+					         to mount your own certificate as a volume.
+					****************************************************
+				EOWARN
+				DEBIAN_FRONTEND=noninteractive make-ssl-cert generate-default-snakeoil --force-overwrite
+				cp /etc/ssl/certs/ssl-cert-snakeoil.pem /etc/ssl/certs/postgresql.crt
+				cp /etc/ssl/private/ssl-cert-snakeoil.key /etc/ssl/private/postgresql.key
+			fi
+
+			cp /etc/ssl/certs/postgresql.crt "$PGDATA/server.crt"
+			cp /etc/ssl/private/postgresql.key "$PGDATA/server.key"
+			chown postgres "$PGDATA/server.crt"
+			chown postgres "$PGDATA/server.key"
+			chmod og-rwx "$PGDATA/server.key"
+
+			sed -i "s|#\?ssl \?=.*|ssl = on|g" "$PGDATA/postgresql.conf"
+			hostMethod=hostssl
+		fi
+
+		{ echo; echo "$hostMethod all all 0.0.0.0/0 $authMethod"; } >> "$PGDATA/pg_hba.conf"
+
+		# internal start of server in order to allow set-up using psql-client
 		# does not listen on external TCP/IP and waits until start finishes
 		gosu postgres pg_ctl -D "$PGDATA" \
 			-o "-c listen_addresses='localhost'" \
