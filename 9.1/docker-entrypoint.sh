@@ -23,6 +23,9 @@ if [ "$1" = 'postgres' ]; then
 		if [ "$POSTGRES_PASSWORD" ]; then
 			pass="PASSWORD '$POSTGRES_PASSWORD'"
 			authMethod=md5
+		elif [ "$POSTGRES_PASSWORD_FILE" ]; then
+			pass="PASSWORD '`cat $POSTGRES_PASSWORD_FILE`'"
+			authMethod=md5
 		else
 			# The - option suppresses leading tabs but *not* spaces. :)
 			cat >&2 <<-'EOWARN'
@@ -34,8 +37,9 @@ if [ "$1" = 'postgres' ]; then
 				         effectively any other container on the same
 				         system.
 
-				         Use "-e POSTGRES_PASSWORD=password" to set
-				         it in "docker run".
+				         Use "-e POSTGRES_PASSWORD=password" or
+				         "-e POSTGRES_PASSWORD_FILE=/my-password" to
+				         set it in "docker run"
 				****************************************************
 			EOWARN
 
