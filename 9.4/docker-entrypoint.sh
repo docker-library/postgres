@@ -45,34 +45,37 @@ if [ "$1" = 'postgres' ]; then
 
 		{ echo; echo "host all all 0.0.0.0/0 $authMethod"; } | gosu postgres tee -a "$PGDATA/pg_hba.conf" > /dev/null
 
-		# internal start of server in order to allow set-up using psql-client		
-		# does not listen on external TCP/IP and waits until start finishes
-		gosu postgres pg_ctl -D "$PGDATA" \
-			-o "-c listen_addresses='localhost'" \
-			-w start
-
 		: ${POSTGRES_USER:=postgres}
 		: ${POSTGRES_DB:=$POSTGRES_USER}
+		: ${POSTGRES_INIT_START:=true}
 		export POSTGRES_USER POSTGRES_DB
 
 		psql=( psql -v ON_ERROR_STOP=1 )
 
-		if [ "$POSTGRES_DB" != 'postgres' ]; then
+		# internal start of server in order to allow set-up using psql-client
+		# does not listen on external TCP/IP and waits until start finishes
+		if [ $POSTGRES_INIT_START = true ]; then
+			gosu postgres pg_ctl -D "$PGDATA" \
+				-o "-c listen_addresses='localhost'" \
+				-w start
+
+			if [ "$POSTGRES_DB" != 'postgres' ]; then
+				"${psql[@]}" --username postgres <<-EOSQL
+					CREATE DATABASE "$POSTGRES_DB" ;
+				EOSQL
+				echo
+			fi
+
+			if [ "$POSTGRES_USER" = 'postgres' ]; then
+				op='ALTER'
+			else
+				op='CREATE'
+			fi
 			"${psql[@]}" --username postgres <<-EOSQL
-				CREATE DATABASE "$POSTGRES_DB" ;
+				$op USER "$POSTGRES_USER" WITH SUPERUSER $pass ;
 			EOSQL
 			echo
 		fi
-
-		if [ "$POSTGRES_USER" = 'postgres' ]; then
-			op='ALTER'
-		else
-			op='CREATE'
-		fi
-		"${psql[@]}" --username postgres <<-EOSQL
-			$op USER "$POSTGRES_USER" WITH SUPERUSER $pass ;
-		EOSQL
-		echo
 
 		psql+=( --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" )
 
@@ -87,7 +90,9 @@ if [ "$1" = 'postgres' ]; then
 			echo
 		done
 
-		gosu postgres pg_ctl -D "$PGDATA" -m fast -w stop
+		if [ $POSTGRES_INIT_START = true ]; then
+			gosu postgres pg_ctl -D "$PGDATA" -m fast -w stop
+		fi
 
 		echo
 		echo 'PostgreSQL init process complete; ready for start up.'
