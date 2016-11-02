@@ -3,8 +3,11 @@ services: docker
 
 env:
   - VERSION=9.6
+  - VERSION=9.6 VARIANT=alpine
   - VERSION=9.5
+  - VERSION=9.5 VARIANT=alpine
   - VERSION=9.4
+  - VERSION=9.4 VARIANT=alpine
   - VERSION=9.3
   - VERSION=9.2
 
@@ -13,8 +16,8 @@ install:
 
 before_script:
   - env | sort
-  - cd "$VERSION"
-  - image="postgres:$VERSION"
+  - cd "$VERSION/$VARIANT"
+  - image="postgres:${VERSION}${VARIANT:+-${VARIANT}}"
 
 script:
   - docker build -t "$image" .
