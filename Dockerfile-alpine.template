@@ -98,12 +98,17 @@ RUN set -ex \
 		$runDeps \
 		bash \
 		su-exec \
-	&& apk del .build-deps \
+# tzdata loading functionality is optional, and fails gracefully
+#		tzdata \
+	&& apk del .fetch-deps .build-deps \
 	&& cd / \
 	&& rm -rf \
 		/usr/src/postgresql \
 		/usr/local/include/* \
 	&& find /usr/local -name '*.a' -delete
+
+# make the sample config easier to munge (and "correct by default")
+RUN sed -ri "s!^#?(listen_addresses)\s*=\s*\S+.*!\1 = '*'!" /usr/local/share/postgresql/postgresql.conf.sample
 
 RUN mkdir -p /var/run/postgresql && chown -R postgres /var/run/postgresql
 
