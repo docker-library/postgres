@@ -3,11 +3,15 @@ services: docker
 
 env:
   - VERSION=9.6
+  - VERSION=9.6 VARIANT=alpine
   - VERSION=9.5
   - VERSION=9.5 VARIANT=alpine
   - VERSION=9.4
+  - VERSION=9.4 VARIANT=alpine
   - VERSION=9.3
+  - VERSION=9.3 VARIANT=alpine
   - VERSION=9.2
+  - VERSION=9.2 VARIANT=alpine
 
 install:
   - git clone https://github.com/docker-library/official-images.git ~/official-images
