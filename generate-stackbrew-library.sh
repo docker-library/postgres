@@ -72,4 +72,20 @@ for version in "${versions[@]}"; do
 		GitCommit: $commit
 		Directory: $version
 	EOE
+
+	for variant in alpine; do
+		[ -f "$version/$variant/Dockerfile" ] || continue
+
+		commit="$(dirCommit "$version/$variant")"
+
+		variantAliases=( "${versionAliases[@]/%/-$variant}" )
+		variantAliases=( "${variantAliases[@]//latest-/}" )
+
+		echo
+		cat <<-EOE
+			Tags: $(join ', ' "${variantAliases[@]}")
+			GitCommit: $commit
+			Directory: $version/$variant
+		EOE
+	done
 done
