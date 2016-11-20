@@ -37,6 +37,15 @@ if [ "$1" = 'postgres' ] && [ "$(id -u)" = '0' ]; then
 	chown -R postgres /var/run/postgresql
 	chmod g+s /var/run/postgresql
 
+	# Create the transaction log directory before initdb is run (below) so the directory is owned by the correct user
+	file_env 'POSTGRES_INITDB_XLOGDIR'
+	if [ "$POSTGRES_INITDB_XLOGDIR" ]; then
+		mkdir -p "$POSTGRES_INITDB_XLOGDIR"
+		chmod 700 "$POSTGRES_INITDB_XLOGDIR"
+		chown -R postgres "$POSTGRES_INITDB_XLOGDIR"
+		export POSTGRES_INITDB_ARGS="$POSTGRES_INITDB_ARGS --xlogdir $POSTGRES_INITDB_XLOGDIR"
+	fi
+
 	exec gosu postgres "$BASH_SOURCE" "$@"
 fi
 
