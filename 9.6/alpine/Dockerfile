@@ -98,8 +98,9 @@ RUN set -ex \
 		$runDeps \
 		bash \
 		su-exec \
-# tzdata loading functionality is optional, and fails gracefully
-#		tzdata \
+# tzdata is optional, but only adds around 1Mb to image size and is recommended by Django documentation:
+# https://docs.djangoproject.com/en/1.10/ref/databases/#optimizing-postgresql-s-configuration
+		tzdata \
 	&& apk del .fetch-deps .build-deps \
 	&& cd / \
 	&& rm -rf \
