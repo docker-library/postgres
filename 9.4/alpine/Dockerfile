@@ -98,7 +98,8 @@ RUN set -ex \
 		$runDeps \
 		bash \
 		su-exec \
-# tzdata adds around 1Mb to image size, but it is suggested by Django documentation that timezone should be set for performance reasons: http://bit.ly/2fMYhh1
+# tzdata is optional, but only adds around 1Mb to image size and is recommended by Django documentation:
+# https://docs.djangoproject.com/en/1.10/ref/databases/#optimizing-postgresql-s-configuration
 		tzdata \
 	&& apk del .fetch-deps .build-deps \
 	&& cd / \
