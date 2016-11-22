@@ -98,8 +98,8 @@ RUN set -ex \
 		$runDeps \
 		bash \
 		su-exec \
-# tzdata loading functionality is optional, and fails gracefully
-#		tzdata \
+# tzdata adds around 1Mb to image size, but it is suggested by Django documentation that timezone should be set for performance reasons: http://bit.ly/2fMYhh1
+		tzdata \
 	&& apk del .fetch-deps .build-deps \
 	&& cd / \
 	&& rm -rf \
