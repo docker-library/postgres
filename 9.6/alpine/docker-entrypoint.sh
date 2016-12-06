@@ -67,7 +67,7 @@ if [ "$1" = 'postgres' ]; then
 			authMethod=trust
 		fi
 
-		{ echo; echo "host all all 0.0.0.0/0 $authMethod"; } | su-exec postgres tee -a "$PGDATA/pg_hba.conf" > /dev/null
+		{ echo; echo "host all all all $authMethod"; } | su-exec postgres tee -a "$PGDATA/pg_hba.conf" > /dev/null
 
 		# internal start of server in order to allow set-up using psql-client		
 		# does not listen on external TCP/IP and waits until start finishes
