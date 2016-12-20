@@ -141,7 +141,7 @@ if [ "$1" = 'postgres' ]; then
 				if [ "$DATABASE_NAME" != 'postgres' ]; then
 					if [ "$DATABASE_OWNER" ]; then
 						"${psql[@]}" --username postgres <<-EOSQL
-						CREATE DATABASE "$DATABASE_NAME owner $DATABASE_OWNER" ;
+						CREATE DATABASE "$DATABASE_NAME" owner "$DATABASE_OWNER" ;
 						EOSQL
 						echo
 					else
