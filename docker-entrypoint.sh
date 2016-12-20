@@ -112,7 +112,7 @@ if [ "$1" = 'postgres' ]; then
 		psql+=( --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" )
 
 		# If you want to create more than one user, please use that variable
-		# Variable example: POSTGRES_USER="user1:user1pass|user2:user2pass|user3:user3password"
+		# Variable example: POSTGRES_USERS="user1:user1pass|user2:user2pass|user3:user3password"
 		if [ "$POSTGRES_USERS" ]; then
 			USERS_ARR=$(echo $POSTGRES_USERS | tr "|" "\n")
 			for USER in $USERS_ARR
@@ -125,7 +125,7 @@ if [ "$1" = 'postgres' ]; then
 					op='CREATE'
 				fi
 				"${psql[@]}" --username postgres <<-EOSQL
-					$op USER "$USER_NAME" WITH SUPERUSER PASSWORD $USER_PASSWORD ;
+					$op USER "$USER_NAME" WITH SUPERUSER PASSWORD "$USER_PASSWORD" ;
 				EOSQL
 			done
 		fi
