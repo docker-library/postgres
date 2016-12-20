@@ -49,6 +49,7 @@ if [ "$1" = 'postgres' ]; then
 				USER_PASSWORD=`echo $USER | cut -d: -f2`
 				if [ "$USER_PASSWORD" ]; then
 					authMethod=md5
+				fi
 			done
 		fi
 
