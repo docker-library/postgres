@@ -106,6 +106,8 @@ RUN set -ex \
 	&& rm -rf \
 		/usr/src/postgresql \
 		/usr/local/include/* \
+		/usr/local/share/doc \
+		/usr/local/share/man \
 	&& find /usr/local -name '*.a' -delete
 
 # make the sample config easier to munge (and "correct by default")
