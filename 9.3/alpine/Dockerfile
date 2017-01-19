@@ -55,6 +55,11 @@ RUN set -ex \
 		zlib-dev \
 	\
 	&& cd /usr/src/postgresql \
+# update "DEFAULT_PGSOCKET_DIR" to "/var/run/postgresql" (matching Debian)
+# see https://anonscm.debian.org/git/pkg-postgresql/postgresql.git/tree/debian/patches/51-default-sockets-in-var.patch?id=8b539fcb3e093a521c095e70bdfa76887217b89f
+	&& awk '$1 == "#define" && $2 == "DEFAULT_PGSOCKET_DIR" && $3 == "\"/tmp\"" { $3 = "\"/var/run/postgresql\""; print; next } { print }' src/include/pg_config_manual.h > src/include/pg_config_manual.h.new \
+	&& grep '/var/run/postgresql' src/include/pg_config_manual.h.new \
+	&& mv src/include/pg_config_manual.h.new src/include/pg_config_manual.h \
 # configure options taken from:
 # https://anonscm.debian.org/cgit/pkg-postgresql/postgresql.git/tree/debian/rules?h=9.5
 	&& ./configure \
@@ -113,10 +118,11 @@ RUN set -ex \
 # make the sample config easier to munge (and "correct by default")
 RUN sed -ri "s!^#?(listen_addresses)\s*=\s*\S+.*!\1 = '*'!" /usr/local/share/postgresql/postgresql.conf.sample
 
-RUN mkdir -p /var/run/postgresql && chown -R postgres /var/run/postgresql
+RUN mkdir -p /var/run/postgresql && chown -R postgres:postgres /var/run/postgresql && chmod g+s /var/run/postgresql
 
 ENV PATH /usr/lib/postgresql/$PG_MAJOR/bin:$PATH
 ENV PGDATA /var/lib/postgresql/data
+RUN mkdir -p "$PGDATA" && chown -R postgres:postgres "$PGDATA" && chmod 700 "$PGDATA"
 VOLUME /var/lib/postgresql/data
 
 COPY docker-entrypoint.sh /
