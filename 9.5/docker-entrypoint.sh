@@ -27,7 +27,8 @@ if [ "${1:0:1}" = '-' ]; then
 	set -- postgres "$@"
 fi
 
-if [ "$1" = 'postgres' ]; then
+# allow the container to be started with `--user`
+if [ "$1" = 'postgres' ] && [ "$(id -u)" = '0' ]; then
 	mkdir -p "$PGDATA"
 	chown -R postgres "$PGDATA"
 	chmod 700 "$PGDATA"
@@ -36,11 +37,18 @@ if [ "$1" = 'postgres' ]; then
 	chown -R postgres /var/run/postgresql
 	chmod g+s /var/run/postgresql
 
+	exec gosu postgres "$BASH_SOURCE" "$@"
+fi
+
+if [ "$1" = 'postgres' ]; then
+	mkdir -p "$PGDATA"
 
 	# look specifically for PG_VERSION, as it is expected in the DB dir
 	if [ ! -s "$PGDATA/PG_VERSION" ]; then
+		chown -R "$(id -u)" "$PGDATA" 2>/dev/null || :
+
 		file_env 'POSTGRES_INITDB_ARGS'
-		eval "gosu postgres initdb $POSTGRES_INITDB_ARGS"
+		eval "initdb --username=postgres $POSTGRES_INITDB_ARGS"
 
 		# check password first so we can output the warning before postgres
 		# messes it up
@@ -68,11 +76,12 @@ if [ "$1" = 'postgres' ]; then
 			authMethod=trust
 		fi
 
-		{ echo; echo "host all all all $authMethod"; } | gosu postgres tee -a "$PGDATA/pg_hba.conf" > /dev/null
+		{ echo; echo "host all all all $authMethod"; } | tee -a "$PGDATA/pg_hba.conf" > /dev/null
 
 		# internal start of server in order to allow set-up using psql-client		
 		# does not listen on external TCP/IP and waits until start finishes
-		gosu postgres pg_ctl -D "$PGDATA" \
+		PGUSER="${PGUSER:-postgres}" \
+		pg_ctl -D "$PGDATA" \
 			-o "-c listen_addresses='localhost'" \
 			-w start
 
@@ -111,14 +120,13 @@ if [ "$1" = 'postgres' ]; then
 			echo
 		done
 
-		gosu postgres pg_ctl -D "$PGDATA" -m fast -w stop
+		PGUSER="${PGUSER:-postgres}" \
+		pg_ctl -D "$PGDATA" -m fast -w stop
 
 		echo
 		echo 'PostgreSQL init process complete; ready for start up.'
 		echo
 	fi
-
-	exec gosu postgres "$@"
 fi
 
 exec "$@"
