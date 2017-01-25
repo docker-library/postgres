@@ -110,7 +110,6 @@ RUN set -ex \
 	&& cd / \
 	&& rm -rf \
 		/usr/src/postgresql \
-		/usr/local/include/* \
 		/usr/local/share/doc \
 		/usr/local/share/man \
 	&& find /usr/local -name '*.a' -delete
