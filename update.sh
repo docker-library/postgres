@@ -12,6 +12,10 @@ versions=( "${versions[@]%/}" )
 packagesBase='http://apt.postgresql.org/pub/repos/apt/dists/jessie-pgdg'
 mainList="$(curl -fsSL "$packagesBase/main/binary-amd64/Packages.bz2" | bunzip2)"
 
+uuidConfigFlag="--with-uuid=e2fs"
+osspUuidVersion='1.6.2'
+osspUuidHash='11a615225baa5f8bb686824423f50e4427acd3f70d394765bdff32801f0fd5b0'
+
 travisEnv=
 for version in "${versions[@]}"; do
 	versionList="$(echo "$mainList"; curl -fsSL "$packagesBase/$version/binary-amd64/Packages.bz2" | bunzip2)"
@@ -34,6 +38,16 @@ for version in "${versions[@]}"; do
 			cp docker-entrypoint.sh "$version/$variant/"
 			sed -i 's/gosu/su-exec/g' "$version/$variant/docker-entrypoint.sh"
 			sed 's/%%PG_MAJOR%%/'"$version"'/g; s/%%PG_VERSION%%/'"$srcVersion"'/g; s/%%PG_SHA256%%/'"$srcSha256"'/g' Dockerfile-$variant.template > "$version/$variant/Dockerfile"
+			if [[ $version =~ ^9.[23]$ ]]; then
+			    uuidConfigFlag='--with-ossp-uuid'
+			    sed -i 's/%%OSSP_UUID_ENV_VARS%%/ENV OSSP_UUID_VERSION '"$osspUuidVersion"'\nENV OSSP_UUID_SHA256 '"$osspUuidHash"'\n/' "$version/$variant/Dockerfile"
+			    sed -i $'/%%INSTALL_OSSP_UUID%%/ {r ossp-uuid.template\n d}' "$version/$variant/Dockerfile"
+			    sed -i '/--enable-tap-tests/d' "$version/$variant/Dockerfile"
+			fi
+			sed -i '/%%OSSP_UUID_ENV_VARS%%/d' "$version/$variant/Dockerfile"
+			sed -i '/%%INSTALL_OSSP_UUID%%/d' "$version/$variant/Dockerfile"
+			sed -i 's/%%UUID_CONFIG_FLAG%%/'"$uuidConfigFlag"'/' "$version/$variant/Dockerfile"
+
 		)
 		travisEnv="\n  - VERSION=$version VARIANT=$variant$travisEnv"
 	done

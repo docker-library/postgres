@@ -17,6 +17,7 @@ ENV PG_MAJOR %%PG_MAJOR%%
 ENV PG_VERSION %%PG_VERSION%%
 ENV PG_SHA256 %%PG_SHA256%%
 
+%%OSSP_UUID_ENV_VARS%%
 RUN set -ex \
 	\
 	&& apk add --no-cache --virtual .fetch-deps \
@@ -54,6 +55,7 @@ RUN set -ex \
 		util-linux-dev \
 		zlib-dev \
 	\
+	%%INSTALL_OSSP_UUID%%
 	&& cd /usr/src/postgresql \
 # update "DEFAULT_PGSOCKET_DIR" to "/var/run/postgresql" (matching Debian)
 # see https://anonscm.debian.org/git/pkg-postgresql/postgresql.git/tree/debian/patches/51-default-sockets-in-var.patch?id=8b539fcb3e093a521c095e70bdfa76887217b89f
@@ -71,7 +73,7 @@ RUN set -ex \
 # skip debugging info -- we want tiny size instead
 #		--enable-debug \
 		--disable-rpath \
-		--with-uuid=e2fs \
+		%%UUID_CONFIG_FLAG%% \
 		--with-gnu-ld \
 		--with-pgport=5432 \
 		--with-system-tzdata=/usr/share/zoneinfo \

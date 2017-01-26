@@ -17,6 +17,9 @@ ENV PG_MAJOR 9.3
 ENV PG_VERSION 9.3.16
 ENV PG_SHA256 845f5e4ac8cf026b6a77c5a180a2fe869f51e9d06acf8d0365b05505a2c66873
 
+ENV OSSP_UUID_VERSION 1.6.2
+ENV OSSP_UUID_SHA256 11a615225baa5f8bb686824423f50e4427acd3f70d394765bdff32801f0fd5b0
+
 RUN set -ex \
 	\
 	&& apk add --no-cache --virtual .fetch-deps \
@@ -54,6 +57,22 @@ RUN set -ex \
 		util-linux-dev \
 		zlib-dev \
 	\
+    && wget -O uuid.tar.gz "http://www.mirrorservice.org/sites/ftp.ossp.org/pkg/lib/uuid/uuid-$OSSP_UUID_VERSION.tar.gz" \
+	&& echo "$OSSP_UUID_SHA256 *uuid.tar.gz" | sha256sum -c - \
+	&& mkdir -p /usr/src/ossp-uuid \
+	&& tar \
+		--extract \
+		--file uuid.tar.gz \
+		--directory /usr/src/ossp-uuid \
+		--strip-components 1 \
+	&& rm uuid.tar.gz \
+	&& cd /usr/src/ossp-uuid \
+	&& ./configure \
+	    --prefix=/usr \
+	&& make -j "$(getconf _NPROCESSORS_ONLN)"\
+	&& make install \
+	&& cd / \
+	&& rm -rf /usr/src/ossp-uuid \
 	&& cd /usr/src/postgresql \
 # update "DEFAULT_PGSOCKET_DIR" to "/var/run/postgresql" (matching Debian)
 # see https://anonscm.debian.org/git/pkg-postgresql/postgresql.git/tree/debian/patches/51-default-sockets-in-var.patch?id=8b539fcb3e093a521c095e70bdfa76887217b89f
@@ -67,11 +86,10 @@ RUN set -ex \
 #		--enable-nls \
 		--enable-integer-datetimes \
 		--enable-thread-safety \
-		--enable-tap-tests \
 # skip debugging info -- we want tiny size instead
 #		--enable-debug \
 		--disable-rpath \
-		--with-uuid=e2fs \
+		--with-ossp-uuid \
 		--with-gnu-ld \
 		--with-pgport=5432 \
 		--with-system-tzdata=/usr/share/zoneinfo \

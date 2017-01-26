@@ -1,0 +1,16 @@
+    && wget -O uuid.tar.gz "http://www.mirrorservice.org/sites/ftp.ossp.org/pkg/lib/uuid/uuid-$OSSP_UUID_VERSION.tar.gz" \
+	&& echo "$OSSP_UUID_SHA256 *uuid.tar.gz" | sha256sum -c - \
+	&& mkdir -p /usr/src/ossp-uuid \
+	&& tar \
+		--extract \
+		--file uuid.tar.gz \
+		--directory /usr/src/ossp-uuid \
+		--strip-components 1 \
+	&& rm uuid.tar.gz \
+	&& cd /usr/src/ossp-uuid \
+	&& ./configure \
+	    --prefix=/usr \
+	&& make -j "$(getconf _NPROCESSORS_ONLN)"\
+	&& make install \
+	&& cd / \
+	&& rm -rf /usr/src/ossp-uuid \
