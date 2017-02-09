@@ -37,7 +37,7 @@ RUN set -ex; \
 	apt-key list
 
 ENV PG_MAJOR 9.2
-ENV PG_VERSION 9.2.19-1.pgdg80+1
+ENV PG_VERSION 9.2.20-1.pgdg80+1
 
 RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main' $PG_MAJOR > /etc/apt/sources.list.d/pgdg.list
 
