@@ -23,6 +23,25 @@ file_env() {
 	unset "$fileVar"
 }
 
+# Execute scripts from a given folder
+# usage: exec_scripts FOLDER 
+exec_scripts() {
+	local execDir="$1"
+	local fileList=(${execDir}/*)
+	if [ ${#fileList[@]} -gt 0 ]; then
+		echo
+		for f in "${fileList[@]}"; do
+			case "$f" in
+				*.sh)     echo "$0: running $f"; . "$f" ;;
+				*.sql)    echo "$0: running $f"; "${psql[@]}" -f "$f"; echo ;;
+				*.sql.gz) echo "$0: running $f"; gunzip -c "$f" | "${psql[@]}"; echo ;;
+				*)        echo "$0: ignoring $f" ;;
+			esac
+			echo
+		done
+	fi
+}
+
 if [ "${1:0:1}" = '-' ]; then
 	set -- postgres "$@"
 fi
@@ -37,6 +56,7 @@ if [ "$1" = 'postgres' ] && [ "$(id -u)" = '0' ]; then
 	chown -R postgres /var/run/postgresql
 	chmod g+s /var/run/postgresql
 
+	exec_scripts "/docker-entrypoint-preexec.d"
 	exec gosu postgres "$BASH_SOURCE" "$@"
 fi
 
@@ -110,15 +130,7 @@ if [ "$1" = 'postgres' ]; then
 		psql+=( --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" )
 
 		echo
-		for f in /docker-entrypoint-initdb.d/*; do
-			case "$f" in
-				*.sh)     echo "$0: running $f"; . "$f" ;;
-				*.sql)    echo "$0: running $f"; "${psql[@]}" -f "$f"; echo ;;
-				*.sql.gz) echo "$0: running $f"; gunzip -c "$f" | "${psql[@]}"; echo ;;
-				*)        echo "$0: ignoring $f" ;;
-			esac
-			echo
-		done
+		exec_scripts "/docker-entrypoint-initdb.d"
 
 		PGUSER="${PGUSER:-postgres}" \
 		pg_ctl -D "$PGDATA" -m fast -w stop
@@ -129,4 +141,5 @@ if [ "$1" = 'postgres' ]; then
 	fi
 fi
 
+exec_scripts "/docker-entrypoint-preexec.d"
 exec "$@"
