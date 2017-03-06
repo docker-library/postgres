@@ -36,6 +36,7 @@ RUN set -ex \
 	\
 	&& apk add --no-cache --virtual .build-deps \
 		bison \
+		coreutils \
 		flex \
 		gcc \
 #		krb5-dev \
@@ -76,6 +77,8 @@ RUN set -ex \
 		--with-pgport=5432 \
 		--with-system-tzdata=/usr/share/zoneinfo \
 		--prefix=/usr/local \
+		--with-includes=/usr/local/include \
+		--with-libraries=/usr/local/lib \
 		\
 # these make our image abnormally large (at least 100MB larger), which seems uncouth for an "Alpine" (ie, "small") variant :)
 #		--with-krb5 \
@@ -88,7 +91,7 @@ RUN set -ex \
 		--with-openssl \
 		--with-libxml \
 		--with-libxslt \
-	&& make -j "$(getconf _NPROCESSORS_ONLN)" world \
+	&& make -j "$(nproc)" world \
 	&& make install-world \
 	&& make -C contrib install \
 	\
