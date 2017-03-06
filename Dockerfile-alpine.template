@@ -37,6 +37,7 @@ RUN set -ex \
 	\
 	&& apk add --no-cache --virtual .build-deps \
 		bison \
+		coreutils \
 		flex \
 		gcc \
 #		krb5-dev \
@@ -55,7 +56,7 @@ RUN set -ex \
 		util-linux-dev \
 		zlib-dev \
 	\
-	%%INSTALL_OSSP_UUID%%
+%%INSTALL_OSSP_UUID%%
 	&& cd /usr/src/postgresql \
 # update "DEFAULT_PGSOCKET_DIR" to "/var/run/postgresql" (matching Debian)
 # see https://anonscm.debian.org/git/pkg-postgresql/postgresql.git/tree/debian/patches/51-default-sockets-in-var.patch?id=8b539fcb3e093a521c095e70bdfa76887217b89f
@@ -78,6 +79,8 @@ RUN set -ex \
 		--with-pgport=5432 \
 		--with-system-tzdata=/usr/share/zoneinfo \
 		--prefix=/usr/local \
+		--with-includes=/usr/local/include \
+		--with-libraries=/usr/local/lib \
 		\
 # these make our image abnormally large (at least 100MB larger), which seems uncouth for an "Alpine" (ie, "small") variant :)
 #		--with-krb5 \
@@ -90,7 +93,7 @@ RUN set -ex \
 		--with-openssl \
 		--with-libxml \
 		--with-libxslt \
-	&& make -j "$(getconf _NPROCESSORS_ONLN)" world \
+	&& make -j "$(nproc)" world \
 	&& make install-world \
 	&& make -C contrib install \
 	\

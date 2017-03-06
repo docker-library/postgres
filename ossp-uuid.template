@@ -1,4 +1,6 @@
-    && wget -O uuid.tar.gz "http://www.mirrorservice.org/sites/ftp.ossp.org/pkg/lib/uuid/uuid-$OSSP_UUID_VERSION.tar.gz" \
+# install OSSP uuid (http://www.ossp.org/pkg/lib/uuid/)
+# see https://github.com/docker-library/postgres/pull/255 for more details
+	&& wget -O uuid.tar.gz "https://www.mirrorservice.org/sites/ftp.ossp.org/pkg/lib/uuid/uuid-$OSSP_UUID_VERSION.tar.gz" \
 	&& echo "$OSSP_UUID_SHA256 *uuid.tar.gz" | sha256sum -c - \
 	&& mkdir -p /usr/src/ossp-uuid \
 	&& tar \
@@ -7,10 +9,12 @@
 		--directory /usr/src/ossp-uuid \
 		--strip-components 1 \
 	&& rm uuid.tar.gz \
-	&& cd /usr/src/ossp-uuid \
-	&& ./configure \
-	    --prefix=/usr \
-	&& make -j "$(getconf _NPROCESSORS_ONLN)"\
-	&& make install \
-	&& cd / \
+	&& ( \
+		cd /usr/src/ossp-uuid \
+		&& ./configure \
+			--prefix=/usr/local \
+		&& make -j "$(nproc)" \
+		&& make install \
+	) \
 	&& rm -rf /usr/src/ossp-uuid \
+	\
