@@ -119,6 +119,10 @@ if [ "$1" = 'postgres' ]; then
 
 		psql+=( --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" )
 
+		if [ -n "$POSTGRES_CONF" ]; then
+			echo "$POSTGRES_CONF" > "$PGDATA/postgresql.conf"
+		fi
+
 		echo
 		for f in /docker-entrypoint-initdb.d/*; do
 			case "$f" in
