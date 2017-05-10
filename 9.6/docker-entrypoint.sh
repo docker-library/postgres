@@ -91,7 +91,7 @@ if [ "$1" = 'postgres' ]; then
 			echo "host all all all $authMethod"
 		} >> "$PGDATA/pg_hba.conf"
 
-		# internal start of server in order to allow set-up using psql-client		
+		# internal start of server in order to allow set-up using psql-client
 		# does not listen on external TCP/IP and waits until start finishes
 		PGUSER="${PGUSER:-postgres}" \
 		pg_ctl -D "$PGDATA" \
