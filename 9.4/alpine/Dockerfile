@@ -71,6 +71,9 @@ RUN set -ex \
 	&& grep '/var/run/postgresql' src/include/pg_config_manual.h.new \
 	&& mv src/include/pg_config_manual.h.new src/include/pg_config_manual.h \
 	&& gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)" \
+# explicitly update autoconf config.guess and config.sub so they support more arches/libcs
+	&& wget -O config/config.guess "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD" \
+	&& wget -O config/config.sub "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD" \
 # configure options taken from:
 # https://anonscm.debian.org/cgit/pkg-postgresql/postgresql.git/tree/debian/rules?h=9.5
 	&& ./configure \
