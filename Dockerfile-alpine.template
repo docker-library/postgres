@@ -46,6 +46,7 @@ RUN set -ex \
 	&& apk add --no-cache --virtual .build-deps \
 		bison \
 		coreutils \
+		dpkg-dev dpkg \
 		flex \
 		gcc \
 #		krb5-dev \
@@ -71,9 +72,11 @@ RUN set -ex \
 	&& awk '$1 == "#define" && $2 == "DEFAULT_PGSOCKET_DIR" && $3 == "\"/tmp\"" { $3 = "\"/var/run/postgresql\""; print; next } { print }' src/include/pg_config_manual.h > src/include/pg_config_manual.h.new \
 	&& grep '/var/run/postgresql' src/include/pg_config_manual.h.new \
 	&& mv src/include/pg_config_manual.h.new src/include/pg_config_manual.h \
+	&& gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)" \
 # configure options taken from:
 # https://anonscm.debian.org/cgit/pkg-postgresql/postgresql.git/tree/debian/rules?h=9.5
 	&& ./configure \
+		--build="$gnuArch" \
 # "/usr/src/postgresql/src/backend/access/common/tupconvert.c:105: undefined reference to `libintl_gettext'"
 #		--enable-nls \
 		--enable-integer-datetimes \
