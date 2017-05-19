@@ -46,8 +46,10 @@ for version in "${versions[@]}"; do
 			case "$version" in
 				9.2|9.3)
 					uuidConfigFlag='--with-ossp-uuid'
-					sed -i 's/%%OSSP_UUID_ENV_VARS%%/ENV OSSP_UUID_VERSION '"$osspUuidVersion"'\nENV OSSP_UUID_SHA256 '"$osspUuidHash"'\n/' "$version/$variant/Dockerfile"
-					sed -i $'/%%INSTALL_OSSP_UUID%%/ {r ossp-uuid.template\n d}' "$version/$variant/Dockerfile"
+					sed -i \
+						-e 's/%%OSSP_UUID_ENV_VARS%%/ENV OSSP_UUID_VERSION '"$osspUuidVersion"'\nENV OSSP_UUID_SHA256 '"$osspUuidHash"'\n/' \
+						-e $'/%%INSTALL_OSSP_UUID%%/ {r ossp-uuid.template\n d}' \
+						"$version/$variant/Dockerfile"
 
 					# configure: WARNING: unrecognized options: --enable-tap-tests
 					sed -i '/--enable-tap-tests/d' "$version/$variant/Dockerfile"
@@ -55,8 +57,10 @@ for version in "${versions[@]}"; do
 
 				*)
 					uuidConfigFlag='--with-uuid=e2fs'
-					sed -i '/%%OSSP_UUID_ENV_VARS%%/d' "$version/$variant/Dockerfile"
-					sed -i '/%%INSTALL_OSSP_UUID%%/d' "$version/$variant/Dockerfile"
+					sed -i \
+						-e '/%%OSSP_UUID_ENV_VARS%%/d' \
+						-e '/%%INSTALL_OSSP_UUID%%/d' \
+						"$version/$variant/Dockerfile"
 					;;
 			esac
 			sed -i 's/%%UUID_CONFIG_FLAG%%/'"$uuidConfigFlag"'/' "$version/$variant/Dockerfile"
