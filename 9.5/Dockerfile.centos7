@@ -1,0 +1,71 @@
+# vim:set ft=dockerfile:
+FROM centos:centos7
+
+# explicitly set user/group IDs
+RUN groupadd -r postgres && useradd -r -g postgres postgres
+
+# grab gosu for easy step-down from root
+ENV GOSU_VERSION 1.7
+ENV GOSU_ARCH amd64
+RUN set -x \
+	&& yum update -y && yum install -y ca-certificates wget && yum clean all \
+	&& wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-${GOSU_ARCH}" \
+	&& wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-${GOSU_ARCH}.asc" \
+	&& export GNUPGHOME="$(mktemp -d)" \
+	&& gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
+	&& gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
+	&& rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc \
+	&& chmod +x /usr/local/bin/gosu \
+	&& gosu nobody true \
+
+# make the "en_US.UTF-8" locale so postgres will be utf-8 enabled by default
+RUN yum update -y \
+	&& localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+
+ENV LANG en_US.utf8
+
+RUN mkdir /docker-entrypoint-initdb.d
+
+ENV PG_REPO="https://download.postgresql.org/pub/repos/yum"
+ENV PG_MAJOR=9.5 \
+PG_MAJOR_NODOT=95 \
+PG_MINOR=.4 \
+PG_REVISION=1 \
+RHEL_VERSION=7.3 \
+REPO_RHEL_ARCH=x86_64 \
+RHEL_ARCH=x86_64 
+ 
+ENV PG_VERSION=${PG_MAJOR}${PG_MINOR}-${PG_REVISION} \
+PGDG_VERSION=${PG_MAJOR}-${PG_REVISION} \
+OSV_NAME=rhel7 
+
+ENV PG_REPOURL="${PG_REPO}/${PG_MAJOR}/redhat/rhel-${RHEL_VERSION}-${REPO_RHEL_ARCH}"
+
+RUN rpm --import ${PG_REPO}/RPM-GPG-KEY-PGDG && rpm --import ${PG_REPO}/RPM-GPG-KEY-PGDG-${PG_MAJOR_NODOT}
+
+RUN echo -e "[postgres_repo]\nname=Postgres Repo\nbaseurl=${PG_REPOURL}\nenabled=1\ngpgcheck=1" > /etc/yum.repos.d/postgres.repo
+
+RUN yum update -y \
+        && yum install -y ${PG_REPOURL}/pgdg-centos${PG_MAJOR_NODOT}-${PGDG_VERSION}.noarch.rpm \
+	&& yum install -y ${PG_REPOURL}/postgresql${PG_MAJOR_NODOT}-server-${PG_VERSION}PGDG.${OSV_NAME}.${RHEL_ARCH}.rpm \
+#	&& sed -ri 's/#(create_main_cluster) .*$/\1 = false/' /etc/postgresql-common/createcluster.conf \
+	&& yum install -y \
+		${PG_REPOURL}/postgresql${PG_MAJOR_NODOT}-${PG_VERSION}PGDG.${OSV_NAME}.${RHEL_ARCH}.rpm \
+		${PG_REPOURL}/postgresql${PG_MAJOR_NODOT}-contrib-${PG_VERSION}PGDG.${OSV_NAME}.${RHEL_ARCH}.rpm \
+	&& yum clean all
+
+# make the sample config easier to munge (and "correct by default")
+RUN sed -ri "s!^#?(listen_addresses)\s*=\s*\S+.*!\1 = '*'!" /usr/pgsql-${PG_MAJOR}/share/postgresql.conf.sample
+
+RUN mkdir -p /var/run/postgresql && chown -R postgres /var/run/postgresql
+
+ENV PATH /usr/pgsql-${PG_MAJOR}/bin:$PATH
+ENV PGDATA /var/lib/pgsql/data
+VOLUME /var/lib/pgsql/data
+
+COPY docker-entrypoint.sh /
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
+
+EXPOSE 5432
+CMD ["postgres"]
