@@ -36,6 +36,22 @@ dirCommit() {
 	)
 }
 
+getArches() {
+	local repo="$1"; shift
+	local officialImagesUrl='https://github.com/docker-library/official-images/raw/master/library/'
+
+	eval "declare -g -A parentRepoToArches=( $(
+		find -name 'Dockerfile' -exec awk '
+				toupper($1) == "FROM" && $2 !~ /^('"$repo"'|scratch|microsoft\/[^:]+)(:|$)/ {
+					print "'"$officialImagesUrl"'" $2
+				}
+			' '{}' + \
+			| sort -u \
+			| xargs bashbrew cat --format '[{{ .RepoName }}:{{ .TagName }}]="{{ join " " .TagEntry.Architectures }}"'
+	) )"
+}
+getArches 'postgres'
+
 cat <<-EOH
 # this file is generated via https://github.com/docker-library/postgres/blob/$(fileCommit "$self")/$self
 
@@ -54,7 +70,9 @@ join() {
 for version in "${versions[@]}"; do
 	commit="$(dirCommit "$version")"
 
-	fullVersion="$(git show "$commit":"$version/Dockerfile" | awk '$1 == "ENV" && $2 == "PG_VERSION" { gsub(/-.*$/, "", $3); gsub(/~/, "-", $3); print $3; exit }')"
+	pgdgVersion="$(git show "$commit":"$version/Dockerfile" | awk '$1 == "ENV" && $2 == "PG_VERSION" { print $3; exit }')"
+	fullVersion="${pgdgVersion%%-*}"
+	fullVersion="${fullVersion//'~'/-}"
 
 	versionAliases=()
 	while [ "$fullVersion" != "$version" -a "${fullVersion%[.-]*}" != "$fullVersion" ]; do
@@ -66,9 +84,19 @@ for version in "${versions[@]}"; do
 		${aliases[$version]:-}
 	)
 
+	versionParent="$(awk 'toupper($1) == "FROM" { print $2 }' "$version/Dockerfile")"
+	versionArches=()
+	# http://apt.postgresql.org/pub/repos/apt/dists/jessie-pgdg/main/
+	for arch in amd64 i386 ppc64le; do
+		if [[ " ${parentRepoToArches[$versionParent]} " =~ " $arch " ]]; then
+			versionArches+=( "$arch" )
+		fi
+	done
+
 	echo
 	cat <<-EOE
 		Tags: $(join ', ' "${versionAliases[@]}")
+		Architectures: $(join ', ' "${versionArches[@]}")
 		GitCommit: $commit
 		Directory: $version
 	EOE
@@ -81,9 +109,13 @@ for version in "${versions[@]}"; do
 		variantAliases=( "${versionAliases[@]/%/-$variant}" )
 		variantAliases=( "${variantAliases[@]//latest-/}" )
 
+		variantParent="$(awk 'toupper($1) == "FROM" { print $2 }' "$version/$variant/Dockerfile")"
+		variantArches="${parentRepoToArches[$variantParent]}"
+
 		echo
 		cat <<-EOE
 			Tags: $(join ', ' "${variantAliases[@]}")
+			Architectures: $(join ', ' $variantArches)
 			GitCommit: $commit
 			Directory: $version/$variant
 		EOE
