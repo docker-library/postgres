@@ -9,25 +9,51 @@ if [ ${#versions[@]} -eq 0 ]; then
 fi
 versions=( "${versions[@]%/}" )
 
-packagesBase='http://apt.postgresql.org/pub/repos/apt/dists/jessie-pgdg'
-mainList="$(curl -fsSL "$packagesBase/main/binary-amd64/Packages.bz2" | bunzip2)"
+declare -A debianSuite=(
+	[9.2]='jessie'
+	[9.3]='jessie'
+	[9.4]='jessie'
+	[9.5]='jessie'
+	[9.6]='jessie'
+	[10]='stretch'
+)
+declare -A alpineVersion=(
+	[9.2]='3.5'
+	[9.3]='3.5'
+	[9.4]='3.5'
+	[9.5]='3.5'
+	[9.6]='3.5'
+	[10]='3.6'
+)
 
 # https://www.mirrorservice.org/sites/ftp.ossp.org/pkg/lib/uuid/?C=M;O=D
 osspUuidVersion='1.6.2'
 osspUuidHash='11a615225baa5f8bb686824423f50e4427acd3f70d394765bdff32801f0fd5b0'
 
+lastSuite=
 travisEnv=
 for version in "${versions[@]}"; do
+	if [ "${debianSuite[$version]}" != "$lastSuite" ]; then
+		lastSuite="${debianSuite[$version]}"
+		packagesBase='http://apt.postgresql.org/pub/repos/apt/dists/'"${debianSuite[$version]}"'-pgdg'
+		mainList="$(curl -fsSL "$packagesBase/main/binary-amd64/Packages.bz2" | bunzip2)"
+	fi
+
 	versionList="$(echo "$mainList"; curl -fsSL "$packagesBase/$version/binary-amd64/Packages.bz2" | bunzip2)"
 	fullVersion="$(echo "$versionList" | awk -F ': ' '$1 == "Package" { pkg = $2 } $1 == "Version" && pkg == "postgresql-'"$version"'" { print $2; exit }' || true)"
 	(
 		set -x
 		cp docker-entrypoint.sh "$version/"
-		sed 's/%%PG_MAJOR%%/'"$version"'/g; s/%%PG_VERSION%%/'"$fullVersion"'/g' Dockerfile-debian.template > "$version/Dockerfile"
+		sed -e 's/%%PG_MAJOR%%/'"$version"'/g;' \
+			-e 's/%%PG_VERSION%%/'"$fullVersion"'/g' \
+			-e 's/%%DEBIAN_SUITE%%/'"${debianSuite[$version]}"'/g' \
+			Dockerfile-debian.template > "$version/Dockerfile"
 	)
 
 	# TODO figure out what to do with odd version numbers here, like release candidates
 	srcVersion="${fullVersion%%-*}"
+	# change "10~beta1" to "10beta1" for ftp urls
+	srcVersion="${srcVersion//\~/}"
 	srcSha256="$(curl -fsSL "https://ftp.postgresql.org/pub/source/v${srcVersion}/postgresql-${srcVersion}.tar.bz2.sha256" | cut -d' ' -f1)"
 	for variant in alpine; do
 		if [ ! -d "$version/$variant" ]; then
@@ -40,6 +66,7 @@ for version in "${versions[@]}"; do
 			sed -e 's/%%PG_MAJOR%%/'"$version"'/g' \
 				-e 's/%%PG_VERSION%%/'"$srcVersion"'/g' \
 				-e 's/%%PG_SHA256%%/'"$srcSha256"'/g' \
+				-e 's/%%ALPINE-VERSION%%/'"${alpineVersion[$version]}"'/g' \
 				"Dockerfile-$variant.template" > "$version/$variant/Dockerfile"
 
 			# TODO remove all this when 9.2 and 9.3 are EOL (2017-10-01 and 2018-10-01 -- from http://www.postgresql.org/support/versioning/)

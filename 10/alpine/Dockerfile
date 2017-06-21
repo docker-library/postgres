@@ -1,5 +1,5 @@
 # vim:set ft=dockerfile:
-FROM alpine:%%ALPINE-VERSION%%
+FROM alpine:3.6
 
 # alpine includes "postgres" user/group in base install
 #   /etc/passwd:22:postgres:x:70:70::/var/lib/postgresql:/bin/sh
@@ -21,11 +21,10 @@ ENV LANG en_US.utf8
 
 RUN mkdir /docker-entrypoint-initdb.d
 
-ENV PG_MAJOR %%PG_MAJOR%%
-ENV PG_VERSION %%PG_VERSION%%
-ENV PG_SHA256 %%PG_SHA256%%
+ENV PG_MAJOR 10
+ENV PG_VERSION 10beta1
+ENV PG_SHA256 7eee02e6f6646c7d4d6e78893a4ff638cfa5f1025b706712da8c6ef2257b5e29
 
-%%OSSP_UUID_ENV_VARS%%
 RUN set -ex \
 	\
 	&& apk add --no-cache --virtual .fetch-deps \
@@ -65,7 +64,6 @@ RUN set -ex \
 		util-linux-dev \
 		zlib-dev \
 	\
-%%INSTALL_OSSP_UUID%%
 	&& cd /usr/src/postgresql \
 # update "DEFAULT_PGSOCKET_DIR" to "/var/run/postgresql" (matching Debian)
 # see https://anonscm.debian.org/git/pkg-postgresql/postgresql.git/tree/debian/patches/51-default-sockets-in-var.patch?id=8b539fcb3e093a521c095e70bdfa76887217b89f
@@ -88,7 +86,7 @@ RUN set -ex \
 # skip debugging info -- we want tiny size instead
 #		--enable-debug \
 		--disable-rpath \
-		%%UUID_CONFIG_FLAG%% \
+		--with-uuid=e2fs \
 		--with-gnu-ld \
 		--with-pgport=5432 \
 		--with-system-tzdata=/usr/share/zoneinfo \

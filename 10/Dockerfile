@@ -1,5 +1,5 @@
 # vim:set ft=dockerfile:
-FROM debian:%%DEBIAN_SUITE%%
+FROM debian:stretch
 
 # explicitly set user/group IDs
 RUN groupadd -r postgres --gid=999 && useradd -r -g postgres --uid=999 postgres
@@ -36,8 +36,8 @@ RUN set -ex; \
 	rm -r "$GNUPGHOME"; \
 	apt-key list
 
-ENV PG_MAJOR %%PG_MAJOR%%
-ENV PG_VERSION %%PG_VERSION%%
+ENV PG_MAJOR 10
+ENV PG_VERSION 10~beta1-1.pgdg90+1
 
 RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main' $PG_MAJOR > /etc/apt/sources.list.d/pgdg.list
 
