@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eo pipefail
+set -Eeuo pipefail
 
 cd "$(dirname "$(readlink -f "$BASH_SOURCE")")"
 
@@ -26,27 +26,28 @@ declare -A alpineVersion=(
 	[10]='3.6'
 )
 
+packagesBase='http://apt.postgresql.org/pub/repos/apt/dists/'
+
 # https://www.mirrorservice.org/sites/ftp.ossp.org/pkg/lib/uuid/?C=M;O=D
 osspUuidVersion='1.6.2'
 osspUuidHash='11a615225baa5f8bb686824423f50e4427acd3f70d394765bdff32801f0fd5b0'
 
-lastSuite=
+declare -A suitePackageList
 travisEnv=
 for version in "${versions[@]}"; do
-	if [ "${debianSuite[$version]}" != "$lastSuite" ]; then
-		lastSuite="${debianSuite[$version]}"
-		packagesBase='http://apt.postgresql.org/pub/repos/apt/dists/'"${debianSuite[$version]}"'-pgdg'
-		mainList="$(curl -fsSL "$packagesBase/main/binary-amd64/Packages.bz2" | bunzip2)"
+	suite="${debianSuite[$version]}"
+	if [ -z "${suitePackageList["$suite"]:+isset}" ]; then
+		suitePackageList["$suite"]="$(curl -fsSL "${packagesBase}/${suite}-pgdg/main/binary-amd64/Packages.bz2" | bunzip2)"
 	fi
 
-	versionList="$(echo "$mainList"; curl -fsSL "$packagesBase/$version/binary-amd64/Packages.bz2" | bunzip2)"
+	versionList="$(echo "${suitePackageList["$suite"]}"; curl -fsSL "${packagesBase}/${suite}-pgdg/${version}/binary-amd64/Packages.bz2" | bunzip2)"
 	fullVersion="$(echo "$versionList" | awk -F ': ' '$1 == "Package" { pkg = $2 } $1 == "Version" && pkg == "postgresql-'"$version"'" { print $2; exit }' || true)"
 	(
 		set -x
 		cp docker-entrypoint.sh "$version/"
 		sed -e 's/%%PG_MAJOR%%/'"$version"'/g;' \
 			-e 's/%%PG_VERSION%%/'"$fullVersion"'/g' \
-			-e 's/%%DEBIAN_SUITE%%/'"${debianSuite[$version]}"'/g' \
+			-e 's/%%DEBIAN_SUITE%%/'"$suite"'/g' \
 			Dockerfile-debian.template > "$version/Dockerfile"
 		if [ "$version" = '10' ]; then
 			# postgresql-contrib-10 package does not exist, but is provided by postgresql-10
@@ -60,7 +61,8 @@ for version in "${versions[@]}"; do
 	# TODO figure out what to do with odd version numbers here, like release candidates
 	srcVersion="${fullVersion%%-*}"
 	# change "10~beta1" to "10beta1" for ftp urls
-	srcVersion="${srcVersion//\~/}"
+	tilde='~'
+	srcVersion="${srcVersion//$tilde/}"
 	srcSha256="$(curl -fsSL "https://ftp.postgresql.org/pub/source/v${srcVersion}/postgresql-${srcVersion}.tar.bz2.sha256" | cut -d' ' -f1)"
 	for variant in alpine; do
 		if [ ! -d "$version/$variant" ]; then
