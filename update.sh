@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eo pipefail
+set -Eeuo pipefail
 
 cd "$(dirname "$(readlink -f "$BASH_SOURCE")")"
 
@@ -9,25 +9,60 @@ if [ ${#versions[@]} -eq 0 ]; then
 fi
 versions=( "${versions[@]%/}" )
 
-packagesBase='http://apt.postgresql.org/pub/repos/apt/dists/jessie-pgdg'
-mainList="$(curl -fsSL "$packagesBase/main/binary-amd64/Packages.bz2" | bunzip2)"
+declare -A debianSuite=(
+	[9.2]='jessie'
+	[9.3]='jessie'
+	[9.4]='jessie'
+	[9.5]='jessie'
+	[9.6]='jessie'
+	[10]='stretch'
+)
+declare -A alpineVersion=(
+	[9.2]='3.5'
+	[9.3]='3.5'
+	[9.4]='3.5'
+	[9.5]='3.5'
+	[9.6]='3.5'
+	[10]='3.6'
+)
+
+packagesBase='http://apt.postgresql.org/pub/repos/apt/dists/'
 
 # https://www.mirrorservice.org/sites/ftp.ossp.org/pkg/lib/uuid/?C=M;O=D
 osspUuidVersion='1.6.2'
 osspUuidHash='11a615225baa5f8bb686824423f50e4427acd3f70d394765bdff32801f0fd5b0'
 
+declare -A suitePackageList
 travisEnv=
 for version in "${versions[@]}"; do
-	versionList="$(echo "$mainList"; curl -fsSL "$packagesBase/$version/binary-amd64/Packages.bz2" | bunzip2)"
+	suite="${debianSuite[$version]}"
+	if [ -z "${suitePackageList["$suite"]:+isset}" ]; then
+		suitePackageList["$suite"]="$(curl -fsSL "${packagesBase}/${suite}-pgdg/main/binary-amd64/Packages.bz2" | bunzip2)"
+	fi
+
+	versionList="$(echo "${suitePackageList["$suite"]}"; curl -fsSL "${packagesBase}/${suite}-pgdg/${version}/binary-amd64/Packages.bz2" | bunzip2)"
 	fullVersion="$(echo "$versionList" | awk -F ': ' '$1 == "Package" { pkg = $2 } $1 == "Version" && pkg == "postgresql-'"$version"'" { print $2; exit }' || true)"
 	(
 		set -x
 		cp docker-entrypoint.sh "$version/"
-		sed 's/%%PG_MAJOR%%/'"$version"'/g; s/%%PG_VERSION%%/'"$fullVersion"'/g' Dockerfile-debian.template > "$version/Dockerfile"
+		sed -e 's/%%PG_MAJOR%%/'"$version"'/g;' \
+			-e 's/%%PG_VERSION%%/'"$fullVersion"'/g' \
+			-e 's/%%DEBIAN_SUITE%%/'"$suite"'/g' \
+			Dockerfile-debian.template > "$version/Dockerfile"
+		if [ "$version" = '10' ]; then
+			# postgresql-contrib-10 package does not exist, but is provided by postgresql-10
+			# Packages.gz:
+			# Package: postgresql-10
+			# Provides: postgresql-contrib-10
+			sed -i -e '/postgresql-contrib-/d' "$version/Dockerfile"
+		fi
 	)
 
 	# TODO figure out what to do with odd version numbers here, like release candidates
 	srcVersion="${fullVersion%%-*}"
+	# change "10~beta1" to "10beta1" for ftp urls
+	tilde='~'
+	srcVersion="${srcVersion//$tilde/}"
 	srcSha256="$(curl -fsSL "https://ftp.postgresql.org/pub/source/v${srcVersion}/postgresql-${srcVersion}.tar.bz2.sha256" | cut -d' ' -f1)"
 	for variant in alpine; do
 		if [ ! -d "$version/$variant" ]; then
@@ -40,7 +75,13 @@ for version in "${versions[@]}"; do
 			sed -e 's/%%PG_MAJOR%%/'"$version"'/g' \
 				-e 's/%%PG_VERSION%%/'"$srcVersion"'/g' \
 				-e 's/%%PG_SHA256%%/'"$srcSha256"'/g' \
+				-e 's/%%ALPINE-VERSION%%/'"${alpineVersion[$version]}"'/g' \
 				"Dockerfile-$variant.template" > "$version/$variant/Dockerfile"
+			if [ "${alpineVersion[$version]}" != '3.5' ]; then
+				# prove was moved out of the perl package and into perl-utils in 3.6
+				# https://pkgs.alpinelinux.org/contents?file=prove&path=&name=&branch=&repo=&arch=x86_64
+				sed -ri 's/(\s+perl)(\s+)/\1-utils\2/' "$version/$variant/Dockerfile"
+			fi
 
 			# TODO remove all this when 9.2 and 9.3 are EOL (2017-10-01 and 2018-10-01 -- from http://www.postgresql.org/support/versioning/)
 			case "$version" in

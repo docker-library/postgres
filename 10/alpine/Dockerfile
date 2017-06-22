@@ -1,5 +1,5 @@
 # vim:set ft=dockerfile:
-FROM alpine:3.5
+FROM alpine:3.6
 
 # alpine includes "postgres" user/group in base install
 #   /etc/passwd:22:postgres:x:70:70::/var/lib/postgresql:/bin/sh
@@ -21,9 +21,9 @@ ENV LANG en_US.utf8
 
 RUN mkdir /docker-entrypoint-initdb.d
 
-ENV PG_MAJOR 9.6
-ENV PG_VERSION 9.6.3
-ENV PG_SHA256 1645b3736901f6d854e695a937389e68ff2066ce0cde9d73919d6ab7c995b9c6
+ENV PG_MAJOR 10
+ENV PG_VERSION 10beta1
+ENV PG_SHA256 7eee02e6f6646c7d4d6e78893a4ff638cfa5f1025b706712da8c6ef2257b5e29
 
 RUN set -ex \
 	\
@@ -57,7 +57,7 @@ RUN set -ex \
 #		openldap-dev \
 		openssl-dev \
 # configure: error: prove not found
-		perl \
+		perl-utils \
 #		perl-dev \
 #		python-dev \
 #		python3-dev \
