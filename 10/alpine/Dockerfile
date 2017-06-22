@@ -56,7 +56,8 @@ RUN set -ex \
 		make \
 #		openldap-dev \
 		openssl-dev \
-		perl \
+# configure: error: prove not found
+		perl-utils \
 #		perl-dev \
 #		python-dev \
 #		python3-dev \

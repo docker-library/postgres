@@ -68,6 +68,11 @@ for version in "${versions[@]}"; do
 				-e 's/%%PG_SHA256%%/'"$srcSha256"'/g' \
 				-e 's/%%ALPINE-VERSION%%/'"${alpineVersion[$version]}"'/g' \
 				"Dockerfile-$variant.template" > "$version/$variant/Dockerfile"
+			if [ "${alpineVersion[$version]}" != '3.5' ]; then
+				# prove was moved out of the perl package and into perl-utils in 3.6
+				# https://pkgs.alpinelinux.org/contents?file=prove&path=&name=&branch=&repo=&arch=x86_64
+				sed -ri 's/(\s+perl)(\s+)/\1-utils\2/' "$version/$variant/Dockerfile"
+			fi
 
 			# TODO remove all this when 9.2 and 9.3 are EOL (2017-10-01 and 2018-10-01 -- from http://www.postgresql.org/support/versioning/)
 			case "$version" in
