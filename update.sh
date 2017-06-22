@@ -48,6 +48,13 @@ for version in "${versions[@]}"; do
 			-e 's/%%PG_VERSION%%/'"$fullVersion"'/g' \
 			-e 's/%%DEBIAN_SUITE%%/'"${debianSuite[$version]}"'/g' \
 			Dockerfile-debian.template > "$version/Dockerfile"
+		if [ "$version" = '10' ]; then
+			# postgresql-contrib-10 package does not exist, but is provided by postgresql-10
+			# Packages.gz:
+			# Package: postgresql-10
+			# Provides: postgresql-contrib-10
+			sed -i -e '/postgresql-contrib-/d' "$version/Dockerfile"
+		fi
 	)
 
 	# TODO figure out what to do with odd version numbers here, like release candidates
