@@ -49,7 +49,6 @@ fi
 
 if [ "$1" = 'postgres' ]; then
 	mkdir -p "$PGDATA"
-	chown -R "$(id -u)" "$PGDATA" 2>/dev/null || :
 	chmod 700 "$PGDATA" 2>/dev/null || :
 
 	# look specifically for PG_VERSION, as it is expected in the DB dir
