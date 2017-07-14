@@ -22,8 +22,8 @@ ENV LANG en_US.utf8
 RUN mkdir /docker-entrypoint-initdb.d
 
 ENV PG_MAJOR 10
-ENV PG_VERSION 10beta1
-ENV PG_SHA256 7eee02e6f6646c7d4d6e78893a4ff638cfa5f1025b706712da8c6ef2257b5e29
+ENV PG_VERSION 10beta2
+ENV PG_SHA256 0d6b50236039fc92e8784bd908b452c38ef63c0f9029f34e7115fbc30e17b195
 
 RUN set -ex \
 	\
@@ -58,6 +58,8 @@ RUN set -ex \
 		openssl-dev \
 # configure: error: prove not found
 		perl-utils \
+# configure: error: Perl module IPC::Run is required to run TAP tests
+		perl-ipc-run \
 #		perl-dev \
 #		python-dev \
 #		python3-dev \
