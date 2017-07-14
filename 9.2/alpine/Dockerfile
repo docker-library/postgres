@@ -61,6 +61,8 @@ RUN set -ex \
 		openssl-dev \
 # configure: error: prove not found
 		perl \
+# configure: error: Perl module IPC::Run is required to run TAP tests
+		perl-ipc-run \
 #		perl-dev \
 #		python-dev \
 #		python3-dev \
