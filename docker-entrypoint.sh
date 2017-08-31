@@ -110,6 +110,13 @@ if [ "$1" = 'postgres' ]; then
 			echo
 		fi
 
+		if [ "$POSTGRES_DB_TEST" ]; then
+			"${psql[@]}" --username postgres <<-EOSQL
+				CREATE DATABASE "${POSTGRES_DB}_test" ;
+			EOSQL
+			echo
+		fi
+
 		if [ "$POSTGRES_USER" = 'postgres' ]; then
 			op='ALTER'
 		else
