@@ -3,16 +3,22 @@ services: docker
 
 env:
   - VERSION=9.6
+  - VERSION=9.6 FORCE_DEB_BUILD=1
   - VERSION=9.6 VARIANT=alpine
   - VERSION=9.5
+  - VERSION=9.5 FORCE_DEB_BUILD=1
   - VERSION=9.5 VARIANT=alpine
   - VERSION=9.4
+  - VERSION=9.4 FORCE_DEB_BUILD=1
   - VERSION=9.4 VARIANT=alpine
   - VERSION=9.3
+  - VERSION=9.3 FORCE_DEB_BUILD=1
   - VERSION=9.3 VARIANT=alpine
   - VERSION=9.2
+  - VERSION=9.2 FORCE_DEB_BUILD=1
   - VERSION=9.2 VARIANT=alpine
   - VERSION=10
+  - VERSION=10 FORCE_DEB_BUILD=1
   - VERSION=10 VARIANT=alpine
 
 install:
@@ -24,8 +30,19 @@ before_script:
   - image="postgres:${VERSION}${VARIANT:+-${VARIANT}}"
 
 script:
-  - travis_retry docker build -t "$image" .
-  - ~/official-images/test/run.sh "$image"
+  - |
+    (
+      set -Eeuo pipefail
+      set -x
+      if [ -n "${FORCE_DEB_BUILD:+x}" ]; then
+        [ "$(dpkg --print-architecture)" = 'amd64' ]
+        grep -qE 'amd64[|]' Dockerfile
+        sed -ri -e 's/amd64[|]//g' Dockerfile
+        ! grep -qE 'amd64[|]' Dockerfile
+      fi
+      travis_retry docker build -t "$image" .
+      ~/official-images/test/run.sh "$image"
+    )
 
 after_script:
   - docker images
