@@ -53,7 +53,7 @@ if [ "$1" = 'postgres' ]; then
 	chmod 700 "$PGDATA" 2>/dev/null || :
 
 	# look specifically for PG_VERSION, as it is expected in the DB dir
-	if [ ! -s "$PGDATA/PG_VERSION" ]; then
+	if [ -s "$PGDATA/PG_VERSION" ]; then
 		file_env 'POSTGRES_INITDB_ARGS'
 		if [ "$POSTGRES_INITDB_XLOGDIR" ]; then
 			export POSTGRES_INITDB_ARGS="$POSTGRES_INITDB_ARGS --xlogdir $POSTGRES_INITDB_XLOGDIR"
