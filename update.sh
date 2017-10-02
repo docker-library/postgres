@@ -10,7 +10,6 @@ fi
 versions=( "${versions[@]%/}" )
 
 declare -A debianSuite=(
-	[9.2]='jessie'
 	[9.3]='jessie'
 	[9.4]='jessie'
 	[9.5]='jessie'
@@ -18,7 +17,6 @@ declare -A debianSuite=(
 	[10]='stretch'
 )
 declare -A alpineVersion=(
-	[9.2]='3.5'
 	[9.3]='3.5'
 	[9.4]='3.5'
 	[9.5]='3.5'
@@ -87,9 +85,9 @@ for version in "${versions[@]}"; do
 				sed -ri 's/(\s+perl)(\s+)/\1-utils\2/' "$version/$variant/Dockerfile"
 			fi
 
-			# TODO remove all this when 9.2 and 9.3 are EOL (2017-10-01 and 2018-10-01 -- from http://www.postgresql.org/support/versioning/)
+			# TODO remove all this when 9.3 is EOL (2018-10-01 -- from http://www.postgresql.org/support/versioning/)
 			case "$version" in
-				9.2|9.3)
+				9.3)
 					uuidConfigFlag='--with-ossp-uuid'
 					sed -i \
 						-e 's/%%OSSP_UUID_ENV_VARS%%/ENV OSSP_UUID_VERSION '"$osspUuidVersion"'\nENV OSSP_UUID_SHA256 '"$osspUuidHash"'\n/' \
