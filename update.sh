@@ -43,6 +43,8 @@ for version in "${versions[@]}"; do
 
 	versionList="$(echo "${suitePackageList["$suite"]}"; curl -fsSL "${packagesBase}/${suite}-pgdg/${version}/binary-amd64/Packages.bz2" | bunzip2)"
 	fullVersion="$(echo "$versionList" | awk -F ': ' '$1 == "Package" { pkg = $2 } $1 == "Version" && pkg == "postgresql-'"$version"'" { print $2; exit }' || true)"
+	majorVersion="${version%%.*}"
+
 	(
 		set -x
 		cp docker-entrypoint.sh "$version/"
@@ -51,7 +53,11 @@ for version in "${versions[@]}"; do
 			-e 's/%%DEBIAN_SUITE%%/'"$suite"'/g' \
 			-e 's/%%ARCH_LIST%%/'"${suiteArches["$suite"]}"'/g' \
 			Dockerfile-debian.template > "$version/Dockerfile"
-		if [ "$version" = '10' ]; then
+		if [ "$majorVersion" = '9' ]; then
+			sed -i -e 's/WALDIR/XLOGDIR/g' \
+				-e 's/waldir/xlogdir/g' \
+				"$version/docker-entrypoint.sh"
+		else
 			# postgresql-contrib-10 package does not exist, but is provided by postgresql-10
 			# Packages.gz:
 			# Package: postgresql-10
@@ -83,6 +89,11 @@ for version in "${versions[@]}"; do
 				# prove was moved out of the perl package and into perl-utils in 3.6
 				# https://pkgs.alpinelinux.org/contents?file=prove&path=&name=&branch=&repo=&arch=x86_64
 				sed -ri 's/(\s+perl)(\s+)/\1-utils\2/' "$version/$variant/Dockerfile"
+			fi
+			if [ "$majorVersion" = '9' ]; then
+				sed -i -e 's/WALDIR/XLOGDIR/g' \
+					-e 's/waldir/xlogdir/g' \
+					"$version/$variant/docker-entrypoint.sh"
 			fi
 
 			# TODO remove all this when 9.3 is EOL (2018-10-01 -- from http://www.postgresql.org/support/versioning/)
