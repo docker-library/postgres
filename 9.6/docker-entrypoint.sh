@@ -44,6 +44,7 @@ if [ "$1" = 'postgres' ] && [ "$(id -u)" = '0' ]; then
 		chmod 700 "$POSTGRES_INITDB_XLOGDIR"
 	fi
 
+	localedef -i $LANGUAGE -c -f UTF-8 -A /usr/share/locale/locale.alias $LANG
 	exec gosu postgres "$BASH_SOURCE" "$@"
 fi
 
