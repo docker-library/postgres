@@ -47,7 +47,7 @@ if [ "$1" = 'postgres' ] && [ "$(id -u)" = '0' ]; then
 	exec gosu postgres "$BASH_SOURCE" "$@"
 fi
 
-if [ "$1" = 'postgres' ]; then
+if [ "$1" = 'postgres' ] || [ "$1" = 'pg_ctl' ] ; then
 	mkdir -p "$PGDATA"
 	chown -R "$(id -u)" "$PGDATA" 2>/dev/null || :
 	chmod 700 "$PGDATA" 2>/dev/null || :
