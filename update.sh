@@ -21,7 +21,7 @@ declare -A alpineVersion=(
 	[9.4]='3.5'
 	[9.5]='3.5'
 	[9.6]='3.5'
-	[10]='3.6'
+	[10]='3.7'
 )
 
 packagesBase='http://apt.postgresql.org/pub/repos/apt/dists/'
