@@ -28,6 +28,11 @@ if [ "${1:0:1}" = '-' ]; then
 fi
 
 # allow the container to be started with `--user`
+if ! whoami &> /dev/null; then
+	if [ -w /etc/passwd ]; then
+		echo "${USER_NAME:-default}:x:$(id -u):0:${USER_NAME:-default} user:${HOME}:/sbin/nologin" >> /etc/passwd
+	fi
+fi
 if [ "$1" = 'postgres' ] && [ "$(id -u)" = '0' ]; then
 	mkdir -p "$PGDATA"
 	chown -R postgres "$PGDATA"
