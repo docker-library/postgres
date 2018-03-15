@@ -47,7 +47,7 @@ for version in "${versions[@]}"; do
 
 	(
 		set -x
-		cp docker-entrypoint.sh "$version/"
+		cp docker-*.sh "$version/"
 		sed -e 's/%%PG_MAJOR%%/'"$version"'/g;' \
 			-e 's/%%PG_VERSION%%/'"$fullVersion"'/g' \
 			-e 's/%%DEBIAN_SUITE%%/'"$suite"'/g' \
@@ -78,7 +78,7 @@ for version in "${versions[@]}"; do
 		fi
 		(
 			set -x
-			cp docker-entrypoint.sh "$version/$variant/"
+			cp docker-*.sh "$version/$variant/"
 			sed -i 's/gosu/su-exec/g' "$version/$variant/docker-entrypoint.sh"
 			sed -e 's/%%PG_MAJOR%%/'"$version"'/g' \
 				-e 's/%%PG_VERSION%%/'"$srcVersion"'/g' \
