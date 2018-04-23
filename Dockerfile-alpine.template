@@ -58,7 +58,7 @@ RUN set -ex \
 #		openldap-dev \
 		openssl-dev \
 # configure: error: prove not found
-		perl \
+		perl-utils \
 # configure: error: Perl module IPC::Run is required to run TAP tests
 		perl-ipc-run \
 #		perl-dev \
