@@ -16,12 +16,9 @@ declare -A debianSuite=(
 	[9.6]='jessie'
 	[10]='stretch'
 )
+defaultAlpineVersion='3.7'
 declare -A alpineVersion=(
-	[9.3]='3.5'
-	[9.4]='3.5'
-	[9.5]='3.5'
-	[9.6]='3.5'
-	[10]='3.7'
+	#[9.6]='3.5'
 )
 
 packagesBase='http://apt.postgresql.org/pub/repos/apt/dists/'
@@ -83,13 +80,8 @@ for version in "${versions[@]}"; do
 			sed -e 's/%%PG_MAJOR%%/'"$version"'/g' \
 				-e 's/%%PG_VERSION%%/'"$srcVersion"'/g' \
 				-e 's/%%PG_SHA256%%/'"$srcSha256"'/g' \
-				-e 's/%%ALPINE-VERSION%%/'"${alpineVersion[$version]}"'/g' \
+				-e 's/%%ALPINE-VERSION%%/'"${alpineVersion[$version]:-$defaultAlpineVersion}"'/g' \
 				"Dockerfile-$variant.template" > "$version/$variant/Dockerfile"
-			if [ "${alpineVersion[$version]}" != '3.5' ]; then
-				# prove was moved out of the perl package and into perl-utils in 3.6
-				# https://pkgs.alpinelinux.org/contents?file=prove&path=&name=&branch=&repo=&arch=x86_64
-				sed -ri 's/(\s+perl)(\s+)/\1-utils\2/' "$version/$variant/Dockerfile"
-			fi
 			if [ "$majorVersion" = '9' ]; then
 				sed -i -e 's/WALDIR/XLOGDIR/g' \
 					-e 's/waldir/xlogdir/g' \
