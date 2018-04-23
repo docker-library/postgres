@@ -9,12 +9,9 @@ if [ ${#versions[@]} -eq 0 ]; then
 fi
 versions=( "${versions[@]%/}" )
 
+defaultDebianSuite='stretch-slim'
 declare -A debianSuite=(
-	[9.3]='jessie'
-	[9.4]='jessie'
-	[9.5]='jessie'
-	[9.6]='jessie'
-	[10]='stretch'
+	#[9.6]='jessie'
 )
 declare -A alpineVersion=(
 	[9.3]='3.5'
@@ -33,7 +30,8 @@ osspUuidHash='11a615225baa5f8bb686824423f50e4427acd3f70d394765bdff32801f0fd5b0'
 declare -A suitePackageList=() suiteArches=()
 travisEnv=
 for version in "${versions[@]}"; do
-	suite="${debianSuite[$version]}"
+	tag="${debianSuite[$version]:-$defaultDebianSuite}"
+	suite="${tag%%-slim}"
 	if [ -z "${suitePackageList["$suite"]:+isset}" ]; then
 		suitePackageList["$suite"]="$(curl -fsSL "${packagesBase}/${suite}-pgdg/main/binary-amd64/Packages.bz2" | bunzip2)"
 	fi
@@ -50,6 +48,7 @@ for version in "${versions[@]}"; do
 		cp docker-entrypoint.sh "$version/"
 		sed -e 's/%%PG_MAJOR%%/'"$version"'/g;' \
 			-e 's/%%PG_VERSION%%/'"$fullVersion"'/g' \
+			-e 's/%%DEBIAN_TAG%%/'"$tag"'/g' \
 			-e 's/%%DEBIAN_SUITE%%/'"$suite"'/g' \
 			-e 's/%%ARCH_LIST%%/'"${suiteArches["$suite"]}"'/g' \
 			Dockerfile-debian.template > "$version/Dockerfile"
