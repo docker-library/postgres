@@ -54,91 +54,114 @@ if [ "$1" = 'postgres' ]; then
 
 	# look specifically for PG_VERSION, as it is expected in the DB dir
 	if [ ! -s "$PGDATA/PG_VERSION" ]; then
-		file_env 'POSTGRES_INITDB_ARGS'
-		if [ "$POSTGRES_INITDB_WALDIR" ]; then
-			export POSTGRES_INITDB_ARGS="$POSTGRES_INITDB_ARGS --waldir $POSTGRES_INITDB_WALDIR"
-		fi
-		eval "initdb --username=postgres $POSTGRES_INITDB_ARGS"
-
-		# check password first so we can output the warning before postgres
-		# messes it up
-		file_env 'POSTGRES_PASSWORD'
-		if [ "$POSTGRES_PASSWORD" ]; then
-			pass="PASSWORD '$POSTGRES_PASSWORD'"
-			authMethod=md5
-		else
-			# The - option suppresses leading tabs but *not* spaces. :)
-			cat >&2 <<-'EOWARN'
-				****************************************************
-				WARNING: No password has been set for the database.
-				         This will allow anyone with access to the
-				         Postgres port to access your database. In
-				         Docker's default configuration, this is
-				         effectively any other container on the same
-				         system.
-
-				         Use "-e POSTGRES_PASSWORD=password" to set
-				         it in "docker run".
-				****************************************************
-			EOWARN
-
-			pass=
-			authMethod=trust
-		fi
-
-		{
-			echo
-			echo "host all all all $authMethod"
-		} >> "$PGDATA/pg_hba.conf"
-
-		# internal start of server in order to allow set-up using psql-client
-		# does not listen on external TCP/IP and waits until start finishes
-		PGUSER="${PGUSER:-postgres}" \
-		pg_ctl -D "$PGDATA" \
-			-o "-c listen_addresses='localhost'" \
-			-w start
-
 		file_env 'POSTGRES_USER' 'postgres'
 		file_env 'POSTGRES_DB' "$POSTGRES_USER"
+		file_env 'POSTGRES_PASSWORD'
+		file_env 'POSTGRES_NUM_SLAVES'
+		file_env 'POSTGRES_MASTER_HOST'
 
-		psql=( psql -v ON_ERROR_STOP=1 )
+		if [ ! "$POSTGRES_MASTER_HOST" ]; then
+			file_env 'POSTGRES_INITDB_ARGS'
+			if [ "$POSTGRES_INITDB_WALDIR" ]; then
+				export POSTGRES_INITDB_ARGS="$POSTGRES_INITDB_ARGS --waldir $POSTGRES_INITDB_WALDIR"
+			fi
+			eval "initdb --username=postgres $POSTGRES_INITDB_ARGS"
 
-		if [ "$POSTGRES_DB" != 'postgres' ]; then
+			# check password first so we can output the warning before postgres
+			# messes it up
+			if [ "$POSTGRES_PASSWORD" ]; then
+				pass="PASSWORD '$POSTGRES_PASSWORD'"
+				authMethod=md5
+			else
+				# The - option suppresses leading tabs but *not* spaces. :)
+				cat >&2 <<-'EOWARN'
+					****************************************************
+					WARNING: No password has been set for the database.
+									This will allow anyone with access to the
+									Postgres port to access your database. In
+									Docker's default configuration, this is
+									effectively any other container on the same
+									system.
+
+									Use "-e POSTGRES_PASSWORD=password" to set
+									it in "docker run".
+					****************************************************
+				EOWARN
+
+				pass=
+				authMethod=trust
+			fi
+
+			{
+				echo
+				echo "host replication all all $authMethod"
+				echo "host all all all $authMethod"
+			} >> "$PGDATA/pg_hba.conf"
+
+			# internal start of server in order to allow set-up using psql-client
+			# does not listen on external TCP/IP and waits until start finishes
+			PGUSER="${PGUSER:-postgres}" \
+			pg_ctl -D "$PGDATA" \
+				-o "-c listen_addresses='localhost'" \
+				-w start
+
+			psql=( psql -v ON_ERROR_STOP=1 )
+
+			if [ "$POSTGRES_DB" != 'postgres' ]; then
+				"${psql[@]}" --username postgres <<-EOSQL
+					CREATE DATABASE "$POSTGRES_DB" ;
+				EOSQL
+				echo
+			fi
+
+			if [ "$POSTGRES_USER" = 'postgres' ]; then
+				op='ALTER'
+			else
+				op='CREATE'
+			fi
 			"${psql[@]}" --username postgres <<-EOSQL
-				CREATE DATABASE "$POSTGRES_DB" ;
+				$op USER "$POSTGRES_USER" WITH SUPERUSER $pass ;
 			EOSQL
 			echo
-		fi
 
-		if [ "$POSTGRES_USER" = 'postgres' ]; then
-			op='ALTER'
-		else
-			op='CREATE'
-		fi
-		"${psql[@]}" --username postgres <<-EOSQL
-			$op USER "$POSTGRES_USER" WITH SUPERUSER $pass ;
-		EOSQL
-		echo
+			psql+=( --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" )
 
-		psql+=( --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" )
-
-		echo
-		for f in /docker-entrypoint-initdb.d/*; do
-			case "$f" in
-				*.sh)     echo "$0: running $f"; . "$f" ;;
-				*.sql)    echo "$0: running $f"; "${psql[@]}" -f "$f"; echo ;;
-				*.sql.gz) echo "$0: running $f"; gunzip -c "$f" | "${psql[@]}"; echo ;;
-				*)        echo "$0: ignoring $f" ;;
-			esac
 			echo
-		done
+			for f in /docker-entrypoint-initdb.d/*; do
+				case "$f" in
+					*.sh)     echo "$0: running $f"; . "$f" ;;
+					*.sql)    echo "$0: running $f"; "${psql[@]}" -f "$f"; echo ;;
+					*.sql.gz) echo "$0: running $f"; gunzip -c "$f" | "${psql[@]}"; echo ;;
+					*)        echo "$0: ignoring $f" ;;
+				esac
+				echo
+			done
 
-		PGUSER="${PGUSER:-postgres}" \
-		pg_ctl -D "$PGDATA" -m fast -w stop
+			PGUSER="${PGUSER:-postgres}" \
+			pg_ctl -D "$PGDATA" -m fast -w stop
 
-		echo
-		echo 'PostgreSQL init process complete; ready for start up.'
-		echo
+		  # do this after initdb, otherwise synchronous_standby_names causes a deadlock
+			if [ $POSTGRES_NUM_SLAVES -gt 0 ]; then
+				echo "enabling replication"
+				{
+					echo
+					echo "wal_level = hot_standby"
+					echo "max_wal_senders = $(($POSTGRES_NUM_SLAVES * 2))" # each slave needs 2 connections when comming up
+					echo "hot_standby = on"
+					echo "synchronous_standby_names = '*'"
+				} >> "$PGDATA/postgresql.conf"
+			fi
+
+			echo
+			echo 'PostgreSQL init process complete; ready for start up.'
+			echo
+		else
+			eval "pg_basebackup -D $PGDATA -R -Xs -P -d \"host=$POSTGRES_MASTER_HOST user=$POSTGRES_USER password=$POSTGRES_PASSWORD \""
+
+			echo
+			echo "PostgreSQL basebackup complete; ready for start up."
+			echo
+		fi
 	fi
 fi
 
