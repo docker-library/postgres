@@ -95,7 +95,7 @@ if [ "$1" = 'postgres' ]; then
 		# does not listen on external TCP/IP and waits until start finishes
 		PGUSER="${PGUSER:-postgres}" \
 		pg_ctl -D "$PGDATA" \
-			-o "-c listen_addresses='localhost'" \
+			-o "-c listen_addresses=''" \
 			-w start
 
 		file_env 'POSTGRES_USER' 'postgres'
