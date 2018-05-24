@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-set -e
+set -Eeo pipefail
+# TODO swap to -Eeuo pipefail above (after handling all potentially-unset variables)
 
 # usage: file_env VAR [DEFAULT]
 #    ie: file_env 'XYZ_DB_PASSWORD' 'example'
@@ -54,11 +55,27 @@ if [ "$1" = 'postgres' ]; then
 
 	# look specifically for PG_VERSION, as it is expected in the DB dir
 	if [ ! -s "$PGDATA/PG_VERSION" ]; then
+		# "initdb" is particular about the current user existing in "/etc/passwd", so we use "nss_wrapper" to fake that if necessary
+		# see https://github.com/docker-library/postgres/pull/253, https://github.com/docker-library/postgres/issues/359, https://cwrap.org/nss_wrapper.html
+		if ! getent passwd "$(id -u)" &> /dev/null && [ -e /usr/lib/libnss_wrapper.so ]; then
+			export LD_PRELOAD='/usr/lib/libnss_wrapper.so'
+			export NSS_WRAPPER_PASSWD="$(mktemp)"
+			export NSS_WRAPPER_GROUP="$(mktemp)"
+			echo "postgres:x:$(id -u):$(id -g):PostgreSQL:$PGDATA:/bin/false" > "$NSS_WRAPPER_PASSWD"
+			echo "postgres:x:$(id -g):" > "$NSS_WRAPPER_GROUP"
+		fi
+
 		file_env 'POSTGRES_INITDB_ARGS'
 		if [ "$POSTGRES_INITDB_WALDIR" ]; then
 			export POSTGRES_INITDB_ARGS="$POSTGRES_INITDB_ARGS --waldir $POSTGRES_INITDB_WALDIR"
 		fi
 		eval "initdb --username=postgres $POSTGRES_INITDB_ARGS"
+
+		# unset/cleanup "nss_wrapper" bits
+		if [ "${LD_PRELOAD:-}" = '/usr/lib/libnss_wrapper.so' ]; then
+			rm -f "$NSS_WRAPPER_PASSWD" "$NSS_WRAPPER_GROUP"
+			unset LD_PRELOAD NSS_WRAPPER_PASSWD NSS_WRAPPER_GROUP
+		fi
 
 		# check password first so we can output the warning before postgres
 		# messes it up
