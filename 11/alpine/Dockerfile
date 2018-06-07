@@ -1,7 +1,7 @@
 # vim:set ft=dockerfile:
 ARG  REPOSITORY=alpine
 ARG  TAG=3.7
-FROM ${REPOSITORY}:${TAG}
+FROM $REPOSITORY:$TAG
 
 # alpine includes "postgres" user/group in base install
 #   /etc/passwd:22:postgres:x:70:70::/var/lib/postgresql:/bin/sh
