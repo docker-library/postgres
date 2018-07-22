@@ -66,6 +66,7 @@ RUN set -ex \
 #		tcl-dev \
 		util-linux-dev \
 		zlib-dev \
+		icu-dev \
 	\
 	&& cd /usr/src/postgresql \
 # update "DEFAULT_PGSOCKET_DIR" to "/var/run/postgresql" (matching Debian)
@@ -108,6 +109,7 @@ RUN set -ex \
 		--with-openssl \
 		--with-libxml \
 		--with-libxslt \
+		--with-icu \
 	&& make -j "$(nproc)" world \
 	&& make install-world \
 	&& make -C contrib install \
