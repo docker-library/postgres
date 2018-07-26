@@ -26,6 +26,7 @@ install:
 
 before_script:
   - env | sort
+  - wget -qO- 'https://github.com/tianon/pgp-happy-eyeballs/raw/master/hack-my-builds.sh' | bash
   - cd "$VERSION/$VARIANT"
   - image="postgres:${VERSION}${VARIANT:+-${VARIANT}}"
 
@@ -40,7 +41,7 @@ script:
         sed -ri -e 's/amd64[|]//g' Dockerfile
         ! grep -qE 'amd64[|]' Dockerfile
       fi
-      travis_retry docker build -t "$image" .
+      docker build -t "$image" .
       ~/official-images/test/run.sh "$image"
     )
 
