@@ -53,6 +53,8 @@ for version in "${versions[@]}"; do
 			sed -i -e 's/WALDIR/XLOGDIR/g' \
 				-e 's/waldir/xlogdir/g' \
 				"$version/docker-entrypoint.sh"
+			# ICU support was introduced in PostgreSQL 10 (https://www.postgresql.org/docs/10/static/release-10.html#id-1.11.6.9.5.13)
+			sed -i -e '/icu/d' "$version/Dockerfile"
 		else
 			# postgresql-contrib-10 package does not exist, but is provided by postgresql-10
 			# Packages.gz:
@@ -85,6 +87,8 @@ for version in "${versions[@]}"; do
 				sed -i -e 's/WALDIR/XLOGDIR/g' \
 					-e 's/waldir/xlogdir/g' \
 					"$version/$variant/docker-entrypoint.sh"
+				# ICU support was introduced in PostgreSQL 10 (https://www.postgresql.org/docs/10/static/release-10.html#id-1.11.6.9.5.13)
+				sed -i -e '/icu/d' "$version/$variant/Dockerfile"
 			fi
 
 			# TODO remove all this when 9.3 is EOL (2018-10-01 -- from http://www.postgresql.org/support/versioning/)
