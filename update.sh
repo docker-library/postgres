@@ -40,29 +40,28 @@ for version in "${versions[@]}"; do
 	fullVersion="$(echo "$versionList" | awk -F ': ' '$1 == "Package" { pkg = $2 } $1 == "Version" && pkg == "postgresql-'"$version"'" { print $2; exit }' || true)"
 	majorVersion="${version%%.*}"
 
-	(
-		set -x
-		cp docker-entrypoint.sh "$version/"
-		sed -e 's/%%PG_MAJOR%%/'"$version"'/g;' \
-			-e 's/%%PG_VERSION%%/'"$fullVersion"'/g' \
-			-e 's/%%DEBIAN_TAG%%/'"$tag"'/g' \
-			-e 's/%%DEBIAN_SUITE%%/'"$suite"'/g' \
-			-e 's/%%ARCH_LIST%%/'"${suiteArches["$suite"]}"'/g' \
-			Dockerfile-debian.template > "$version/Dockerfile"
-		if [ "$majorVersion" = '9' ]; then
-			sed -i -e 's/WALDIR/XLOGDIR/g' \
-				-e 's/waldir/xlogdir/g' \
-				"$version/docker-entrypoint.sh"
-			# ICU support was introduced in PostgreSQL 10 (https://www.postgresql.org/docs/10/static/release-10.html#id-1.11.6.9.5.13)
-			sed -i -e '/icu/d' "$version/Dockerfile"
-		else
-			# postgresql-contrib-10 package does not exist, but is provided by postgresql-10
-			# Packages.gz:
-			# Package: postgresql-10
-			# Provides: postgresql-contrib-10
-			sed -i -e '/postgresql-contrib-/d' "$version/Dockerfile"
-		fi
-	)
+	echo "$version: $fullVersion"
+
+	cp docker-entrypoint.sh "$version/"
+	sed -e 's/%%PG_MAJOR%%/'"$version"'/g;' \
+		-e 's/%%PG_VERSION%%/'"$fullVersion"'/g' \
+		-e 's/%%DEBIAN_TAG%%/'"$tag"'/g' \
+		-e 's/%%DEBIAN_SUITE%%/'"$suite"'/g' \
+		-e 's/%%ARCH_LIST%%/'"${suiteArches["$suite"]}"'/g' \
+		Dockerfile-debian.template > "$version/Dockerfile"
+	if [ "$majorVersion" = '9' ]; then
+		sed -i -e 's/WALDIR/XLOGDIR/g' \
+			-e 's/waldir/xlogdir/g' \
+			"$version/docker-entrypoint.sh"
+		# ICU support was introduced in PostgreSQL 10 (https://www.postgresql.org/docs/10/static/release-10.html#id-1.11.6.9.5.13)
+		sed -i -e '/icu/d' "$version/Dockerfile"
+	else
+		# postgresql-contrib-10 package does not exist, but is provided by postgresql-10
+		# Packages.gz:
+		# Package: postgresql-10
+		# Provides: postgresql-contrib-10
+		sed -i -e '/postgresql-contrib-/d' "$version/Dockerfile"
+	fi
 
 	# TODO figure out what to do with odd version numbers here, like release candidates
 	srcVersion="${fullVersion%%-*}"
@@ -74,46 +73,45 @@ for version in "${versions[@]}"; do
 		if [ ! -d "$version/$variant" ]; then
 			continue
 		fi
-		(
-			set -x
-			cp docker-entrypoint.sh "$version/$variant/"
-			sed -i 's/gosu/su-exec/g' "$version/$variant/docker-entrypoint.sh"
-			sed -e 's/%%PG_MAJOR%%/'"$version"'/g' \
-				-e 's/%%PG_VERSION%%/'"$srcVersion"'/g' \
-				-e 's/%%PG_SHA256%%/'"$srcSha256"'/g' \
-				-e 's/%%ALPINE-VERSION%%/'"${alpineVersion[$version]:-$defaultAlpineVersion}"'/g' \
-				"Dockerfile-$variant.template" > "$version/$variant/Dockerfile"
-			if [ "$majorVersion" = '9' ]; then
-				sed -i -e 's/WALDIR/XLOGDIR/g' \
-					-e 's/waldir/xlogdir/g' \
-					"$version/$variant/docker-entrypoint.sh"
-				# ICU support was introduced in PostgreSQL 10 (https://www.postgresql.org/docs/10/static/release-10.html#id-1.11.6.9.5.13)
-				sed -i -e '/icu/d' "$version/$variant/Dockerfile"
-			fi
 
-			# TODO remove all this when 9.3 is EOL (2018-10-01 -- from http://www.postgresql.org/support/versioning/)
-			case "$version" in
-				9.3)
-					uuidConfigFlag='--with-ossp-uuid'
-					sed -i \
-						-e 's/%%OSSP_UUID_ENV_VARS%%/ENV OSSP_UUID_VERSION '"$osspUuidVersion"'\nENV OSSP_UUID_SHA256 '"$osspUuidHash"'\n/' \
-						-e $'/%%INSTALL_OSSP_UUID%%/ {r ossp-uuid.template\n d}' \
-						"$version/$variant/Dockerfile"
+		cp docker-entrypoint.sh "$version/$variant/"
+		sed -i 's/gosu/su-exec/g' "$version/$variant/docker-entrypoint.sh"
+		sed -e 's/%%PG_MAJOR%%/'"$version"'/g' \
+			-e 's/%%PG_VERSION%%/'"$srcVersion"'/g' \
+			-e 's/%%PG_SHA256%%/'"$srcSha256"'/g' \
+			-e 's/%%ALPINE-VERSION%%/'"${alpineVersion[$version]:-$defaultAlpineVersion}"'/g' \
+			"Dockerfile-$variant.template" > "$version/$variant/Dockerfile"
+		if [ "$majorVersion" = '9' ]; then
+			sed -i -e 's/WALDIR/XLOGDIR/g' \
+				-e 's/waldir/xlogdir/g' \
+				"$version/$variant/docker-entrypoint.sh"
+			# ICU support was introduced in PostgreSQL 10 (https://www.postgresql.org/docs/10/static/release-10.html#id-1.11.6.9.5.13)
+			sed -i -e '/icu/d' "$version/$variant/Dockerfile"
+		fi
 
-					# configure: WARNING: unrecognized options: --enable-tap-tests
-					sed -i '/--enable-tap-tests/d' "$version/$variant/Dockerfile"
-					;;
+		# TODO remove all this when 9.3 is EOL (2018-10-01 -- from http://www.postgresql.org/support/versioning/)
+		case "$version" in
+			9.3)
+				uuidConfigFlag='--with-ossp-uuid'
+				sed -i \
+					-e 's/%%OSSP_UUID_ENV_VARS%%/ENV OSSP_UUID_VERSION '"$osspUuidVersion"'\nENV OSSP_UUID_SHA256 '"$osspUuidHash"'\n/' \
+					-e $'/%%INSTALL_OSSP_UUID%%/ {r ossp-uuid.template\n d}' \
+					"$version/$variant/Dockerfile"
 
-				*)
-					uuidConfigFlag='--with-uuid=e2fs'
-					sed -i \
-						-e '/%%OSSP_UUID_ENV_VARS%%/d' \
-						-e '/%%INSTALL_OSSP_UUID%%/d' \
-						"$version/$variant/Dockerfile"
-					;;
-			esac
-			sed -i 's/%%UUID_CONFIG_FLAG%%/'"$uuidConfigFlag"'/' "$version/$variant/Dockerfile"
-		)
+				# configure: WARNING: unrecognized options: --enable-tap-tests
+				sed -i '/--enable-tap-tests/d' "$version/$variant/Dockerfile"
+				;;
+
+			*)
+				uuidConfigFlag='--with-uuid=e2fs'
+				sed -i \
+					-e '/%%OSSP_UUID_ENV_VARS%%/d' \
+					-e '/%%INSTALL_OSSP_UUID%%/d' \
+					"$version/$variant/Dockerfile"
+				;;
+		esac
+		sed -i 's/%%UUID_CONFIG_FLAG%%/'"$uuidConfigFlag"'/' "$version/$variant/Dockerfile"
+
 		travisEnv="\n  - VERSION=$version VARIANT=$variant$travisEnv"
 	done
 
