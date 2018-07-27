@@ -67,6 +67,7 @@ RUN set -ex \
 #		tcl-dev \
 		util-linux-dev \
 		zlib-dev \
+		icu-dev \
 	\
 %%INSTALL_OSSP_UUID%%
 	&& cd /usr/src/postgresql \
@@ -110,6 +111,7 @@ RUN set -ex \
 		--with-openssl \
 		--with-libxml \
 		--with-libxslt \
+		--with-icu \
 	&& make -j "$(nproc)" world \
 	&& make install-world \
 	&& make -C contrib install \
