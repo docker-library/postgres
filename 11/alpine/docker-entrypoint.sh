@@ -81,7 +81,7 @@ if [ "$1" = 'postgres' ]; then
 		# messes it up
 		file_env 'POSTGRES_PASSWORD'
 		if [ "$POSTGRES_PASSWORD" ]; then
-			pass="PASSWORD '$POSTGRES_PASSWORD'"
+			pass="PASSWORD :'pass'"
 			authMethod=md5
 		else
 			# The - option suppresses leading tabs but *not* spaces. :)
@@ -121,8 +121,8 @@ if [ "$1" = 'postgres' ]; then
 		psql=( psql -v ON_ERROR_STOP=1 )
 
 		if [ "$POSTGRES_DB" != 'postgres' ]; then
-			"${psql[@]}" --username postgres <<-EOSQL
-				CREATE DATABASE "$POSTGRES_DB" ;
+			"${psql[@]}" --username postgres --set db="$POSTGRES_DB" <<-'EOSQL'
+				CREATE DATABASE :"db" ;
 			EOSQL
 			echo
 		fi
@@ -132,8 +132,8 @@ if [ "$1" = 'postgres' ]; then
 		else
 			op='CREATE'
 		fi
-		"${psql[@]}" --username postgres <<-EOSQL
-			$op USER "$POSTGRES_USER" WITH SUPERUSER $pass ;
+		"${psql[@]}" --username postgres --set user="$POSTGRES_USER" --set pass="$POSTGRES_PASSWORD" <<-EOSQL
+			$op USER :"user" WITH SUPERUSER $pass ;
 		EOSQL
 		echo
 
