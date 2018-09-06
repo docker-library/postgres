@@ -65,11 +65,14 @@ if [ "$1" = 'postgres' ]; then
 			echo "postgres:x:$(id -g):" > "$NSS_WRAPPER_GROUP"
 		fi
 
+		file_env 'POSTGRES_USER' 'postgres'
+		file_env 'POSTGRES_PASSWORD'
+
 		file_env 'POSTGRES_INITDB_ARGS'
 		if [ "$POSTGRES_INITDB_WALDIR" ]; then
 			export POSTGRES_INITDB_ARGS="$POSTGRES_INITDB_ARGS --waldir $POSTGRES_INITDB_WALDIR"
 		fi
-		eval "initdb --username=postgres $POSTGRES_INITDB_ARGS"
+		eval 'initdb --username="$POSTGRES_USER" --pwfile=<(echo "$POSTGRES_PASSWORD") '"$POSTGRES_INITDB_ARGS"
 
 		# unset/cleanup "nss_wrapper" bits
 		if [ "${LD_PRELOAD:-}" = '/usr/lib/libnss_wrapper.so' ]; then
@@ -79,9 +82,7 @@ if [ "$1" = 'postgres' ]; then
 
 		# check password first so we can output the warning before postgres
 		# messes it up
-		file_env 'POSTGRES_PASSWORD'
-		if [ "$POSTGRES_PASSWORD" ]; then
-			pass="PASSWORD :'pass'"
+		if [ -n "$POSTGRES_PASSWORD" ]; then
 			authMethod=md5
 		else
 			# The - option suppresses leading tabs but *not* spaces. :)
@@ -99,7 +100,6 @@ if [ "$1" = 'postgres' ]; then
 				****************************************************
 			EOWARN
 
-			pass=
 			authMethod=trust
 		fi
 
@@ -110,34 +110,23 @@ if [ "$1" = 'postgres' ]; then
 
 		# internal start of server in order to allow set-up using psql-client
 		# does not listen on external TCP/IP and waits until start finishes
-		PGUSER="${PGUSER:-postgres}" \
+		PGUSER="${PGUSER:-$POSTGRES_USER}" \
 		pg_ctl -D "$PGDATA" \
 			-o "-c listen_addresses=''" \
 			-w start
 
-		file_env 'POSTGRES_USER' 'postgres'
 		file_env 'POSTGRES_DB' "$POSTGRES_USER"
 
-		psql=( psql -v ON_ERROR_STOP=1 )
+		export PGPASSWORD="${PGPASSWORD:-$POSTGRES_PASSWORD}"
+		psql=( psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --no-password )
 
 		if [ "$POSTGRES_DB" != 'postgres' ]; then
-			"${psql[@]}" --username postgres --set db="$POSTGRES_DB" <<-'EOSQL'
+			"${psql[@]}" --dbname postgres --set db="$POSTGRES_DB" <<-'EOSQL'
 				CREATE DATABASE :"db" ;
 			EOSQL
 			echo
 		fi
-
-		if [ "$POSTGRES_USER" = 'postgres' ]; then
-			op='ALTER'
-		else
-			op='CREATE'
-		fi
-		"${psql[@]}" --username postgres --set user="$POSTGRES_USER" --set pass="$POSTGRES_PASSWORD" <<-EOSQL
-			$op USER :"user" WITH SUPERUSER $pass ;
-		EOSQL
-		echo
-
-		psql+=( --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" )
+		psql+=( --dbname "$POSTGRES_DB" )
 
 		echo
 		for f in /docker-entrypoint-initdb.d/*; do
@@ -160,8 +149,10 @@ if [ "$1" = 'postgres' ]; then
 			echo
 		done
 
-		PGUSER="${PGUSER:-postgres}" \
+		PGUSER="${PGUSER:-$POSTGRES_USER}" \
 		pg_ctl -D "$PGDATA" -m fast -w stop
+
+		unset PGPASSWORD
 
 		echo
 		echo 'PostgreSQL init process complete; ready for start up.'
