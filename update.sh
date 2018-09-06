@@ -9,6 +9,9 @@ if [ ${#versions[@]} -eq 0 ]; then
 fi
 versions=( "${versions[@]%/}" )
 
+# sort version numbers with highest last (so it goes first in .travis.yml)
+IFS=$'\n'; versions=( $(echo "${versions[*]}" | sort -V) ); unset IFS
+
 defaultDebianSuite='stretch-slim'
 declare -A debianSuite=(
 	#[9.6]='jessie'
