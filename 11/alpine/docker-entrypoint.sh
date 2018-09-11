@@ -30,9 +30,11 @@ fi
 
 # allow the container to be started with `--user`
 if [ "$1" = 'postgres' ] && [ "$(id -u)" = '0' ]; then
-	mkdir -p "$PGDATA"
-	chown -R postgres "$PGDATA"
-	chmod 700 "$PGDATA"
+	if mountpoint $PGDATA; then
+		mkdir -p "$PGDATA"
+		chown -R postgres "$PGDATA"
+		chmod 700 "$PGDATA"
+	fi
 
 	mkdir -p /var/run/postgresql
 	chown -R postgres /var/run/postgresql
@@ -49,9 +51,11 @@ if [ "$1" = 'postgres' ] && [ "$(id -u)" = '0' ]; then
 fi
 
 if [ "$1" = 'postgres' ]; then
-	mkdir -p "$PGDATA"
-	chown -R "$(id -u)" "$PGDATA" 2>/dev/null || :
-	chmod 700 "$PGDATA" 2>/dev/null || :
+	if mountpoint $PGDATA; then
+		mkdir -p "$PGDATA"
+		chown -R "$(id -u)" "$PGDATA" 2>/dev/null || :
+		chmod 700 "$PGDATA" 2>/dev/null || :
+	fi
 
 	# look specifically for PG_VERSION, as it is expected in the DB dir
 	if [ ! -s "$PGDATA/PG_VERSION" ]; then
