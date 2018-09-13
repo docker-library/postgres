@@ -110,10 +110,12 @@ if [ "$1" = 'postgres' ]; then
 
 		# internal start of server in order to allow set-up using psql-client
 		# does not listen on external TCP/IP and waits until start finishes
-		PGUSER="${PGUSER:-$POSTGRES_USER}" \
-		pg_ctl -D "$PGDATA" \
-			-o "-c listen_addresses=''" \
-			-w start
+		file_env 'POSTGRES_SETUP_ARGS'
+		eval "PGUSER=\"${PGUSER:-$POSTGRES_USER}\" \
+			pg_ctl -D \"$PGDATA\" \
+			-o \"-c listen_addresses=''\" \
+			$POSTGRES_SETUP_ARGS \
+			-w start"
 
 		file_env 'POSTGRES_DB' "$POSTGRES_USER"
 
