@@ -99,6 +99,40 @@ for version in "${versions[@]}"; do
 		travisEnv="\n  - VERSION=$version VARIANT=$variant$travisEnv"
 	done
 
+	for variant in windows; do
+		if [ ! -d "$version/$variant" ]; then
+			continue
+		fi
+
+		pgcVersion='3.3.7'
+		pgcRepository='https://s3.amazonaws.com/pgcentral'
+
+		cp docker-entrypoint.cmd "$version/$variant/docker-entrypoint.cmd"
+		cp Dockerfile-windows.template "$version/$variant/Dockerfile"
+
+		case "$version" in
+			9.4)
+				pgcDbVersion='pg94'
+				;;
+			9.5)
+				pgcDbVersion='pg95'
+				;;
+			9.6)
+				pgcDbVersion='pg96'
+				;;
+			10)
+				pgcDbVersion='pg10'
+				;;
+			11)
+				pgcDbVersion='pg11'
+				;;
+		esac
+		sed -e 's|%%PGC_VERSION%%|'"$pgcVersion"'|g' \
+			-e 's|%%PGC_REPOSITORY%%|'"$pgcRepository"'|g' \
+			-e 's|%%PGC_DB_VERSION%%|'"$pgcDbVersion"'|g' \
+			"Dockerfile-$variant.template" > "$version/$variant/Dockerfile"
+	done
+
 	travisEnv="\n  - VERSION=$version FORCE_DEB_BUILD=1$travisEnv"
 	travisEnv="\n  - VERSION=$version$travisEnv"
 done
