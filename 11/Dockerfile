@@ -71,7 +71,7 @@ RUN set -ex; \
 	apt-key list
 
 ENV PG_MAJOR 11
-ENV PG_VERSION 11~beta4-1.pgdg90+1
+ENV PG_VERSION 11~rc1-1.pgdg90+1
 
 RUN set -ex; \
 	\
