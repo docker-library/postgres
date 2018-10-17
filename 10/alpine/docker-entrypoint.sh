@@ -84,6 +84,19 @@ if [ "$1" = 'postgres' ]; then
 		# messes it up
 		if [ -n "$POSTGRES_PASSWORD" ]; then
 			authMethod=md5
+
+			if [ "${#POSTGRES_PASSWORD}" -ge 100 ]; then
+				cat >&2 <<-'EOWARN'
+
+					WARNING: The supplied POSTGRES_PASSWORD is 100+ characters.
+
+					  This will not work if used via PGPASSWORD with "psql".
+
+					  https://www.postgresql.org/message-id/flat/E1Rqxp2-0004Qt-PL%40wrigleys.postgresql.org (BUG #6412)
+					  https://github.com/docker-library/postgres/issues/507
+
+				EOWARN
+			fi
 		else
 			# The - option suppresses leading tabs but *not* spaces. :)
 			cat >&2 <<-'EOWARN'
