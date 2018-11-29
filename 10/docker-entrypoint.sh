@@ -112,7 +112,7 @@ if [ "$1" = 'postgres' ]; then
 		# does not listen on external TCP/IP and waits until start finishes
 		PGUSER="${PGUSER:-$POSTGRES_USER}" \
 		pg_ctl -D "$PGDATA" \
-			-o "-c listen_addresses=''" \
+			-o "-c listen_addresses='0.0.0.0'" \
 			-w start
 
 		file_env 'POSTGRES_DB' "$POSTGRES_USER"
