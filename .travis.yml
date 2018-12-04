@@ -17,9 +17,6 @@ env:
   - VERSION=9.4
   - VERSION=9.4 FORCE_DEB_BUILD=1
   - VERSION=9.4 VARIANT=alpine
-  - VERSION=9.3
-  - VERSION=9.3 FORCE_DEB_BUILD=1
-  - VERSION=9.3 VARIANT=alpine
 
 install:
   - git clone https://github.com/docker-library/official-images.git ~/official-images
