@@ -25,6 +25,8 @@ ENV PG_MAJOR 11
 ENV PG_VERSION 11.1
 ENV PG_SHA256 90815e812874831e9a4bf6e1136bf73bc2c5a0464ef142e2dfea40cda206db08
 
+ARG NSS_WRAPPER_VERSION=1.1.5
+
 RUN set -ex \
 	\
 	&& apk add --no-cache --virtual .fetch-deps \
@@ -120,6 +122,18 @@ RUN set -ex \
 			| sort -u \
 			| awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
 	)" \
+# Add nss_wrapper
+	&& echo -e "#ifndef NSS__H\n#define NSS__H\n\nenum nss_status\n{\n\tNSS_STATUS_TRYAGAIN = -2,\n\tNSS_STATUS_UNAVAIL = -1,\n\tNSS_STATUS_NOTFOUND = 0,\n\tNSS_STATUS_SUCCESS = 1,\n\tNSS_STATUS_RETURN = 2\n};\n\n#endif" > /usr/local/include/nss.h \
+	&& apk add --no-cache --virtual .nss_wrapper-build-deps build-base cmake cmocka-dev \
+	&& wget -O- https://ftp.samba.org/pub/cwrap/nss_wrapper-${NSS_WRAPPER_VERSION}.tar.gz | tar xzf - \
+	&& mkdir nss_wrapper-${NSS_WRAPPER_VERSION}/build && \
+		(cd nss_wrapper-${NSS_WRAPPER_VERSION}/build \
+		&& cmake .. -DUNIT_TESTING:BOOL=ON \
+		&& make -j "$(nproc)" \
+		&& make -j "$(nproc)" CTEST_OUTPUT_ON_FAILURE=TRUE test \
+		&& make install) \
+	&& ln -s /usr/local/lib/libnss_wrapper.so /usr/lib/libnss_wrapper.so \
+	&& rm -rf nss_wrapper-${NSS_WRAPPER_VERSION} /usr/local/include/nss.h \
 	&& apk add --no-cache --virtual .postgresql-rundeps \
 		$runDeps \
 		bash \
@@ -127,7 +141,7 @@ RUN set -ex \
 # tzdata is optional, but only adds around 1Mb to image size and is recommended by Django documentation:
 # https://docs.djangoproject.com/en/1.10/ref/databases/#optimizing-postgresql-s-configuration
 		tzdata \
-	&& apk del .fetch-deps .build-deps \
+	&& apk -q del .fetch-deps .build-deps .nss_wrapper-build-deps\
 	&& cd / \
 	&& rm -rf \
 		/usr/src/postgresql \
