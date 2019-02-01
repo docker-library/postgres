@@ -16,7 +16,7 @@ defaultDebianSuite='stretch-slim'
 declare -A debianSuite=(
 	#[9.6]='jessie'
 )
-defaultAlpineVersion='3.8'
+defaultAlpineVersion='3.9'
 declare -A alpineVersion=(
 	#[9.6]='3.5'
 )
