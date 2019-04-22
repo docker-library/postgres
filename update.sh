@@ -92,29 +92,6 @@ for version in "${versions[@]}"; do
 			sed -i -e '/icu/d' "$version/$variant/Dockerfile"
 		fi
 
-		# TODO remove all this when 9.3 is EOL (2018-10-01 -- from http://www.postgresql.org/support/versioning/)
-		case "$version" in
-			9.3)
-				uuidConfigFlag='--with-ossp-uuid'
-				sed -i \
-					-e 's/%%OSSP_UUID_ENV_VARS%%/ENV OSSP_UUID_VERSION '"$osspUuidVersion"'\nENV OSSP_UUID_SHA256 '"$osspUuidHash"'\n/' \
-					-e $'/%%INSTALL_OSSP_UUID%%/ {r ossp-uuid.template\n d}' \
-					"$version/$variant/Dockerfile"
-
-				# configure: WARNING: unrecognized options: --enable-tap-tests
-				sed -i '/--enable-tap-tests/d' "$version/$variant/Dockerfile"
-				;;
-
-			*)
-				uuidConfigFlag='--with-uuid=e2fs'
-				sed -i \
-					-e '/%%OSSP_UUID_ENV_VARS%%/d' \
-					-e '/%%INSTALL_OSSP_UUID%%/d' \
-					"$version/$variant/Dockerfile"
-				;;
-		esac
-		sed -i 's/%%UUID_CONFIG_FLAG%%/'"$uuidConfigFlag"'/' "$version/$variant/Dockerfile"
-
 		travisEnv="\n  - VERSION=$version VARIANT=$variant$travisEnv"
 	done
 
