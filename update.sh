@@ -92,6 +92,10 @@ for version in "${versions[@]}"; do
 			sed -i -e '/icu/d' "$version/$variant/Dockerfile"
 		fi
 
+		if [ "$majorVersion" -gt 11 ]; then
+			sed -i '/backwards compat/d' "$version/$variant/Dockerfile"
+		fi
+
 		travisEnv="\n  - VERSION=$version VARIANT=$variant$travisEnv"
 	done
 
