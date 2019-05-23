@@ -104,32 +104,41 @@ for version in "${versions[@]}"; do
 			continue
 		fi
 
-		pgcVersion='3.3.7'
-		pgcRepository='https://s3.amazonaws.com/pgcentral'
+		edbRepository='https://get.enterprisedb.com/postgresql'
 
 		cp docker-entrypoint.cmd "$version/$variant/docker-entrypoint.cmd"
 		cp Dockerfile-windows.template "$version/$variant/Dockerfile"
 
 		case "$version" in
 			9.4)
-				pgcDbVersion='pg94'
+				edbVersion='9.4.22-1'
+				# Visual C++ 2013 Redistributable Package
+				edbVCRedist='https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe'
 				;;
 			9.5)
-				pgcDbVersion='pg95'
+				edbVersion='9.5.17-1'
+				# Visual C++ 2013 Redistributable Package
+				edbVCRedist='https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe'
 				;;
 			9.6)
-				pgcDbVersion='pg96'
+				edbVersion='9.6.13-1'
+				# Visual C++ 2013 Redistributable Package
+				edbVCRedist='https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe'
 				;;
 			10)
-				pgcDbVersion='pg10'
+				edbVersion='10.8-1'
+				# Visual C++ 2013 Redistributable Package
+				edbVCRedist='https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe'
 				;;
 			11)
-				pgcDbVersion='pg11'
+				edbVersion='11.3-1'
+				# Visual C++ 2017 Redistributable Package
+				edbVCRedist='https://download.visualstudio.microsoft.com/download/pr/11100230/15ccb3f02745c7b206ad10373cbca89b/VC_redist.x64.exe'
 				;;
 		esac
-		sed -e 's|%%PGC_VERSION%%|'"$pgcVersion"'|g' \
-			-e 's|%%PGC_REPOSITORY%%|'"$pgcRepository"'|g' \
-			-e 's|%%PGC_DB_VERSION%%|'"$pgcDbVersion"'|g' \
+		sed -e 's|%%EDB_VERSION%%|'"$edbVersion"'|g' \
+			-e 's|%%EDB_REPOSITORY%%|'"$edbRepository"'|g' \
+			-e 's|%%EDB_VCREDIST%%|'"$edbVCRedist"'|g' \
 			"Dockerfile-$variant.template" > "$version/$variant/Dockerfile"
 	done
 
