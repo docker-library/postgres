@@ -1,5 +1,5 @@
 # vim:set ft=dockerfile:
-FROM alpine:%%ALPINE-VERSION%%
+FROM alpine:3.9
 
 # alpine includes "postgres" user/group in base install
 #   /etc/passwd:22:postgres:x:70:70::/var/lib/postgresql:/bin/sh
@@ -21,9 +21,9 @@ ENV LANG en_US.utf8
 
 RUN mkdir /docker-entrypoint-initdb.d
 
-ENV PG_MAJOR %%PG_MAJOR%%
-ENV PG_VERSION %%PG_VERSION%%
-ENV PG_SHA256 %%PG_SHA256%%
+ENV PG_MAJOR 12
+ENV PG_VERSION 12beta1
+ENV PG_SHA256 203e2d0151d75e3328a6b6b85eae88e50168ae27423b39787cea595365da9fad
 
 RUN set -ex \
 	\
@@ -147,7 +147,6 @@ RUN mkdir -p "$PGDATA" && chown -R postgres:postgres "$PGDATA" && chmod 777 "$PG
 VOLUME /var/lib/postgresql/data
 
 COPY docker-entrypoint.sh /usr/local/bin/
-RUN ln -s usr/local/bin/docker-entrypoint.sh / # backwards compat
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 5432

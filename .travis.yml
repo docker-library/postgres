@@ -2,6 +2,9 @@ language: bash
 services: docker
 
 env:
+  - VERSION=12
+  - VERSION=12 FORCE_DEB_BUILD=1
+  - VERSION=12 VARIANT=alpine
   - VERSION=11
   - VERSION=11 FORCE_DEB_BUILD=1
   - VERSION=11 VARIANT=alpine
