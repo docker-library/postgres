@@ -56,6 +56,9 @@ docker_create_db_directories() {
 }
 
 # initialize empty PGDATA directory with new database via 'initdb'
+# arguments to `initdb` can be passed via POSTGRES_INITDB_ARGS or as arguments to this function
+# `initdb` automatically creates the "postgres", "template0", and "template1" dbnames
+# this is also where the database user is created, specified by `POSTGRES_USER` env
 docker_init_database_dir() {
 	# "initdb" is particular about the current user existing in "/etc/passwd", so we use "nss_wrapper" to fake that if necessary
 	# see https://github.com/docker-library/postgres/pull/253, https://github.com/docker-library/postgres/issues/359, https://cwrap.org/nss_wrapper.html
@@ -67,12 +70,11 @@ docker_init_database_dir() {
 		echo "postgres:x:$(id -g):" > "$NSS_WRAPPER_GROUP"
 	fi
 
-	file_env 'POSTGRES_INITDB_ARGS'
 	if [ "$POSTGRES_INITDB_WALDIR" ]; then
-		export POSTGRES_INITDB_ARGS="$POSTGRES_INITDB_ARGS --waldir $POSTGRES_INITDB_WALDIR"
+		set -- --waldir "$POSTGRES_INITDB_WALDIR" "$@"
 	fi
 
-	eval 'initdb --username="$POSTGRES_USER" --pwfile=<(echo "$POSTGRES_PASSWORD") '"$POSTGRES_INITDB_ARGS"
+	eval 'initdb --username="$POSTGRES_USER" --pwfile=<(echo "$POSTGRES_PASSWORD") '"$POSTGRES_INITDB_ARGS"' "$@"'
 
 	# unset/cleanup "nss_wrapper" bits
 	if [ "${LD_PRELOAD:-}" = '/usr/lib/libnss_wrapper.so' ]; then
@@ -116,15 +118,16 @@ docker_verify_minimum_env() {
 	fi
 }
 
-# run, source, or read files from /docker-entrypoint-initdb.d (or specified directory)
+# usage: docker_process_init_files [file [file [...]]]
+#    ie: docker_process_init_files /always-initdb.d/*
+# process initializer files, based on file extensions and permissions
 docker_process_init_files() {
 	# psql here for backwards compatiblilty "${psql[@]}"
 	psql=( docker_process_sql )
 
-	local initDir="${1:-/docker-entrypoint-initdb.d}"
-
 	echo
-	for f in "${initDir%/}"/*; do
+	local f
+	for f; do
 		case "$f" in
 			*.sh)
 				# https://github.com/docker-library/postgres/issues/450#issuecomment-393167936
@@ -145,7 +148,11 @@ docker_process_init_files() {
 	done
 }
 
-# run `psql` with proper arguments for user and db
+# Execute sql script, passed via stdin (or -f flag of pqsl)
+# usage: docker_process_sql [psql-cli-args]
+#    ie: docker_process_sql --dbname=mydb <<<'INSERT ...'
+#    ie: docker_process_sql -f my-file.sql
+#    ie: docker_process_sql <my-file.sql
 docker_process_sql() {
 	local query_runner=( psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --no-password )
 	if [ -n "$POSTGRES_DB" ]; then
@@ -155,8 +162,8 @@ docker_process_sql() {
 	"${query_runner[@]}" "$@"
 }
 
-# create initial postgresql superuser with password and database
-# uses environment variables for input: POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB
+# create initial database
+# uses environment variables for input: POSTGRES_DB
 docker_setup_db() {
 	if [ "$POSTGRES_DB" != 'postgres' ]; then
 		POSTGRES_DB= docker_process_sql --dbname postgres --set db="$POSTGRES_DB" <<-'EOSQL'
@@ -166,12 +173,20 @@ docker_setup_db() {
 	fi
 }
 
-# get user/pass and db from env vars or via file
+# Loads various settings that are used elsewhere in the script
+# This should be called before any other functions
 docker_setup_env() {
 	file_env 'POSTGRES_PASSWORD'
 
 	file_env 'POSTGRES_USER' 'postgres'
 	file_env 'POSTGRES_DB' "$POSTGRES_USER"
+	file_env 'POSTGRES_INITDB_ARGS'
+
+	declare -g DATABASE_ALREADY_EXISTS
+	# look specifically for PG_VERSION, as it is expected in the DB dir
+	if [ -s "$PGDATA/PG_VERSION" ]; then
+		DATABASE_ALREADY_EXISTS='true'
+	fi
 }
 
 # append md5 or trust auth to pg_hba.conf based on existence of POSTGRES_PASSWORD
@@ -189,10 +204,13 @@ pg_setup_hba_conf() {
 	} >> "$PGDATA/pg_hba.conf"
 }
 
-# start socket-only postgresql server for setting up user or running scripts
+# start socket-only postgresql server for setting up or running scripts
 # all arguments will be passed along as arguments to `postgres` (via pg_ctl)
 docker_temp_server_start() {
-	# internal start of server in order to allow set-up using psql-client
+	if [ "$1" = 'postgres' ]; then
+		shift
+	fi
+	# internal start of server in order to allow setup using psql client
 	# does not listen on external TCP/IP and waits until start finishes (can be overridden via args)
 	PGUSER="${PGUSER:-$POSTGRES_USER}" \
 	pg_ctl -D "$PGDATA" \
@@ -214,6 +232,7 @@ _main() {
 
 
 	if [ "$1" = 'postgres' ]; then
+		docker_setup_env
 		# setup data directories and permissions (when run as root)
 		docker_create_db_directories
 		if [ "$(id -u)" = '0' ]; then
@@ -222,22 +241,18 @@ _main() {
 		fi
 
 		# only run initialization on an empty data directory
-		# look specifically for PG_VERSION, as it is expected in the DB dir
-		if [ ! -s "$PGDATA/PG_VERSION" ]; then
-			docker_init_database_dir
-
-			docker_setup_env
+		if [ -z "$DATABASE_ALREADY_EXISTS" ]; then
 			docker_verify_minimum_env
+			docker_init_database_dir
 			pg_setup_hba_conf
 
 			# PGPASSWORD is required for psql when authentication is required for 'local' connections via pg_hba.conf and is otherwise harmless
 			# e.g. when '--auth=md5' or '--auth-local=md5' is used in POSTGRES_INITDB_ARGS
 			export PGPASSWORD="${PGPASSWORD:-$POSTGRES_PASSWORD}"
-			docker_temp_server_start "${@:2}"
+			docker_temp_server_start "$@"
 
 			docker_setup_db
-
-			docker_process_init_files
+			docker_process_init_files /docker-entrypoint-initdb.d/*
 
 			docker_temp_server_stop
 			unset PGPASSWORD
