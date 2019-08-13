@@ -142,7 +142,7 @@ if [ "$1" = 'postgres' ]; then
 		psql+=( --dbname "$POSTGRES_DB" )
 
 		echo
-		for f in /docker-entrypoint-initdb.d/*; do
+		for f in /docker-entrypoint-initdb.d/*/**; do
 			case "$f" in
 				*.sh)
 					# https://github.com/docker-library/postgres/issues/450#issuecomment-393167936
