@@ -28,10 +28,6 @@ declare -A alpineVersion=(
 
 packagesBase='http://apt.postgresql.org/pub/repos/apt/dists/'
 
-# https://www.mirrorservice.org/sites/ftp.ossp.org/pkg/lib/uuid/?C=M;O=D
-osspUuidVersion='1.6.2'
-osspUuidHash='11a615225baa5f8bb686824423f50e4427acd3f70d394765bdff32801f0fd5b0'
-
 declare -A suitePackageList=() suiteArches=()
 travisEnv=
 for version in "${versions[@]}"; do
