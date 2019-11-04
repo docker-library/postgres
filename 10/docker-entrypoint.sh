@@ -72,101 +72,118 @@ if [ "$1" = 'postgres' ]; then
 		if [ "$POSTGRES_INITDB_WALDIR" ]; then
 			export POSTGRES_INITDB_ARGS="$POSTGRES_INITDB_ARGS --waldir $POSTGRES_INITDB_WALDIR"
 		fi
-		eval 'initdb --username="$POSTGRES_USER" --pwfile=<(echo "$POSTGRES_PASSWORD") '"$POSTGRES_INITDB_ARGS"
 
-		# unset/cleanup "nss_wrapper" bits
-		if [ "${LD_PRELOAD:-}" = '/usr/lib/libnss_wrapper.so' ]; then
-			rm -f "$NSS_WRAPPER_PASSWD" "$NSS_WRAPPER_GROUP"
-			unset LD_PRELOAD NSS_WRAPPER_PASSWD NSS_WRAPPER_GROUP
-		fi
+		# not run initdb if set replication environment
+		file_env 'PRIMARY_HOST'
+		file_env 'PRIMARY_PORT' '5432'
+		file_env 'PRIMARY_SLOTNAME' 'dockerslot'
+		file_env 'PRIMARY_USER' 'postgres'
+		file_env 'PRIMARY_PASSWORD'
 
-		# check password first so we can output the warning before postgres
-		# messes it up
-		if [ -n "$POSTGRES_PASSWORD" ]; then
-			authMethod=md5
-
-			if [ "${#POSTGRES_PASSWORD}" -ge 100 ]; then
-				cat >&2 <<-'EOWARN'
-
-					WARNING: The supplied POSTGRES_PASSWORD is 100+ characters.
-
-					  This will not work if used via PGPASSWORD with "psql".
-
-					  https://www.postgresql.org/message-id/flat/E1Rqxp2-0004Qt-PL%40wrigleys.postgresql.org (BUG #6412)
-					  https://github.com/docker-library/postgres/issues/507
-
-				EOWARN
+		if [ "$PRIMARY_HOST" ]; then
+			file_env 'WALDIR'
+			if [ "$POSTGRES_INITDB_WALDIR" ]; then
+				export WALDIR="--waldir $POSTGRES_INITDB_WALDIR"
 			fi
+
+			eval 'pg_basebackup -D "$PGDATA" -Fp -X stream -S "$PRIMARY_SLOTNAME" -d postgresql://"$PRIMARY_USER":"$PRIMARY_PASSWORD"@"$PRIMARY_HOST":"$PRIMARY_PORT" -R -P '"$WALDIR"
 		else
-			# The - option suppresses leading tabs but *not* spaces. :)
-			cat >&2 <<-'EOWARN'
-				****************************************************
-				WARNING: No password has been set for the database.
-				         This will allow anyone with access to the
-				         Postgres port to access your database. In
-				         Docker's default configuration, this is
-				         effectively any other container on the same
-				         system.
+			eval 'initdb --username="$POSTGRES_USER" --pwfile=<(echo "$POSTGRES_PASSWORD") '"$POSTGRES_INITDB_ARGS"
 
-				         Use "-e POSTGRES_PASSWORD=password" to set
-				         it in "docker run".
-				****************************************************
-			EOWARN
+			# unset/cleanup "nss_wrapper" bits
+			if [ "${LD_PRELOAD:-}" = '/usr/lib/libnss_wrapper.so' ]; then
+				rm -f "$NSS_WRAPPER_PASSWD" "$NSS_WRAPPER_GROUP"
+				unset LD_PRELOAD NSS_WRAPPER_PASSWD NSS_WRAPPER_GROUP
+			fi
 
-			authMethod=trust
+			# check password first so we can output the warning before postgres
+			# messes it up
+			if [ -n "$POSTGRES_PASSWORD" ]; then
+				authMethod=md5
+
+				if [ "${#POSTGRES_PASSWORD}" -ge 100 ]; then
+					cat >&2 <<-'EOWARN'
+
+						WARNING: The supplied POSTGRES_PASSWORD is 100+ characters.
+
+						  This will not work if used via PGPASSWORD with "psql".
+
+						  https://www.postgresql.org/message-id/flat/E1Rqxp2-0004Qt-PL%40wrigleys.postgresql.org (BUG #6412)
+						  https://github.com/docker-library/postgres/issues/507
+
+					EOWARN
+				fi
+			else
+				# The - option suppresses leading tabs but *not* spaces. :)
+				cat >&2 <<-'EOWARN'
+					****************************************************
+					WARNING: No password has been set for the database.
+					         This will allow anyone with access to the
+					         Postgres port to access your database. In
+					         Docker's default configuration, this is
+					         effectively any other container on the same
+					         system.
+
+					         Use "-e POSTGRES_PASSWORD=password" to set
+					         it in "docker run".
+					****************************************************
+				EOWARN
+
+				authMethod=trust
+			fi
+
+			{
+				echo
+				echo "host all all all $authMethod"
+				echo "host replication all all $authMethod"
+			} >> "$PGDATA/pg_hba.conf"
+
+			# internal start of server in order to allow set-up using psql-client
+			# does not listen on external TCP/IP and waits until start finishes
+			PGUSER="${PGUSER:-$POSTGRES_USER}" \
+			pg_ctl -D "$PGDATA" \
+				-o "-c listen_addresses=''" \
+				-w start
+
+			file_env 'POSTGRES_DB' "$POSTGRES_USER"
+
+			export PGPASSWORD="${PGPASSWORD:-$POSTGRES_PASSWORD}"
+			psql=( psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --no-password )
+
+			if [ "$POSTGRES_DB" != 'postgres' ]; then
+				"${psql[@]}" --dbname postgres --set db="$POSTGRES_DB" <<-'EOSQL'
+					CREATE DATABASE :"db" ;
+				EOSQL
+				echo
+			fi
+			psql+=( --dbname "$POSTGRES_DB" )
+
+			echo
+			for f in /docker-entrypoint-initdb.d/*; do
+				case "$f" in
+					*.sh)
+						# https://github.com/docker-library/postgres/issues/450#issuecomment-393167936
+						# https://github.com/docker-library/postgres/pull/452
+						if [ -x "$f" ]; then
+							echo "$0: running $f"
+							"$f"
+						else
+							echo "$0: sourcing $f"
+							. "$f"
+						fi
+						;;
+					*.sql)    echo "$0: running $f"; "${psql[@]}" -f "$f"; echo ;;
+					*.sql.gz) echo "$0: running $f"; gunzip -c "$f" | "${psql[@]}"; echo ;;
+					*)        echo "$0: ignoring $f" ;;
+				esac
+				echo
+			done
+
+			PGUSER="${PGUSER:-$POSTGRES_USER}" \
+			pg_ctl -D "$PGDATA" -m fast -w stop
+
+			unset PGPASSWORD
 		fi
-
-		{
-			echo
-			echo "host all all all $authMethod"
-		} >> "$PGDATA/pg_hba.conf"
-
-		# internal start of server in order to allow set-up using psql-client
-		# does not listen on external TCP/IP and waits until start finishes
-		PGUSER="${PGUSER:-$POSTGRES_USER}" \
-		pg_ctl -D "$PGDATA" \
-			-o "-c listen_addresses=''" \
-			-w start
-
-		file_env 'POSTGRES_DB' "$POSTGRES_USER"
-
-		export PGPASSWORD="${PGPASSWORD:-$POSTGRES_PASSWORD}"
-		psql=( psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --no-password )
-
-		if [ "$POSTGRES_DB" != 'postgres' ]; then
-			"${psql[@]}" --dbname postgres --set db="$POSTGRES_DB" <<-'EOSQL'
-				CREATE DATABASE :"db" ;
-			EOSQL
-			echo
-		fi
-		psql+=( --dbname "$POSTGRES_DB" )
-
-		echo
-		for f in /docker-entrypoint-initdb.d/*; do
-			case "$f" in
-				*.sh)
-					# https://github.com/docker-library/postgres/issues/450#issuecomment-393167936
-					# https://github.com/docker-library/postgres/pull/452
-					if [ -x "$f" ]; then
-						echo "$0: running $f"
-						"$f"
-					else
-						echo "$0: sourcing $f"
-						. "$f"
-					fi
-					;;
-				*.sql)    echo "$0: running $f"; "${psql[@]}" -f "$f"; echo ;;
-				*.sql.gz) echo "$0: running $f"; gunzip -c "$f" | "${psql[@]}"; echo ;;
-				*)        echo "$0: ignoring $f" ;;
-			esac
-			echo
-		done
-
-		PGUSER="${PGUSER:-$POSTGRES_USER}" \
-		pg_ctl -D "$PGDATA" -m fast -w stop
-
-		unset PGPASSWORD
-
 		echo
 		echo 'PostgreSQL init process complete; ready for start up.'
 		echo
