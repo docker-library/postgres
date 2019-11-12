@@ -34,7 +34,7 @@ _is_sourced() {
 
 # used to create initial posgres directories and if run as root, ensure ownership to the "postgres" user
 docker_create_db_directories() {
-	local user="$(id -u)"
+	local user; user="$(id -u)"
 
 	mkdir -p "$PGDATA"
 	chmod 700 "$PGDATA"
@@ -46,7 +46,9 @@ docker_create_db_directories() {
 	# Create the transaction log directory before initdb is run so the directory is owned by the correct user
 	if [ "$POSTGRES_INITDB_XLOGDIR" ]; then
 		mkdir -p "$POSTGRES_INITDB_XLOGDIR"
-		[ "$user" = '0' ] && find "$POSTGRES_INITDB_XLOGDIR" \! -user postgres - exec chown postgres '{}' +
+		if [ "$user" = '0' ]; then
+			find "$POSTGRES_INITDB_XLOGDIR" \! -user postgres -exec chown postgres '{}' +
+		fi
 		chmod 700 "$POSTGRES_INITDB_XLOGDIR"
 	fi
 
@@ -193,10 +195,8 @@ docker_setup_env() {
 
 # append md5 or trust auth to pg_hba.conf based on existence of POSTGRES_PASSWORD
 pg_setup_hba_conf() {
-	local authMethod
-	if [ "$POSTGRES_PASSWORD" ]; then
-		authMethod='md5'
-	else
+	local authMethod='md5'
+	if [ -z "$POSTGRES_PASSWORD" ]; then
 		authMethod='trust'
 	fi
 
@@ -231,7 +231,6 @@ _main() {
 	if [ "${1:0:1}" = '-' ]; then
 		set -- postgres "$@"
 	fi
-
 
 	if [ "$1" = 'postgres' ]; then
 		docker_setup_env
