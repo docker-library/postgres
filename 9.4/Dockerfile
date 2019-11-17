@@ -173,5 +173,7 @@ COPY docker-entrypoint.sh /usr/local/bin/
 RUN ln -s usr/local/bin/docker-entrypoint.sh / # backwards compat
 ENTRYPOINT ["docker-entrypoint.sh"]
 
+HEALTHCHECK --timeout=5s CMD pg_isready
+
 EXPOSE 5432
 CMD ["postgres"]
