@@ -32,7 +32,7 @@ _is_sourced() {
 		&& [ "${FUNCNAME[1]}" = 'source' ]
 }
 
-# used to create initial posgres directories and if run as root, ensure ownership to the "postgres" user
+# used to create initial postgres directories and if run as root, ensure ownership to the "postgres" user
 docker_create_db_directories() {
 	local user; user="$(id -u)"
 
