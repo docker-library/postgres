@@ -96,6 +96,10 @@ for version in "${versions[@]}"; do
 		if [ "$majorVersion" -gt 11 ]; then
 			sed -i '/backwards compat/d' "$version/$variant/Dockerfile"
 		fi
+		if [ "$majorVersion" -lt 11 ]; then
+			# JIT / LLVM is only supported in PostgreSQL 11+ (https://github.com/docker-library/postgres/issues/475)
+			sed -i '/llvm/d' "$version/$variant/Dockerfile"
+		fi
 
 		travisEnv="\n  - VERSION=$version VARIANT=$variant$travisEnv"
 	done

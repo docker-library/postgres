@@ -54,6 +54,7 @@ RUN set -ex \
 		libxml2-dev \
 		libxslt-dev \
 		linux-headers \
+		llvm8-dev clang g++ \
 		make \
 #		openldap-dev \
 		openssl-dev \
@@ -111,6 +112,7 @@ RUN set -ex \
 		--with-libxml \
 		--with-libxslt \
 		--with-icu \
+		--with-llvm \
 	&& make -j "$(nproc)" world \
 	&& make install-world \
 	&& make -C contrib install \
