@@ -50,7 +50,7 @@ RUN set -ex \
 		libxml2-dev \
 		libxslt-dev \
 		linux-headers \
-		llvm8-dev clang g++ \
+		llvm9-dev clang g++ \
 		make \
 #		openldap-dev \
 		openssl-dev \
