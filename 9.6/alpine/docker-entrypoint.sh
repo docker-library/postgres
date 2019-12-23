@@ -87,7 +87,10 @@ docker_init_database_dir() {
 	fi
 }
 
-# print large warning if POSTGRES_PASSWORD is empty
+# print large warning if POSTGRES_PASSWORD is long
+# error if both POSTGRES_PASSWORD is unset and POSTGRES_HOST_AUTH_METHOD is not 'trust'
+# print large warning if POSTGRES_HOST_AUTH_METHOD is set to 'trust'
+# assumes database is not set up, ie: [ -z "$DATABASE_ALREADY_EXISTS" ]
 docker_verify_minimum_env() {
 	# check password first so we can output the warning before postgres
 	# messes it up
@@ -103,22 +106,36 @@ docker_verify_minimum_env() {
 
 		EOWARN
 	fi
-	if [ -z "$POSTGRES_PASSWORD" ]; then
+	if [ -z "$POSTGRES_PASSWORD" ] && [ 'trust' != "$POSTGRES_HOST_AUTH_METHOD" ]; then
 		# The - option suppresses leading tabs but *not* spaces. :)
+		cat >&2 <<-'EOE'
+			Error: Database is uninitialized and superuser password is not specified.
+			       You must specify POSTGRES_PASSWORD for the superuser. Use
+			       "-e POSTGRES_PASSWORD=password" to set it in "docker run".
+
+			       You may also use POSTGRES_HOST_AUTH_METHOD=trust to allow all connections
+			       without a password. This is *not* recommended. See PostgreSQL
+			       documentation about "trust":
+			       https://www.postgresql.org/docs/current/auth-trust.html
+		EOE
+		exit 1
+	fi
+	if [ 'trust' = "$POSTGRES_HOST_AUTH_METHOD" ]; then
 		cat >&2 <<-'EOWARN'
-			****************************************************
-			WARNING: No password has been set for the database.
-			         This will allow anyone with access to the
-			         Postgres port to access your database. In
-			         Docker's default configuration, this is
-			         effectively any other container on the same
-			         system.
+			********************************************************************************
+			WARNING: POSTGRES_HOST_AUTH_METHOD has been set to "trust". This will allow
+			         anyone with access to the Postgres port to access your database without
+			         a password, even if POSTGRES_PASSWORD is set. See PostgreSQL
+			         documentation about "trust":
+			         https://www.postgresql.org/docs/current/auth-trust.html
+			         In Docker's default configuration, this is effectively any other
+			         container on the same system.
 
-			         Use "-e POSTGRES_PASSWORD=password" to set
-			         it in "docker run".
-			****************************************************
+			         It is not recommended to use POSTGRES_HOST_AUTH_METHOD=trust. Replace
+			         it with "-e POSTGRES_PASSWORD=password" instead to set a password in
+			         "docker run".
+			********************************************************************************
 		EOWARN
-
 	fi
 }
 
@@ -185,6 +202,8 @@ docker_setup_env() {
 	file_env 'POSTGRES_USER' 'postgres'
 	file_env 'POSTGRES_DB' "$POSTGRES_USER"
 	file_env 'POSTGRES_INITDB_ARGS'
+	# default authentication method is md5
+	: "${POSTGRES_HOST_AUTH_METHOD:=md5}"
 
 	declare -g DATABASE_ALREADY_EXISTS
 	# look specifically for PG_VERSION, as it is expected in the DB dir
@@ -193,16 +212,15 @@ docker_setup_env() {
 	fi
 }
 
-# append md5 or trust auth to pg_hba.conf based on existence of POSTGRES_PASSWORD
+# append POSTGRES_HOST_AUTH_METHOD to pg_hba.conf for "host" connections
 pg_setup_hba_conf() {
-	local authMethod='md5'
-	if [ -z "$POSTGRES_PASSWORD" ]; then
-		authMethod='trust'
-	fi
-
 	{
 		echo
-		echo "host all all all $authMethod"
+		if [ 'trust' = "$POSTGRES_HOST_AUTH_METHOD" ]; then
+			echo '# warning trust is enabled for all connections'
+			echo '# see https://www.postgresql.org/docs/12/auth-trust.html'
+		fi
+		echo "host all all all $POSTGRES_HOST_AUTH_METHOD"
 	} >> "$PGDATA/pg_hba.conf"
 }
 
