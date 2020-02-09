@@ -229,6 +229,21 @@ docker_temp_server_stop() {
 	pg_ctl -D "$PGDATA" -m fast -w stop
 }
 
+# run stdin lines as individual commands, while a temp server is started
+docker_run_with_temp_server() {
+		# PGPASSWORD is required for psql when authentication is required for 'local' connections via pg_hba.conf and is otherwise harmless
+		# e.g. when '--auth=md5' or '--auth-local=md5' is used in POSTGRES_INITDB_ARGS
+		export PGPASSWORD="${PGPASSWORD:-$POSTGRES_PASSWORD}"
+		docker_temp_server_start "$@"
+
+		while read command; do
+			${command}
+		done
+
+		docker_temp_server_stop
+		unset PGPASSWORD
+}
+
 # check arguments for an option that would cause postgres to stop
 # return true if there is one
 _pg_want_help() {
@@ -267,16 +282,10 @@ _main() {
 			docker_init_database_dir
 			pg_setup_hba_conf
 
-			# PGPASSWORD is required for psql when authentication is required for 'local' connections via pg_hba.conf and is otherwise harmless
-			# e.g. when '--auth=md5' or '--auth-local=md5' is used in POSTGRES_INITDB_ARGS
-			export PGPASSWORD="${PGPASSWORD:-$POSTGRES_PASSWORD}"
-			docker_temp_server_start "$@"
-
-			docker_setup_db
-			docker_process_init_files /docker-entrypoint-initdb.d/*
-
-			docker_temp_server_stop
-			unset PGPASSWORD
+			docker_run_with_temp_server <<-'COMMANDS'
+				docker_setup_db
+				docker_process_init_files /docker-entrypoint-initdb.d/* /docker-entrypoint-updatedb.d/*
+			COMMANDS
 
 			echo
 			echo 'PostgreSQL init process complete; ready for start up.'
@@ -285,6 +294,12 @@ _main() {
 			echo
 			echo 'PostgreSQL Database directory appears to contain a database; Skipping initialization'
 			echo
+
+			if [ -d /docker-entrypoint-updatedb.d/ ]; then
+				docker_run_with_temp_server <<-'COMMANDS'
+					docker_process_init_files /docker-entrypoint-updatedb.d/*
+				COMMANDS
+			fi
 		fi
 	fi
 
