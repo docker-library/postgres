@@ -71,7 +71,7 @@ RUN set -ex; \
 	apt-key list
 
 ENV PG_MAJOR 9.4
-ENV PG_VERSION 9.4.25-1.pgdg90+1
+ENV PG_VERSION 9.4.26-1.pgdg90+1
 
 RUN set -ex; \
 	\
