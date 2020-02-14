@@ -5,7 +5,7 @@ FROM alpine:3.11
 # https://git.alpinelinux.org/aports/tree/main/postgresql/postgresql.pre-install?h=3.11-stable
 RUN set -eux; \
 	addgroup -g 70 -S postgres; \
-	adduser -u 70 -S -D -G postgres -H -h /var/lib/postgresql postgres; \
+	adduser -u 70 -S -D -G postgres -H -h /var/lib/postgresql -s /bin/sh postgres; \
 	mkdir -p /var/lib/postgresql; \
 	chown -R postgres:postgres /var/lib/postgresql
 
