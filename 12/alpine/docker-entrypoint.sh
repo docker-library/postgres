@@ -88,7 +88,7 @@ docker_init_database_dir() {
 }
 
 # print large warning if POSTGRES_PASSWORD is long
-# error if both POSTGRES_PASSWORD is unset and POSTGRES_HOST_AUTH_METHOD is not 'trust'
+# error if both POSTGRES_PASSWORD is empty and POSTGRES_HOST_AUTH_METHOD is not 'trust'
 # print large warning if POSTGRES_HOST_AUTH_METHOD is set to 'trust'
 # assumes database is not set up, ie: [ -z "$DATABASE_ALREADY_EXISTS" ]
 docker_verify_minimum_env() {
@@ -110,12 +110,13 @@ docker_verify_minimum_env() {
 		# The - option suppresses leading tabs but *not* spaces. :)
 		cat >&2 <<-'EOE'
 			Error: Database is uninitialized and superuser password is not specified.
-			       You must specify POSTGRES_PASSWORD for the superuser. Use
-			       "-e POSTGRES_PASSWORD=password" to set it in "docker run".
+			       You must specify POSTGRES_PASSWORD to a non-empty value for the
+			       superuser. For example, "-e POSTGRES_PASSWORD=password" on "docker run".
 
-			       You may also use POSTGRES_HOST_AUTH_METHOD=trust to allow all connections
-			       without a password. This is *not* recommended. See PostgreSQL
-			       documentation about "trust":
+			       You may also use "POSTGRES_HOST_AUTH_METHOD=trust" to allow all
+			       connections without a password. This is *not* recommended.
+
+			       See PostgreSQL documentation about "trust":
 			       https://www.postgresql.org/docs/current/auth-trust.html
 		EOE
 		exit 1
