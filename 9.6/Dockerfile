@@ -48,12 +48,16 @@ RUN set -eux; \
 	localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 ENV LANG en_US.utf8
 
+RUN set -eux; \
+	apt-get update; \
+	apt-get install -y --no-install-recommends \
 # install "nss_wrapper" in case we need to fake "/etc/passwd" and "/etc/group" (especially for OpenShift)
 # https://github.com/docker-library/postgres/issues/359
 # https://cwrap.org/nss_wrapper.html
-RUN set -eux; \
-	apt-get update; \
-	apt-get install -y --no-install-recommends libnss-wrapper; \
+		libnss-wrapper \
+# install "xz-utils" for .sql.xz docker-entrypoint-initdb.d files
+		xz-utils \
+	; \
 	rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /docker-entrypoint-initdb.d
