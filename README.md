@@ -11,7 +11,7 @@ The [full image description on Docker Hub](https://hub.docker.com/_/postgres/) i
 ### Pin a digest to avoid breaking changes
 Docker "Official Images" use tags that correspond to the version of the application they run (in our case, Postgres) and therefore do not typically have any way of indicating changes (even breaking changes) to the image configuration in their tags or "version numbers".  Because of this, it is highly recommended that you "pin" a specific SHA digest of this image wherever it is used if you need to avoid breaking changes.
 
-The digest for every tag is available on Docker Hub.  For instance, if you visit the [tags page for Postgres](https://hub.docker.com/_/postgres?tab=tags), and click on "12.2" you will see the sha256-digest for the most recent build of "12.2" at the top of the page.  This can be used to pin your image reference to that specific build of the image so that nothing will ever change in your environment unless you explicitly update it.  For instnace, in a Docker Compose configuration, you might use something like:
+The digest for every tag is available on Docker Hub.  For instance, if you visit the [tags page for Postgres](https://hub.docker.com/_/postgres?tab=tags), and click on "12.2" you will see the sha256-digest for the most recent build of "12.2" at the top of the page.  This can be used to pin your image reference to that specific build of the image so that nothing will ever change in your environment unless you explicitly update it.  For instance, in a Docker Compose configuration, you might use something like:
 
 ```yaml
 # docker-compose.yaml
