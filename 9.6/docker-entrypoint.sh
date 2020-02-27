@@ -284,6 +284,10 @@ _main() {
 		# only run initialization on an empty data directory
 		if [ -z "$DATABASE_ALREADY_EXISTS" ]; then
 			docker_verify_minimum_env
+
+			# check dir permissions to reduce likelihood of half-initialized database
+			ls /docker-entrypoint-initdb.d/ > /dev/null
+
 			docker_init_database_dir
 			pg_setup_hba_conf
 
