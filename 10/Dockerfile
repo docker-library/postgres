@@ -84,7 +84,7 @@ RUN set -ex; \
 	\
 	dpkgArch="$(dpkg --print-architecture)"; \
 	case "$dpkgArch" in \
-		amd64|i386|ppc64el) \
+		amd64 | i386 | ppc64el) \
 # arches officialy built by upstream
 			echo "deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main $PG_MAJOR" > /etc/apt/sources.list.d/pgdg.list; \
 			apt-get update; \

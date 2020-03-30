@@ -27,32 +27,65 @@ declare -A alpineVersion=(
 )
 
 packagesBase='http://apt.postgresql.org/pub/repos/apt/dists/'
-
 declare -A suitePackageList=() suiteArches=()
+fetch_suite_package_list() {
+	local suite="$1"; shift
+	local arch="${1:-amd64}"
+
+	if [ -z "${suitePackageList["$suite-$arch"]:+isset}" ]; then
+		suitePackageList["$suite-$arch"]="$(curl -fsSL "$packagesBase/$suite-pgdg/main/binary-$arch/Packages.bz2" | bunzip2)"
+	fi
+}
+fetch_suite_arches() {
+	local suite="$1"; shift
+
+	if [ -z "${suiteArches["$suite"]:+isset}" ]; then
+		local suiteRelease
+		suiteRelease="$(curl -fsSL "$packagesBase/$suite-pgdg/Release")"
+		suiteArches["$suite"]="$(gawk <<<"$suiteRelease" -F ':[[:space:]]+' '$1 == "Architectures" { print $2; exit }')"
+	fi
+}
+
 travisEnv=
 for version in "${versions[@]}"; do
 	tag="${debianSuite[$version]:-$defaultDebianSuite}"
 	suite="${tag%%-slim}"
-	if [ -z "${suitePackageList["$suite"]:+isset}" ]; then
-		suitePackageList["$suite"]="$(curl -fsSL "${packagesBase}/${suite}-pgdg/main/binary-amd64/Packages.bz2" | bunzip2)"
-	fi
-	if [ -z "${suiteArches["$suite"]:+isset}" ]; then
-		suiteArches["$suite"]="$(curl -fsSL "${packagesBase}/${suite}-pgdg/Release" | gawk -F ':[[:space:]]+' '$1 == "Architectures" { gsub(/[[:space:]]+/, "|", $2); print $2 }')"
-	fi
-
-	versionList="$(echo "${suitePackageList["$suite"]}"; curl -fsSL "${packagesBase}/${suite}-pgdg/${version}/binary-amd64/Packages.bz2" | bunzip2)"
-	fullVersion="$(echo "$versionList" | awk -F ': ' '$1 == "Package" { pkg = $2 } $1 == "Version" && pkg == "postgresql-'"$version"'" { print $2; exit }' || true)"
 	majorVersion="${version%%.*}"
 
-	echo "$version: $fullVersion"
+	fetch_suite_package_list "$suite" 'amd64'
+	fullVersion="$(awk <<<"${suitePackageList["$suite-amd64"]}" -F ': ' -v version="$version" '
+		$1 == "Package" { pkg = $2 }
+		$1 == "Version" && pkg == "postgresql-" version { print $2; exit }
+	')"
+	if [ -z "$fullVersion" ]; then
+		echo >&2 "error: missing postgresql-$version package!"
+		exit 1
+	fi
+
+	fetch_suite_arches "$suite"
+	versionArches=
+	for arch in ${suiteArches["$suite"]}; do
+		fetch_suite_package_list "$suite" "$arch"
+		archVersion="$(awk <<<"${suitePackageList["$suite-$arch"]}" -F ': ' -v version="$version" '
+			$1 == "Package" { pkg = $2 }
+			$1 == "Version" && pkg == "postgresql-" version { print $2; exit }
+		')"
+		if [ "$archVersion" = "$fullVersion" ]; then
+			[ -z "$versionArches" ] || versionArches+=' | '
+			versionArches+="$arch"
+		fi
+	done
+
+	echo "$version: $fullVersion ($versionArches)"
 
 	cp docker-entrypoint.sh "$version/"
 	sed -e 's/%%PG_MAJOR%%/'"$version"'/g;' \
 		-e 's/%%PG_VERSION%%/'"$fullVersion"'/g' \
 		-e 's/%%DEBIAN_TAG%%/'"$tag"'/g' \
 		-e 's/%%DEBIAN_SUITE%%/'"$suite"'/g' \
-		-e 's/%%ARCH_LIST%%/'"${suiteArches["$suite"]}"'/g' \
-		Dockerfile-debian.template > "$version/Dockerfile"
+		-e 's/%%ARCH_LIST%%/'"$versionArches"'/g' \
+		Dockerfile-debian.template \
+		> "$version/Dockerfile"
 	if [ "$majorVersion" = '9' ]; then
 		sed -i -e 's/WALDIR/XLOGDIR/g' \
 			-e 's/waldir/xlogdir/g' \
@@ -84,7 +117,8 @@ for version in "${versions[@]}"; do
 			-e 's/%%PG_VERSION%%/'"$srcVersion"'/g' \
 			-e 's/%%PG_SHA256%%/'"$srcSha256"'/g' \
 			-e 's/%%ALPINE-VERSION%%/'"${alpineVersion[$version]:-$defaultAlpineVersion}"'/g' \
-			"Dockerfile-$variant.template" > "$version/$variant/Dockerfile"
+			"Dockerfile-$variant.template" \
+			> "$version/$variant/Dockerfile"
 		if [ "$majorVersion" = '9' ]; then
 			sed -i -e 's/WALDIR/XLOGDIR/g' \
 				-e 's/waldir/xlogdir/g' \
@@ -109,4 +143,4 @@ for version in "${versions[@]}"; do
 done
 
 travis="$(awk -v 'RS=\n\n' '$1 == "env:" { $0 = "env:'"$travisEnv"'" } { printf "%s%s", $0, RS }' .travis.yml)"
-echo "$travis" > .travis.yml
+cat <<<"$travis" > .travis.yml
