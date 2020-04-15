@@ -226,6 +226,15 @@ pg_setup_hba_conf() {
 	} >> "$PGDATA/pg_hba.conf"
 }
 
+# enable scram-sha-256 password encryption based on POSTGRES_HOST_AUTH_METHOD env var
+scram-sha-256_postgresql_conf() {
+	{
+		if [ "$POSTGRES_HOST_AUTH_METHOD" = 'scram-sha-256' ]; then
+			sed --in-place 's/#password_encryption = md5/password_encryption = scram-sha-256/' $PGDATA/postgresql.conf
+		fi
+	}
+}
+
 # start socket-only postgresql server for setting up or running scripts
 # all arguments will be passed along as arguments to `postgres` (via pg_ctl)
 docker_temp_server_start() {
@@ -289,6 +298,7 @@ _main() {
 			ls /docker-entrypoint-initdb.d/ > /dev/null
 
 			docker_init_database_dir
+			scram-sha-256_postgresql_conf
 			pg_setup_hba_conf
 
 			# PGPASSWORD is required for psql when authentication is required for 'local' connections via pg_hba.conf and is otherwise harmless
