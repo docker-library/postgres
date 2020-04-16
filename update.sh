@@ -138,6 +138,49 @@ for version in "${versions[@]}"; do
 		travisEnv="\n  - VERSION=$version VARIANT=$variant$travisEnv"
 	done
 
+	for variant in windows; do
+		if [ ! -d "$version/$variant" ]; then
+			continue
+		fi
+
+		edbRepository='https://get.enterprisedb.com/postgresql'
+
+		cp docker-entrypoint.cmd "$version/$variant/docker-entrypoint.cmd"
+		cp Dockerfile-windows.template "$version/$variant/Dockerfile"
+
+		case "$version" in
+			9.4)
+				edbVersion='9.4.22-1'
+				# Visual C++ 2013 Redistributable Package
+				edbVCRedist='https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe'
+				;;
+			9.5)
+				edbVersion='9.5.17-1'
+				# Visual C++ 2013 Redistributable Package
+				edbVCRedist='https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe'
+				;;
+			9.6)
+				edbVersion='9.6.13-1'
+				# Visual C++ 2013 Redistributable Package
+				edbVCRedist='https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe'
+				;;
+			10)
+				edbVersion='10.8-1'
+				# Visual C++ 2013 Redistributable Package
+				edbVCRedist='https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe'
+				;;
+			11)
+				edbVersion='11.3-1'
+				# Visual C++ 2017 Redistributable Package
+				edbVCRedist='https://download.visualstudio.microsoft.com/download/pr/11100230/15ccb3f02745c7b206ad10373cbca89b/VC_redist.x64.exe'
+				;;
+		esac
+		sed -e 's|%%EDB_VERSION%%|'"$edbVersion"'|g' \
+			-e 's|%%EDB_REPOSITORY%%|'"$edbRepository"'|g' \
+			-e 's|%%EDB_VCREDIST%%|'"$edbVCRedist"'|g' \
+			"Dockerfile-$variant.template" > "$version/$variant/Dockerfile"
+	done
+
 	travisEnv="\n  - VERSION=$version FORCE_DEB_BUILD=1$travisEnv"
 	travisEnv="\n  - VERSION=$version$travisEnv"
 done

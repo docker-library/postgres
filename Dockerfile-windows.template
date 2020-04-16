@@ -1,0 +1,66 @@
+####
+#### Download and prepare PostgreSQL for Windows
+####
+FROM mcr.microsoft.com/windows/servercore:1809 as prepare
+
+##### Use PowerShell for the installation
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+
+### Download EnterpriseDB and remove cruft
+RUN $URL1 = '%%EDB_REPOSITORY%%/postgresql-%%EDB_VERSION%%-windows-x64-binaries.zip' ; \
+    Invoke-WebRequest -Uri $URL1 -OutFile 'C:\\EnterpriseDB.zip' ; \
+    Expand-Archive 'C:\\EnterpriseDB.zip' -DestinationPath 'C:\\' ; \
+    Remove-Item -Path 'C:\\EnterpriseDB.zip' ; \
+    Remove-Item -Recurse -Force –Path 'C:\\pgsql\\doc' ; \
+    Remove-Item -Recurse -Force –Path 'C:\\pgsql\\include' ; \
+    Remove-Item -Recurse -Force –Path 'C:\\pgsql\\pgAdmin*' ; \
+    Remove-Item -Recurse -Force –Path 'C:\\pgsql\\StackBuilder'
+
+### Make the sample config easier to munge (and "correct by default")
+RUN $SAMPLE_FILE = 'C:\\pgsql\\share\\postgresql.conf.sample' ; \
+    $SAMPLE_CONF = Get-Content $SAMPLE_FILE ; \
+    $SAMPLE_CONF = $SAMPLE_CONF -Replace '#listen_addresses = ''localhost''','listen_addresses = ''*''' ; \
+    $SAMPLE_CONF | Set-Content $SAMPLE_FILE
+
+# Install Visual C++ Redistributable Package
+RUN $URL2 = '%%EDB_VCREDIST%%' ; \
+    Invoke-WebRequest -Uri $URL2 -OutFile 'C:\\vcredist.exe' ; \
+    Start-Process 'C:\\vcredist.exe' -Wait \
+        -ArgumentList @( \
+            '/install', \
+            '/passive', \
+            '/norestart' \
+        )
+
+# Copy relevant DLLs to PostgreSQL
+RUN if (Test-Path 'C:\\windows\\system32\\msvcp120.dll') { \
+        Write-Host('Visual C++ 2013 Redistributable Package') ; \
+        Copy-Item 'C:\\windows\\system32\\msvcp120.dll' -Destination 'C:\\pgsql\\bin\\msvcp120.dll' ; \
+        Copy-Item 'C:\\windows\\system32\\msvcr120.dll' -Destination 'C:\\pgsql\\bin\\msvcr120.dll' ; \
+    } else { \
+        Write-Host('Visual C++ 2017 Redistributable Package') ; \
+        Copy-Item 'C:\\windows\\system32\\vcruntime140.dll' -Destination 'C:\\pgsql\\bin\\vcruntime140.dll' ; \
+    }
+
+####
+#### PostgreSQL on Windows Nano Server
+####
+FROM mcr.microsoft.com/windows/nanoserver:1809
+
+RUN mkdir "C:\\docker-entrypoint-initdb.d"
+
+#### Copy over PostgreSQL
+COPY --from=prepare "C:\\pgsql" "C:\\pgsql"
+
+#### In order to set system PATH, ContainerAdministrator must be used
+USER ContainerAdministrator
+RUN setx /M PATH "C:\\pgsql\\bin;%PATH%"
+USER ContainerUser
+ENV PGDATA "C:\\pgsql\\data"
+RUN mkdir "%PGDATA%"
+
+COPY docker-entrypoint.cmd "C:\\"
+ENTRYPOINT ["C:\\docker-entrypoint.cmd"]
+
+EXPOSE 5432
+CMD ["postgres"]
