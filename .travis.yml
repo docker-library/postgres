@@ -34,9 +34,9 @@ script:
       set -x
       if [ -n "${FORCE_DEB_BUILD:+x}" ]; then
         [ "$(dpkg --print-architecture)" = 'amd64' ]
-        grep -qE 'amd64 [|]' Dockerfile
-        sed -ri -e 's/amd64 [|]//g' Dockerfile
-        ! grep -qE 'amd64 [|]' Dockerfile
+        grep -qE 'amd64 [|] ' Dockerfile
+        sed -ri -e 's/amd64 [|] //g' Dockerfile
+        ! grep -qE 'amd64 [|] ' Dockerfile
       fi
       docker build -t "$image" .
       ~/official-images/test/run.sh "$image"
