@@ -9,9 +9,6 @@ if [ ${#versions[@]} -eq 0 ]; then
 fi
 versions=( "${versions[@]%/}" )
 
-# sort version numbers with highest last (so it goes first in .travis.yml)
-IFS=$'\n'; versions=( $(echo "${versions[*]}" | sort -V) ); unset IFS
-
 defaultDebianSuite='buster-slim'
 declare -A debianSuite=(
 	# https://github.com/docker-library/postgres/issues/582
@@ -46,7 +43,6 @@ fetch_suite_arches() {
 	fi
 }
 
-travisEnv=
 for version in "${versions[@]}"; do
 	tag="${debianSuite[$version]:-$defaultDebianSuite}"
 	suite="${tag%%-slim}"
@@ -134,13 +130,5 @@ for version in "${versions[@]}"; do
 			# JIT / LLVM is only supported in PostgreSQL 11+ (https://github.com/docker-library/postgres/issues/475)
 			sed -i '/llvm/d' "$version/$variant/Dockerfile"
 		fi
-
-		travisEnv="\n  - VERSION=$version VARIANT=$variant$travisEnv"
 	done
-
-	travisEnv="\n  - VERSION=$version FORCE_DEB_BUILD=1$travisEnv"
-	travisEnv="\n  - VERSION=$version$travisEnv"
 done
-
-travis="$(awk -v 'RS=\n\n' '$1 == "env:" { $0 = "env:'"$travisEnv"'" } { printf "%s%s", $0, RS }' .travis.yml)"
-cat <<<"$travis" > .travis.yml
