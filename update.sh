@@ -125,6 +125,10 @@ for version in "${versions[@]}"; do
 		sed -i -e '/postgresql-contrib-/d' "$version/Dockerfile"
 	fi
 
+	if [ "$majorVersion" != '13' ]; then
+		sed -i -e '/DEBIAN_FRONTEND/d' "$version/Dockerfile"
+	fi
+
 	# TODO figure out what to do with odd version numbers here, like release candidates
 	srcVersion="${fullVersion%%-*}"
 	# change "10~beta1" to "10beta1" for ftp urls
