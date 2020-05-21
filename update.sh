@@ -24,14 +24,39 @@ declare -A alpineVersion=(
 )
 
 packagesBase='http://apt.postgresql.org/pub/repos/apt/dists/'
-declare -A suitePackageList=() suiteArches=()
+declare -A suitePackageList=() suiteVersionPackageList=() suiteArches=()
+_raw_package_list() {
+	local suite="$1"; shift
+	local component="$1"; shift
+	local arch="$1"; shift
+
+	curl -fsSL "$packagesBase/$suite-pgdg/$component/binary-$arch/Packages.bz2" | bunzip2
+}
 fetch_suite_package_list() {
 	local suite="$1"; shift
-	local arch="${1:-amd64}"
+	local version="$1"; shift
+	local arch="$1"; shift
 
+	# normal (GA) releases end up in the "main" component of upstream's repository
 	if [ -z "${suitePackageList["$suite-$arch"]:+isset}" ]; then
-		suitePackageList["$suite-$arch"]="$(curl -fsSL "$packagesBase/$suite-pgdg/main/binary-$arch/Packages.bz2" | bunzip2)"
+		local suiteArchPackageList
+		suiteArchPackageList="$(_raw_package_list "$suite" 'main' "$arch")"
+		suitePackageList["$suite-$arch"]="$suiteArchPackageList"
 	fi
+
+	# ... but pre-release versions (betas, etc) end up in the "PG_MAJOR" component (so we need to check both)
+	if [ -z "${suiteVersionPackageList["$suite-$version-$arch"]:+isset}" ]; then
+		local versionPackageList
+		versionPackageList="$(_raw_package_list "$suite" "$version" "$arch")"
+		suiteVersionPackageList["$suite-$version-$arch"]="$versionPackageList"
+	fi
+}
+awk_package_list() {
+	local suite="$1"; shift
+	local version="$1"; shift
+	local arch="$1"; shift
+
+	awk -F ': ' -v version="$version" "$@" <<<"${suitePackageList["$suite-$arch"]}"$'\n'"${suiteVersionPackageList["$suite-$version-$arch"]}"
 }
 fetch_suite_arches() {
 	local suite="$1"; shift
@@ -48,11 +73,13 @@ for version in "${versions[@]}"; do
 	suite="${tag%%-slim}"
 	majorVersion="${version%%.*}"
 
-	fetch_suite_package_list "$suite" 'amd64'
-	fullVersion="$(awk <<<"${suitePackageList["$suite-amd64"]}" -F ': ' -v version="$version" '
-		$1 == "Package" { pkg = $2 }
-		$1 == "Version" && pkg == "postgresql-" version { print $2; exit }
-	')"
+	fetch_suite_package_list "$suite" "$version" 'amd64'
+	fullVersion="$(
+		awk_package_list "$suite" "$version" 'amd64' '
+			$1 == "Package" { pkg = $2 }
+			$1 == "Version" && pkg == "postgresql-" version { print $2; exit }
+		'
+	)"
 	if [ -z "$fullVersion" ]; then
 		echo >&2 "error: missing postgresql-$version package!"
 		exit 1
@@ -61,11 +88,13 @@ for version in "${versions[@]}"; do
 	fetch_suite_arches "$suite"
 	versionArches=
 	for arch in ${suiteArches["$suite"]}; do
-		fetch_suite_package_list "$suite" "$arch"
-		archVersion="$(awk <<<"${suitePackageList["$suite-$arch"]}" -F ': ' -v version="$version" '
-			$1 == "Package" { pkg = $2 }
-			$1 == "Version" && pkg == "postgresql-" version { print $2; exit }
-		')"
+		fetch_suite_package_list "$suite" "$version" "$arch"
+		archVersion="$(
+			awk_package_list "$suite" "$version" "$arch" '
+				$1 == "Package" { pkg = $2 }
+				$1 == "Version" && pkg == "postgresql-" version { print $2; exit }
+			'
+		)"
 		if [ "$archVersion" = "$fullVersion" ]; then
 			[ -z "$versionArches" ] || versionArches+=' | '
 			versionArches+="$arch"
