@@ -2,7 +2,7 @@
 FROM alpine:%%ALPINE-VERSION%%
 
 # 70 is the standard uid/gid for "postgres" in Alpine
-# https://git.alpinelinux.org/aports/tree/main/postgresql/postgresql.pre-install?h=3.11-stable
+# https://git.alpinelinux.org/aports/tree/main/postgresql/postgresql.pre-install?h=3.12-stable
 RUN set -eux; \
 	addgroup -g 70 -S postgres; \
 	adduser -u 70 -S -D -G postgres -H -h /var/lib/postgresql -s /bin/sh postgres; \
@@ -50,7 +50,7 @@ RUN set -ex \
 		libxml2-dev \
 		libxslt-dev \
 		linux-headers \
-		llvm9-dev clang g++ \
+		llvm10-dev clang g++ \
 		make \
 #		openldap-dev \
 		openssl-dev \
