@@ -23,11 +23,6 @@ ENV PG_SHA256 94ed64a6179048190695c86ec707cc25d016056ce10fc9d229267d9a8f1dcf41
 
 RUN set -ex \
 	\
-	&& apk add --no-cache --virtual .fetch-deps \
-		ca-certificates \
-		openssl \
-		tar \
-	\
 	&& wget -O postgresql.tar.bz2 "https://ftp.postgresql.org/pub/source/v$PG_VERSION/postgresql-$PG_VERSION.tar.bz2" \
 	&& echo "$PG_SHA256 *postgresql.tar.bz2" | sha256sum -c - \
 	&& mkdir -p /usr/src/postgresql \
@@ -126,7 +121,7 @@ RUN set -ex \
 # tzdata is optional, but only adds around 1Mb to image size and is recommended by Django documentation:
 # https://docs.djangoproject.com/en/1.10/ref/databases/#optimizing-postgresql-s-configuration
 		tzdata \
-	&& apk del .fetch-deps .build-deps \
+	&& apk del --no-network .build-deps \
 	&& cd / \
 	&& rm -rf \
 		/usr/src/postgresql \
