@@ -18,8 +18,8 @@ ENV LANG en_US.utf8
 RUN mkdir /docker-entrypoint-initdb.d
 
 ENV PG_MAJOR 13
-ENV PG_VERSION 13beta2
-ENV PG_SHA256 51b8c64f4c354728555144a7bfbdced96afb86e5cfa80a26b5e96a1d9081ee9f
+ENV PG_VERSION 13beta3
+ENV PG_SHA256 863e33ee9d1099e2a0f1cab6dbd015789b2c2af75cfbad814a3acdf7c8eeaf9d
 
 RUN set -eux; \
 	\
