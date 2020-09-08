@@ -144,7 +144,7 @@ docker_verify_minimum_env() {
 #    ie: docker_process_init_files /always-initdb.d/*
 # process initializer files, based on file extensions and permissions
 docker_process_init_files() {
-	# psql here for backwards compatiblilty "${psql[@]}"
+	# psql here for backwards compatibility "${psql[@]}"
 	psql=( docker_process_sql )
 
 	echo
