@@ -83,7 +83,7 @@ RUN set -ex; \
 	apt-key list
 
 ENV PG_MAJOR 13
-ENV PG_VERSION 13~rc1-1.pgdg100+1
+ENV PG_VERSION 13.0-1.pgdg100+1
 
 RUN set -ex; \
 	\
