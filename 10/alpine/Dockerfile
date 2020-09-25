@@ -130,7 +130,6 @@ RUN set -eux; \
 		/usr/local/share/doc \
 		/usr/local/share/man \
 	; \
-	find /usr/local -name '*.a' -delete; \
 	\
 	postgres --version
 
