@@ -78,6 +78,10 @@ docker_init_database_dir() {
 		set -- --waldir "$POSTGRES_INITDB_WALDIR" "$@"
 	fi
 
+	if [ 'peer' = "$POSTGRES_HOST_AUTH_METHOD" ]; then
+		set -- --auth=peer "$@"
+	fi
+
 	eval 'initdb --username="$POSTGRES_USER" --pwfile=<(echo "$POSTGRES_PASSWORD") '"$POSTGRES_INITDB_ARGS"' "$@"'
 
 	# unset/cleanup "nss_wrapper" bits
@@ -88,7 +92,7 @@ docker_init_database_dir() {
 }
 
 # print large warning if POSTGRES_PASSWORD is long
-# error if both POSTGRES_PASSWORD is empty and POSTGRES_HOST_AUTH_METHOD is not 'trust'
+# error if both POSTGRES_PASSWORD is empty and POSTGRES_HOST_AUTH_METHOD is not 'trust' or 'peer'
 # print large warning if POSTGRES_HOST_AUTH_METHOD is set to 'trust'
 # assumes database is not set up, ie: [ -z "$DATABASE_ALREADY_EXISTS" ]
 docker_verify_minimum_env() {
@@ -106,12 +110,15 @@ docker_verify_minimum_env() {
 
 		EOWARN
 	fi
-	if [ -z "$POSTGRES_PASSWORD" ] && [ 'trust' != "$POSTGRES_HOST_AUTH_METHOD" ]; then
+	if [ -z "$POSTGRES_PASSWORD" ] && [ 'trust' != "$POSTGRES_HOST_AUTH_METHOD" ] && [ 'peer' != "$POSTGRES_HOST_AUTH_METHOD" ]; then
 		# The - option suppresses leading tabs but *not* spaces. :)
 		cat >&2 <<-'EOE'
 			Error: Database is uninitialized and superuser password is not specified.
 			       You must specify POSTGRES_PASSWORD to a non-empty value for the
 			       superuser. For example, "-e POSTGRES_PASSWORD=password" on "docker run".
+
+			       You may use "POSTGRES_HOST_AUTH_METHOD=peer" to allow
+			       local connections identified by OS username without a password.
 
 			       You may also use "POSTGRES_HOST_AUTH_METHOD=trust" to allow all
 			       connections without a password. This is *not* recommended.
@@ -221,8 +228,9 @@ pg_setup_hba_conf() {
 		if [ 'trust' = "$POSTGRES_HOST_AUTH_METHOD" ]; then
 			echo '# warning trust is enabled for all connections'
 			echo '# see https://www.postgresql.org/docs/12/auth-trust.html'
+		elif [ 'peer' != "$POSTGRES_HOST_AUTH_METHOD" ]; then
+			echo "host all all all $POSTGRES_HOST_AUTH_METHOD"
 		fi
-		echo "host all all all $POSTGRES_HOST_AUTH_METHOD"
 	} >> "$PGDATA/pg_hba.conf"
 }
 
@@ -310,6 +318,10 @@ _main() {
 			echo 'PostgreSQL Database directory appears to contain a database; Skipping initialization'
 			echo
 		fi
+	fi
+
+	if [ 'peer' = "$POSTGRES_HOST_AUTH_METHOD" ]; then
+		set -- "$@" -c listen_addresses=''
 	fi
 
 	exec "$@"
