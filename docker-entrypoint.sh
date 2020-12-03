@@ -188,7 +188,7 @@ docker_process_sql() {
 # create initial database
 # uses environment variables for input: POSTGRES_DB
 docker_setup_db() {
-	if [ "$POSTGRES_DB" != 'postgres' ]; then
+	if [ "$POSTGRES_DB" != 'postgres' ] || [ "$POSTGRES_DB" != 'template1' ]; then
 		POSTGRES_DB= docker_process_sql --dbname postgres --set db="$POSTGRES_DB" <<-'EOSQL'
 			CREATE DATABASE :"db" ;
 		EOSQL
