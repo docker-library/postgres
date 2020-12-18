@@ -90,6 +90,18 @@ RUN set -ex; \
 # see note below about "*.pyc" files
 	export PYTHONDONTWRITEBYTECODE=1; \
 	\
+	{ \
+		echo 'Explanation: block installation of the "postgresql" metapackage, since it will almost always pull in something different than we expect'; \
+		echo 'Package: postgresql'; \
+		echo 'Pin: version *'; \
+		echo 'Pin-Priority: -10'; \
+		echo; \
+		echo 'Explanation: block installation of Debian postgresql packages, since we only want upstream'; \
+		echo 'Package: postgresql* libpq*'; \
+		echo 'Pin: release o=Debian'; \
+		echo 'Pin-Priority: -10'; \
+	} > /etc/apt/preferences.d/postgres.pref; \
+	\
 	dpkgArch="$(dpkg --print-architecture)"; \
 	case "$dpkgArch" in \
 		%%ARCH_LIST%%) \
