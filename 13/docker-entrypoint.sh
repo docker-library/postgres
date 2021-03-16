@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-set -Eeo pipefail
-# TODO swap to -Eeuo pipefail above (after handling all potentially-unset variables)
+set -Eeuo pipefail
 
 # usage: file_env VAR [DEFAULT]
 #    ie: file_env 'XYZ_DB_PASSWORD' 'example'
