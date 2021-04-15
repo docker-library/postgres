@@ -135,14 +135,19 @@ for version in "${versions[@]}"; do
 	tilde='~'
 	srcVersion="${srcVersion//$tilde/}"
 	srcSha256="$(curl -fsSL "https://ftp.postgresql.org/pub/source/v${srcVersion}/postgresql-${srcVersion}.tar.bz2.sha256" | cut -d' ' -f1)"
-	for variant in alpine; do
+	for variant in alpine opensuse; do
 		if [ ! -d "$version/$variant" ]; then
 			continue
 		fi
 
 		cp docker-entrypoint.sh "$version/$variant/"
-		sed -i 's/gosu/su-exec/g' "$version/$variant/docker-entrypoint.sh"
-		sed -e 's/%%PG_MAJOR%%/'"$version"'/g' \
+		if [ "$variant" == 'alpine' ]; then
+			sed -i 's/gosu/su-exec/g' "$version/$variant/docker-entrypoint.sh"
+		else
+			sed -i 's/gosu/sudo -E -u/g' "$version/$variant/docker-entrypoint.sh"
+		fi
+    version_no_dot=$(echo $version | sed 's/\.//')
+		sed -e 's/%%PG_MAJOR%%/'"$version_no_dot"'/g' \
 			-e 's/%%PG_VERSION%%/'"$srcVersion"'/g' \
 			-e 's/%%PG_SHA256%%/'"$srcSha256"'/g' \
 			-e 's/%%ALPINE-VERSION%%/'"${alpineVersion[$version]:-$defaultAlpineVersion}"'/g' \
