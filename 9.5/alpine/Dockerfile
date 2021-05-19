@@ -59,6 +59,8 @@ RUN set -eux; \
 #		tcl-dev \
 		util-linux-dev \
 		zlib-dev \
+# install "zstd" for .sql.zst docker-entrypoint-initdb.d files
+		zstd \
 	; \
 	\
 	cd /usr/src/postgresql; \
