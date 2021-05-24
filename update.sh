@@ -12,12 +12,9 @@ versions=( "${versions[@]%/}" )
 defaultDebianSuite='buster-slim'
 declare -A debianSuite=(
 	# https://github.com/docker-library/postgres/issues/582
-	[9.4]='stretch-slim'
-	[9.5]='stretch-slim'
 	[9.6]='stretch-slim'
 	[10]='stretch-slim'
 	[11]='stretch-slim'
-	[14]='bullseye-slim'
 )
 defaultAlpineVersion='3.13'
 declare -A alpineVersion=(
@@ -128,6 +125,9 @@ for version in "${versions[@]}"; do
 
 	if [ "$majorVersion" != '13' ]; then
 		sed -i -e '/DEBIAN_FRONTEND/d' "$version/Dockerfile"
+	fi
+	if [ "$majorVersion" -gt 11 ]; then
+		sed -i '/backwards compat/d' "$version/Dockerfile"
 	fi
 
 	# TODO figure out what to do with odd version numbers here, like release candidates
