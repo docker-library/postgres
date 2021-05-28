@@ -1,4 +1,9 @@
-# vim:set ft=dockerfile:
+#
+# NOTE: THIS DOCKERFILE IS GENERATED VIA "apply-templates.sh"
+#
+# PLEASE DO NOT EDIT IT DIRECTLY.
+#
+
 FROM debian:buster-slim
 
 RUN set -ex; \
@@ -82,8 +87,10 @@ RUN set -ex; \
 	rm -rf "$GNUPGHOME"; \
 	apt-key list
 
-ENV PG_MAJOR 13
-ENV PG_VERSION 13.3-1.pgdg100+1
+ENV PG_MAJOR 9.6
+ENV PATH $PATH:/usr/lib/postgresql/$PG_MAJOR/bin
+
+ENV PG_VERSION 9.6.22-1.pgdg100+1
 
 RUN set -ex; \
 	\
@@ -102,15 +109,6 @@ RUN set -ex; \
 # let's build binaries from their published source packages
 			echo "deb-src http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main $PG_MAJOR" > /etc/apt/sources.list.d/pgdg.list; \
 			\
-			case "$PG_MAJOR" in \
-				9.* | 10 ) ;; \
-				*) \
-# https://github.com/docker-library/postgres/issues/484 (clang-6.0 required, only available in stretch-backports)
-# TODO remove this once we hit buster+
-					echo 'deb http://deb.debian.org/debian buster-backports main' >> /etc/apt/sources.list.d/pgdg.list; \
-					;; \
-			esac; \
-			\
 			tempDir="$(mktemp -d)"; \
 			cd "$tempDir"; \
 			\
@@ -118,8 +116,6 @@ RUN set -ex; \
 			\
 # build .deb files from upstream's source packages (which are verified by apt-get)
 			apt-get update; \
-# we need DEBIAN_FRONTEND on postgresql-13 for slapd ("Please enter the password for the admin entry in your LDAP directory."); see https://bugs.debian.org/929417
-			DEBIAN_FRONTEND=noninteractive \
 			apt-get build-dep -y \
 				postgresql-common pgdg-keyring \
 				"postgresql-$PG_MAJOR=$PG_VERSION" \
@@ -153,6 +149,7 @@ RUN set -ex; \
 	sed -ri 's/#(create_main_cluster) .*$/\1 = false/' /etc/postgresql-common/createcluster.conf; \
 	apt-get install -y --no-install-recommends \
 		"postgresql-$PG_MAJOR=$PG_VERSION" \
+		"postgresql-contrib-$PG_MAJOR=$PG_VERSION" \
 	; \
 	\
 	rm -rf /var/lib/apt/lists/*; \
@@ -164,7 +161,9 @@ RUN set -ex; \
 	fi; \
 	\
 # some of the steps above generate a lot of "*.pyc" files (and setting "PYTHONDONTWRITEBYTECODE" beforehand doesn't propagate properly for some reason), so we clean them up manually (as long as they aren't owned by a package)
-	find /usr -name '*.pyc' -type f -exec bash -c 'for pyc; do dpkg -S "$pyc" &> /dev/null || rm -vf "$pyc"; done' -- '{}' +
+	find /usr -name '*.pyc' -type f -exec bash -c 'for pyc; do dpkg -S "$pyc" &> /dev/null || rm -vf "$pyc"; done' -- '{}' +; \
+	\
+	postgres --version
 
 # make the sample config easier to munge (and "correct by default")
 RUN set -eux; \
@@ -176,7 +175,6 @@ RUN set -eux; \
 
 RUN mkdir -p /var/run/postgresql && chown -R postgres:postgres /var/run/postgresql && chmod 2777 /var/run/postgresql
 
-ENV PATH $PATH:/usr/lib/postgresql/$PG_MAJOR/bin
 ENV PGDATA /var/lib/postgresql/data
 # this 777 will be replaced by 700 at runtime (allows semi-arbitrary "--user" values)
 RUN mkdir -p "$PGDATA" && chown -R postgres:postgres "$PGDATA" && chmod 777 "$PGDATA"

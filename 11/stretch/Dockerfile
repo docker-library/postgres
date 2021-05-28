@@ -1,4 +1,10 @@
-FROM debian:{{ env.variant }}-slim
+#
+# NOTE: THIS DOCKERFILE IS GENERATED VIA "apply-templates.sh"
+#
+# PLEASE DO NOT EDIT IT DIRECTLY.
+#
+
+FROM debian:stretch-slim
 
 RUN set -ex; \
 	if ! command -v gpg > /dev/null; then \
@@ -81,10 +87,10 @@ RUN set -ex; \
 	rm -rf "$GNUPGHOME"; \
 	apt-key list
 
-ENV PG_MAJOR {{ env.version }}
+ENV PG_MAJOR 11
 ENV PATH $PATH:/usr/lib/postgresql/$PG_MAJOR/bin
 
-ENV PG_VERSION {{ .[env.variant].version }}
+ENV PG_VERSION 11.12-1.pgdg90+1
 
 RUN set -ex; \
 	\
@@ -93,21 +99,19 @@ RUN set -ex; \
 	\
 	dpkgArch="$(dpkg --print-architecture)"; \
 	case "$dpkgArch" in \
-		{{ .[env.variant].arches | join(" | ") }}) \
+		amd64 | i386 | ppc64el) \
 # arches officialy built by upstream
-			echo "deb http://apt.postgresql.org/pub/repos/apt/ {{ env.variant }}-pgdg main $PG_MAJOR" > /etc/apt/sources.list.d/pgdg.list; \
+			echo "deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main $PG_MAJOR" > /etc/apt/sources.list.d/pgdg.list; \
 			apt-get update; \
 			;; \
 		*) \
 # we're on an architecture upstream doesn't officially build for
 # let's build binaries from their published source packages
-			echo "deb-src http://apt.postgresql.org/pub/repos/apt/ {{ env.variant }}-pgdg main $PG_MAJOR" > /etc/apt/sources.list.d/pgdg.list; \
+			echo "deb-src http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main $PG_MAJOR" > /etc/apt/sources.list.d/pgdg.list; \
 			\
-{{ if env.variant == "stretch" and .major >= 11 then ( -}}
 # https://github.com/docker-library/postgres/issues/484 (clang-6.0 required, only available in stretch-backports)
-			echo 'deb http://deb.debian.org/debian {{ env.variant }}-backports main' >> /etc/apt/sources.list.d/pgdg.list; \
+			echo 'deb http://deb.debian.org/debian stretch-backports main' >> /etc/apt/sources.list.d/pgdg.list; \
 			\
-{{ ) else "" end -}}
 			tempDir="$(mktemp -d)"; \
 			cd "$tempDir"; \
 			\
@@ -115,10 +119,6 @@ RUN set -ex; \
 			\
 # build .deb files from upstream's source packages (which are verified by apt-get)
 			apt-get update; \
-{{ if .major == 13 then ( -}}
-# we need DEBIAN_FRONTEND on postgresql-13 for slapd ("Please enter the password for the admin entry in your LDAP directory."); see https://bugs.debian.org/929417
-			DEBIAN_FRONTEND=noninteractive \
-{{ ) else "" end -}}
 			apt-get build-dep -y \
 				postgresql-common pgdg-keyring \
 				"postgresql-$PG_MAJOR=$PG_VERSION" \
@@ -152,9 +152,6 @@ RUN set -ex; \
 	sed -ri 's/#(create_main_cluster) .*$/\1 = false/' /etc/postgresql-common/createcluster.conf; \
 	apt-get install -y --no-install-recommends \
 		"postgresql-$PG_MAJOR=$PG_VERSION" \
-{{ if .major == 9 then ( -}}
-		"postgresql-contrib-$PG_MAJOR=$PG_VERSION" \
-{{ ) else "" end -}}
 	; \
 	\
 	rm -rf /var/lib/apt/lists/*; \
@@ -186,9 +183,6 @@ RUN mkdir -p "$PGDATA" && chown -R postgres:postgres "$PGDATA" && chmod 777 "$PG
 VOLUME /var/lib/postgresql/data
 
 COPY docker-entrypoint.sh /usr/local/bin/
-{{ if .major >= 11 then "" else ( -}}
-RUN ln -s usr/local/bin/docker-entrypoint.sh / # backwards compat
-{{ ) end -}}
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 # We set the default STOPSIGNAL to SIGINT, which corresponds to what PostgreSQL

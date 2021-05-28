@@ -1,4 +1,9 @@
-# vim:set ft=dockerfile:
+#
+# NOTE: THIS DOCKERFILE IS GENERATED VIA "apply-templates.sh"
+#
+# PLEASE DO NOT EDIT IT DIRECTLY.
+#
+
 FROM alpine:3.14
 
 # 70 is the standard uid/gid for "postgres" in Alpine
@@ -59,6 +64,7 @@ RUN set -eux; \
 #		tcl-dev \
 		util-linux-dev \
 		zlib-dev \
+# https://www.postgresql.org/docs/10/static/release-10.html#id-1.11.6.9.5.13
 		icu-dev \
 	; \
 	\
@@ -134,7 +140,10 @@ RUN set -eux; \
 	postgres --version
 
 # make the sample config easier to munge (and "correct by default")
-RUN sed -ri "s!^#?(listen_addresses)\s*=\s*\S+.*!\1 = '*'!" /usr/local/share/postgresql/postgresql.conf.sample
+RUN set -eux; \
+	cp -v /usr/local/share/postgresql/postgresql.conf.sample /usr/local/share/postgresql/postgresql.conf.sample.orig; \
+	sed -ri "s!^#?(listen_addresses)\s*=\s*\S+.*!\1 = '*'!" /usr/local/share/postgresql/postgresql.conf.sample; \
+	grep -F "listen_addresses = '*'" /usr/local/share/postgresql/postgresql.conf.sample
 
 RUN mkdir -p /var/run/postgresql && chown -R postgres:postgres /var/run/postgresql && chmod 2777 /var/run/postgresql
 
