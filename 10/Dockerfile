@@ -65,6 +65,8 @@ RUN set -eux; \
 		libnss-wrapper \
 # install "xz-utils" for .sql.xz docker-entrypoint-initdb.d files
 		xz-utils \
+# install "zstd" for .sql.zst docker-entrypoint-initdb.d files
+		zstd \
 	; \
 	rm -rf /var/lib/apt/lists/*
 
