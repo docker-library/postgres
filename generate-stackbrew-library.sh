@@ -1,5 +1,5 @@
-#!/bin/bash
-set -eu
+#!/usr/bin/env bash
+set -Eeuo pipefail
 
 declare -A aliases=(
 	[13]='latest'
@@ -9,11 +9,13 @@ declare -A aliases=(
 self="$(basename "$BASH_SOURCE")"
 cd "$(dirname "$(readlink -f "$BASH_SOURCE")")"
 
-versions=( */ )
-versions=( "${versions[@]%/}" )
+if [ "$#" -eq 0 ]; then
+	versions="$(jq -r 'keys | map(@sh) | join(" ")' versions.json)"
+	eval "set -- $versions"
+fi
 
 # sort version numbers with highest first
-IFS=$'\n'; versions=( $(echo "${versions[*]}" | sort -rV) ); unset IFS
+IFS=$'\n'; set -- $(sort -rV <<<"$*"); unset IFS
 
 # get the most recent commit which modified any of "$@"
 fileCommit() {
@@ -25,15 +27,19 @@ dirCommit() {
 	local dir="$1"; shift
 	(
 		cd "$dir"
-		fileCommit \
-			Dockerfile \
-			$(git show HEAD:./Dockerfile | awk '
+		files="$(
+			git show HEAD:./Dockerfile | awk '
 				toupper($1) == "COPY" {
 					for (i = 2; i < NF; i++) {
+						if ($i ~ /^--from=/) {
+							next
+						}
 						print $i
 					}
 				}
-			')
+			'
+		)"
+		fileCommit Dockerfile $files
 	)
 }
 
@@ -68,12 +74,16 @@ join() {
 	echo "${out#$sep}"
 }
 
-for version in "${versions[@]}"; do
-	commit="$(dirCommit "$version")"
+for version; do
+	export version
 
-	pgdgVersion="$(git show "$commit":"$version/Dockerfile" | awk '$1 == "ENV" && $2 == "PG_VERSION" { print $3; exit }')"
-	fullVersion="${pgdgVersion%%-*}"
-	fullVersion="${fullVersion//'~'/-}"
+	variants="$(jq -r '.[env.version].debianSuites + ["alpine"] | map(@sh) | join(" ")' versions.json)"
+	eval "variants=( $variants )"
+
+	debian="$(jq -r '.[env.version].debian' versions.json)"
+
+	fullVersion="$(jq -r '.[env.version].version' versions.json)"
+	origVersion="$fullVersion"
 
 	versionAliases=()
 	while [ "$fullVersion" != "$version" -a "${fullVersion%[.-]*}" != "$fullVersion" ]; do
@@ -83,42 +93,37 @@ for version in "${versions[@]}"; do
 	# skip unadorned "version" on prereleases: https://www.postgresql.org/developer/beta/
 	# - https://github.com/docker-library/postgres/issues/662
 	# - https://github.com/docker-library/postgres/issues/784
-	case "$pgdgVersion" in
-		*alpha* | *beta*| *rc*) ;;
+	case "$origVersion" in
+		*alpha* | *beta* | *rc*) ;;
 		*) versionAliases+=( $version ) ;;
 	esac
 	versionAliases+=(
 		${aliases[$version]:-}
 	)
 
-	versionParent="$(awk 'toupper($1) == "FROM" { print $2 }' "$version/Dockerfile")"
-	versionArches="${parentRepoToArches[$versionParent]}"
+	for variant in "${variants[@]}"; do
+		dir="$version/$variant"
+		commit="$(dirCommit "$dir")"
 
-	echo
-	cat <<-EOE
-		Tags: $(join ', ' "${versionAliases[@]}")
-		Architectures: $(join ', ' $versionArches)
-		GitCommit: $commit
-		Directory: $version
-	EOE
-
-	for variant in alpine; do
-		[ -f "$version/$variant/Dockerfile" ] || continue
-
-		commit="$(dirCommit "$version/$variant")"
+		parent="$(awk 'toupper($1) == "FROM" { print $2 }' "$dir/Dockerfile")"
+		arches="${parentRepoToArches[$parent]}"
 
 		variantAliases=( "${versionAliases[@]/%/-$variant}" )
 		variantAliases=( "${variantAliases[@]//latest-/}" )
 
-		variantParent="$(awk 'toupper($1) == "FROM" { print $2 }' "$version/$variant/Dockerfile")"
-		variantArches="${parentRepoToArches[$variantParent]}"
+		if [ "$variant" = "$debian" ]; then
+			variantAliases=(
+				"${versionAliases[@]}"
+				"${variantAliases[@]}"
+			)
+		fi
 
 		echo
 		cat <<-EOE
 			Tags: $(join ', ' "${variantAliases[@]}")
-			Architectures: $(join ', ' $variantArches)
+			Architectures: $(join ', ' $arches)
 			GitCommit: $commit
-			Directory: $version/$variant
+			Directory: $dir
 		EOE
 	done
 done

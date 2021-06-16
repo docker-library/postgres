@@ -1,0 +1,124 @@
+{
+  "10": {
+    "alpine": "3.14",
+    "buster": {
+      "arches": [
+        "amd64",
+        "arm64",
+        "i386",
+        "ppc64el"
+      ],
+      "version": "10.17-1.pgdg100+1"
+    },
+    "debian": "stretch",
+    "debianSuites": [
+      "buster",
+      "stretch"
+    ],
+    "major": 10,
+    "sha256": "5af28071606c9cd82212c19ba584657a9d240e1c4c2da28fc1f3998a2754b26c",
+    "stretch": {
+      "arches": [
+        "amd64",
+        "i386",
+        "ppc64el"
+      ],
+      "version": "10.17-1.pgdg90+1"
+    },
+    "version": "10.17"
+  },
+  "11": {
+    "alpine": "3.14",
+    "buster": {
+      "arches": [
+        "amd64",
+        "arm64",
+        "i386",
+        "ppc64el"
+      ],
+      "version": "11.12-1.pgdg100+1"
+    },
+    "debian": "stretch",
+    "debianSuites": [
+      "buster",
+      "stretch"
+    ],
+    "major": 11,
+    "sha256": "87f9d8b16b2b8ef71586f2ec76beac844819f64734b07fa33986755c2f53cb04",
+    "stretch": {
+      "arches": [
+        "amd64",
+        "i386",
+        "ppc64el"
+      ],
+      "version": "11.12-1.pgdg90+1"
+    },
+    "version": "11.12"
+  },
+  "12": {
+    "alpine": "3.14",
+    "buster": {
+      "arches": [
+        "amd64",
+        "arm64",
+        "i386",
+        "ppc64el"
+      ],
+      "version": "12.7-1.pgdg100+1"
+    },
+    "debian": "buster",
+    "debianSuites": [
+      "buster"
+    ],
+    "major": 12,
+    "sha256": "8490741f47c88edc8b6624af009ce19fda4dc9b31c4469ce2551d84075d5d995",
+    "version": "12.7"
+  },
+  "13": {
+    "alpine": "3.14",
+    "buster": {
+      "arches": [
+        "amd64",
+        "arm64",
+        "i386",
+        "ppc64el"
+      ],
+      "version": "13.3-1.pgdg100+1"
+    },
+    "debian": "buster",
+    "debianSuites": [
+      "buster"
+    ],
+    "major": 13,
+    "sha256": "3cd9454fa8c7a6255b6743b767700925ead1b9ab0d7a0f9dcb1151010f8eb4a1",
+    "version": "13.3"
+  },
+  "9.6": {
+    "alpine": "3.14",
+    "buster": {
+      "arches": [
+        "amd64",
+        "arm64",
+        "i386",
+        "ppc64el"
+      ],
+      "version": "9.6.22-1.pgdg100+1"
+    },
+    "debian": "stretch",
+    "debianSuites": [
+      "buster",
+      "stretch"
+    ],
+    "major": 9,
+    "sha256": "3d32cd101025a0556813397c69feff3df3d63736adb8adeaf365c522f39f2930",
+    "stretch": {
+      "arches": [
+        "amd64",
+        "i386",
+        "ppc64el"
+      ],
+      "version": "9.6.22-1.pgdg90+1"
+    },
+    "version": "9.6.22"
+  }
+}

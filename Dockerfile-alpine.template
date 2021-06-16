@@ -1,5 +1,4 @@
-# vim:set ft=dockerfile:
-FROM alpine:%%ALPINE-VERSION%%
+FROM alpine:{{ .alpine }}
 
 # 70 is the standard uid/gid for "postgres" in Alpine
 # https://git.alpinelinux.org/aports/tree/main/postgresql/postgresql.pre-install?h=3.12-stable
@@ -17,9 +16,9 @@ ENV LANG en_US.utf8
 
 RUN mkdir /docker-entrypoint-initdb.d
 
-ENV PG_MAJOR %%PG_MAJOR%%
-ENV PG_VERSION %%PG_VERSION%%
-ENV PG_SHA256 %%PG_SHA256%%
+ENV PG_MAJOR {{ env.version }}
+ENV PG_VERSION {{ .version }}
+ENV PG_SHA256 {{ .sha256 }}
 
 RUN set -eux; \
 	\
@@ -46,7 +45,9 @@ RUN set -eux; \
 		libxml2-dev \
 		libxslt-dev \
 		linux-headers \
+{{ if .major >= 11 then ( -}}
 		llvm11-dev clang g++ \
+{{ ) else "" end -}}
 		make \
 #		openldap-dev \
 		openssl-dev \
@@ -60,7 +61,10 @@ RUN set -eux; \
 #		tcl-dev \
 		util-linux-dev \
 		zlib-dev \
+{{ if .major >= 10 then ( -}}
+# https://www.postgresql.org/docs/10/static/release-10.html#id-1.11.6.9.5.13
 		icu-dev \
+{{ ) else "" end -}}
 	; \
 	\
 	cd /usr/src/postgresql; \
@@ -104,8 +108,12 @@ RUN set -eux; \
 		--with-openssl \
 		--with-libxml \
 		--with-libxslt \
+{{ if .major >= 10 then ( -}}
 		--with-icu \
+{{ ) else "" end -}}
+{{ if .major >= 11 then ( -}}
 		--with-llvm \
+{{ ) else "" end -}}
 	; \
 	make -j "$(nproc)" world; \
 	make install-world; \
@@ -136,7 +144,10 @@ RUN set -eux; \
 	postgres --version
 
 # make the sample config easier to munge (and "correct by default")
-RUN sed -ri "s!^#?(listen_addresses)\s*=\s*\S+.*!\1 = '*'!" /usr/local/share/postgresql/postgresql.conf.sample
+RUN set -eux; \
+	cp -v /usr/local/share/postgresql/postgresql.conf.sample /usr/local/share/postgresql/postgresql.conf.sample.orig; \
+	sed -ri "s!^#?(listen_addresses)\s*=\s*\S+.*!\1 = '*'!" /usr/local/share/postgresql/postgresql.conf.sample; \
+	grep -F "listen_addresses = '*'" /usr/local/share/postgresql/postgresql.conf.sample
 
 RUN mkdir -p /var/run/postgresql && chown -R postgres:postgres /var/run/postgresql && chmod 2777 /var/run/postgresql
 
@@ -146,7 +157,9 @@ RUN mkdir -p "$PGDATA" && chown -R postgres:postgres "$PGDATA" && chmod 777 "$PG
 VOLUME /var/lib/postgresql/data
 
 COPY docker-entrypoint.sh /usr/local/bin/
+{{ if .major >= 11 then "" else ( -}}
 RUN ln -s usr/local/bin/docker-entrypoint.sh / # backwards compat
+{{ ) end -}}
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 # We set the default STOPSIGNAL to SIGINT, which corresponds to what PostgreSQL
