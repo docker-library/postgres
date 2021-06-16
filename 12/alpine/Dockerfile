@@ -1,5 +1,5 @@
 # vim:set ft=dockerfile:
-FROM alpine:3.13
+FROM alpine:3.14
 
 # 70 is the standard uid/gid for "postgres" in Alpine
 # https://git.alpinelinux.org/aports/tree/main/postgresql/postgresql.pre-install?h=3.12-stable
@@ -46,7 +46,7 @@ RUN set -eux; \
 		libxml2-dev \
 		libxslt-dev \
 		linux-headers \
-		llvm10-dev clang g++ \
+		llvm11-dev clang g++ \
 		make \
 #		openldap-dev \
 		openssl-dev \
