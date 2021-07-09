@@ -1,4 +1,10 @@
-FROM alpine:{{ .alpine }}
+#
+# NOTE: THIS DOCKERFILE IS GENERATED VIA "apply-templates.sh"
+#
+# PLEASE DO NOT EDIT IT DIRECTLY.
+#
+
+FROM alpine:3.14
 
 # 70 is the standard uid/gid for "postgres" in Alpine
 # https://git.alpinelinux.org/aports/tree/main/postgresql/postgresql.pre-install?h=3.12-stable
@@ -16,9 +22,9 @@ ENV LANG en_US.utf8
 
 RUN mkdir /docker-entrypoint-initdb.d
 
-ENV PG_MAJOR {{ env.version }}
-ENV PG_VERSION {{ .version }}
-ENV PG_SHA256 {{ .sha256 }}
+ENV PG_MAJOR 14
+ENV PG_VERSION 14beta2
+ENV PG_SHA256 ffe64a76f50a2363443c1c9dc2195138933e931e351b74fb35a7935eae7c60a5
 
 RUN set -eux; \
 	\
@@ -45,9 +51,7 @@ RUN set -eux; \
 		libxml2-dev \
 		libxslt-dev \
 		linux-headers \
-{{ if .major >= 11 then ( -}}
 		llvm11-dev clang g++ \
-{{ ) else "" end -}}
 		make \
 #		openldap-dev \
 		openssl-dev \
@@ -61,14 +65,10 @@ RUN set -eux; \
 #		tcl-dev \
 		util-linux-dev \
 		zlib-dev \
-{{ if .major >= 10 then ( -}}
 # https://www.postgresql.org/docs/10/static/release-10.html#id-1.11.6.9.5.13
 		icu-dev \
-{{ ) else "" end -}}
-{{ if .major >= 14 then ( -}}
 # https://www.postgresql.org/docs/14/release-14.html#id-1.11.6.5.5.3.7
 		lz4-dev \
-{{ ) else "" end -}}
 	; \
 	\
 	cd /usr/src/postgresql; \
@@ -112,15 +112,9 @@ RUN set -eux; \
 		--with-openssl \
 		--with-libxml \
 		--with-libxslt \
-{{ if .major >= 10 then ( -}}
 		--with-icu \
-{{ ) else "" end -}}
-{{ if .major >= 11 then ( -}}
 		--with-llvm \
-{{ ) else "" end -}}
-{{ if .major >= 14 then ( -}}
 		--with-lz4 \
-{{ ) else "" end -}}
 	; \
 	make -j "$(nproc)" world; \
 	make install-world; \
@@ -164,9 +158,6 @@ RUN mkdir -p "$PGDATA" && chown -R postgres:postgres "$PGDATA" && chmod 777 "$PG
 VOLUME /var/lib/postgresql/data
 
 COPY docker-entrypoint.sh /usr/local/bin/
-{{ if .major >= 11 then "" else ( -}}
-RUN ln -s usr/local/bin/docker-entrypoint.sh / # backwards compat
-{{ ) end -}}
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 # We set the default STOPSIGNAL to SIGINT, which corresponds to what PostgreSQL

@@ -93,6 +93,25 @@
     "sha256": "3cd9454fa8c7a6255b6743b767700925ead1b9ab0d7a0f9dcb1151010f8eb4a1",
     "version": "13.3"
   },
+  "14": {
+    "alpine": "3.14",
+    "buster": {
+      "arches": [
+        "amd64",
+        "arm64",
+        "i386",
+        "ppc64el"
+      ],
+      "version": "14~beta2-1.pgdg100+1"
+    },
+    "debian": "buster",
+    "debianSuites": [
+      "buster"
+    ],
+    "major": 14,
+    "sha256": "ffe64a76f50a2363443c1c9dc2195138933e931e351b74fb35a7935eae7c60a5",
+    "version": "14beta2"
+  },
   "9.6": {
     "alpine": "3.14",
     "buster": {
