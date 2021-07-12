@@ -83,20 +83,18 @@ for version; do
 	debian="$(jq -r '.[env.version].debian' versions.json)"
 
 	fullVersion="$(jq -r '.[env.version].version' versions.json)"
-	origVersion="$fullVersion"
 
-	versionAliases=()
-	while [ "$fullVersion" != "$version" -a "${fullVersion%[.-]*}" != "$fullVersion" ]; do
-		versionAliases+=( $fullVersion )
-		fullVersion="${fullVersion%[.-]*}"
-	done
+	# ex: 9.6.22, 13.3, or 14beta2
+	versionAliases=(
+		$fullVersion
+	)
 	# skip unadorned "version" on prereleases: https://www.postgresql.org/developer/beta/
-	# - https://github.com/docker-library/postgres/issues/662
-	# - https://github.com/docker-library/postgres/issues/784
-	case "$origVersion" in
+	# ex: 9.6, 13, or 14
+	case "$fullVersion" in
 		*alpha* | *beta* | *rc*) ;;
 		*) versionAliases+=( $version ) ;;
 	esac
+	# ex: 9 or latest
 	versionAliases+=(
 		${aliases[$version]:-}
 	)
