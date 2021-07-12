@@ -111,12 +111,19 @@ for version; do
 		variantAliases=( "${versionAliases[@]/%/-$variant}" )
 		variantAliases=( "${variantAliases[@]//latest-/}" )
 
-		if [ "$variant" = "$debian" ]; then
-			variantAliases=(
-				"${versionAliases[@]}"
-				"${variantAliases[@]}"
-			)
-		fi
+		case "$variant" in
+			"$debian")
+				variantAliases=(
+					"${versionAliases[@]}"
+					"${variantAliases[@]}"
+				)
+				;;
+			alpine)
+				alpine="alpine${parent#*:}"
+				variantAliases+=( "${versionAliases[@]/%/-$alpine}" )
+				variantAliases=( "${variantAliases[@]//latest-/}" )
+				;;
+		esac
 
 		echo
 		cat <<-EOE
