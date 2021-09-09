@@ -37,6 +37,8 @@ for version; do
 	variants="$(jq -r '.[env.version].debianSuites + ["alpine"] | map(@sh) | join(" ")' versions.json)"
 	eval "variants=( $variants )"
 
+	rm -rf "$version"
+
 	for variant in "${variants[@]}"; do
 		export variant
 

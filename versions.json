@@ -1,18 +1,17 @@
 {
   "10": {
     "alpine": "3.14",
-    "buster": {
+    "bullseye": {
       "arches": [
         "amd64",
         "arm64",
-        "i386",
         "ppc64el"
       ],
-      "version": "10.18-1.pgdg100+1"
+      "version": "10.18-1.pgdg110+1"
     },
     "debian": "stretch",
     "debianSuites": [
-      "buster",
+      "bullseye",
       "stretch"
     ],
     "major": 10,
@@ -29,18 +28,17 @@
   },
   "11": {
     "alpine": "3.14",
-    "buster": {
+    "bullseye": {
       "arches": [
         "amd64",
         "arm64",
-        "i386",
         "ppc64el"
       ],
-      "version": "11.13-1.pgdg100+1"
+      "version": "11.13-1.pgdg110+1"
     },
     "debian": "stretch",
     "debianSuites": [
-      "buster",
+      "bullseye",
       "stretch"
     ],
     "major": 11,
@@ -57,18 +55,17 @@
   },
   "12": {
     "alpine": "3.14",
-    "buster": {
+    "bullseye": {
       "arches": [
         "amd64",
         "arm64",
-        "i386",
         "ppc64el"
       ],
-      "version": "12.8-1.pgdg100+1"
+      "version": "12.8-1.pgdg110+1"
     },
-    "debian": "buster",
+    "debian": "bullseye",
     "debianSuites": [
-      "buster"
+      "bullseye"
     ],
     "major": 12,
     "sha256": "e26401e090c34ccb15ffb33a111f340833833535a7b7c5cd11cd88ab57d9c62a",
@@ -76,18 +73,17 @@
   },
   "13": {
     "alpine": "3.14",
-    "buster": {
+    "bullseye": {
       "arches": [
         "amd64",
         "arm64",
-        "i386",
         "ppc64el"
       ],
-      "version": "13.4-1.pgdg100+1"
+      "version": "13.4-1.pgdg110+1"
     },
-    "debian": "buster",
+    "debian": "bullseye",
     "debianSuites": [
-      "buster"
+      "bullseye"
     ],
     "major": 13,
     "sha256": "ea93e10390245f1ce461a54eb5f99a48d8cabd3a08ce4d652ec2169a357bc0cd",
@@ -95,18 +91,17 @@
   },
   "14": {
     "alpine": "3.14",
-    "buster": {
+    "bullseye": {
       "arches": [
         "amd64",
         "arm64",
-        "i386",
         "ppc64el"
       ],
-      "version": "14~beta3-1.pgdg100+1"
+      "version": "14~beta3-1.pgdg110+1"
     },
-    "debian": "buster",
+    "debian": "bullseye",
     "debianSuites": [
-      "buster"
+      "bullseye"
     ],
     "major": 14,
     "sha256": "2ea265980193db70106576201a2fee5b2d72bf9890d3911ddd374d4830624bfa",
@@ -114,18 +109,17 @@
   },
   "9.6": {
     "alpine": "3.14",
-    "buster": {
+    "bullseye": {
       "arches": [
         "amd64",
         "arm64",
-        "i386",
         "ppc64el"
       ],
-      "version": "9.6.23-1.pgdg100+1"
+      "version": "9.6.23-1.pgdg110+1"
     },
     "debian": "stretch",
     "debianSuites": [
-      "buster",
+      "bullseye",
       "stretch"
     ],
     "major": 9,
