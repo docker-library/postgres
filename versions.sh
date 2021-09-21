@@ -2,14 +2,14 @@
 set -Eeuo pipefail
 
 # https://github.com/docker-library/postgres/issues/582 😬
-defaultDebianSuite='buster'
+defaultDebianSuite='bullseye'
 declare -A debianSuites=(
 	[9.6]='stretch'
 	[10]='stretch'
 	[11]='stretch'
 )
 allDebianSuites=(
-	buster
+	bullseye
 	stretch
 )
 defaultAlpineVersion='3.14'
@@ -89,7 +89,7 @@ for version in "${versions[@]}"; do
 	for suite in "${allDebianSuites[@]}"; do
 		versionDebianSuites+=( "$suite" )
 		if [ "$suite" = "$versionDebianSuite" ]; then
-			# if our default is "buster" we shouldn't even consider "stretch"
+			# if our default is newer than stretch we shouldn't even consider providing stretch
 			break
 		fi
 	done
