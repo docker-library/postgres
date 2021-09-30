@@ -79,7 +79,7 @@
         "arm64",
         "ppc64el"
       ],
-      "version": "13.4-1.pgdg110+1"
+      "version": "13.4-4.pgdg110+1"
     },
     "debian": "bullseye",
     "debianSuites": [
