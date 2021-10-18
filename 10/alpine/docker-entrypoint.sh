@@ -220,8 +220,7 @@ docker_setup_env() {
 	file_env 'POSTGRES_USER' 'postgres'
 	file_env 'POSTGRES_DB' "$POSTGRES_USER"
 	file_env 'POSTGRES_INITDB_ARGS'
-	# default authentication method is md5
-	: "${POSTGRES_HOST_AUTH_METHOD:=md5}"
+	: "${POSTGRES_HOST_AUTH_METHOD:=}"
 
 	declare -g DATABASE_ALREADY_EXISTS
 	# look specifically for PG_VERSION, as it is expected in the DB dir
@@ -231,7 +230,21 @@ docker_setup_env() {
 }
 
 # append POSTGRES_HOST_AUTH_METHOD to pg_hba.conf for "host" connections
+# all arguments will be passed along as arguments to `postgres` for getting the value of 'password_encryption'
 pg_setup_hba_conf() {
+	# default authentication method is md5 on versions before 14
+	# https://www.postgresql.org/about/news/postgresql-14-released-2318/
+	if [ "$1" = 'postgres' ]; then
+		shift
+	fi
+	local auth
+	# check the default/configured encryption and use that as the auth method
+	auth="$(postgres -C password_encryption "$@")"
+	# postgres 9 only reports "on" and not "md5"
+	if [ "$auth" = 'on' ]; then
+		auth='md5'
+	fi
+	: "${POSTGRES_HOST_AUTH_METHOD:=$auth}"
 	{
 		echo
 		if [ 'trust' = "$POSTGRES_HOST_AUTH_METHOD" ]; then
@@ -305,7 +318,7 @@ _main() {
 			ls /docker-entrypoint-initdb.d/ > /dev/null
 
 			docker_init_database_dir
-			pg_setup_hba_conf
+			pg_setup_hba_conf "$@"
 
 			# PGPASSWORD is required for psql when authentication is required for 'local' connections via pg_hba.conf and is otherwise harmless
 			# e.g. when '--auth=md5' or '--auth-local=md5' is used in POSTGRES_INITDB_ARGS
