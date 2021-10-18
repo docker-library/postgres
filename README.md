@@ -1,26 +1,36 @@
-# https://github.com/docker-library/postgres
+# OpenSQL-PostgreSQL
 
-## Maintained by: [the PostgreSQL Docker Community](https://github.com/docker-library/postgres)
+Dockerfile source for postgresql docker image originated from [docker library](https://github.com/docker-library/postgres).
 
-This is the Git repo of the [Docker "Official Image"](https://github.com/docker-library/official-images#what-are-official-images) for [`postgres`](https://hub.docker.com/_/postgres/) (not to be confused with any official `postgres` image provided by `postgres` upstream). See [the Docker Hub page](https://hub.docker.com/_/postgres/) for the full readme on how to use this Docker image and for information regarding contributing and issues.
+## How to use 
 
-The [full image description on Docker Hub](https://hub.docker.com/_/postgres/) is generated/maintained over in [the docker-library/docs repository](https://github.com/docker-library/docs), specifically in [the `postgres` directory](https://github.com/docker-library/docs/tree/master/postgres).
+``` shell
+$ docker run --name some-postgres -e POSTGRES_PASSWORD=mysecretpassword -d postgres
+```
 
-## See a change merged here that doesn't show up on Docker Hub yet?
+The default postgres user and database are created in the entrypoint with initdb. The only required environment variable is `POSTGRES_PASSWORD`, the rest are optional.
 
-For more information about the full official images change lifecycle, see [the "An image's source changed in Git, now what?" FAQ entry](https://github.com/docker-library/faq#an-images-source-changed-in-git-now-what).
+### Environment Variables
 
-For outstanding `postgres` image PRs, check [PRs with the "library/postgres" label on the official-images repository](https://github.com/docker-library/official-images/labels/library%2Fpostgres). For the current "source of truth" for [`postgres`](https://hub.docker.com/_/postgres/), see [the `library/postgres` file in the official-images repository](https://github.com/docker-library/official-images/blob/master/library/postgres).
+| **Variable** | **Short Description** |
+|:-------------|:----------------|
+| POSTGRES_PASSWORD | The password for the superuser. It must not be empty or undefined. |
+| POSTGRES_USER | (Optional) Creates user with superuser power and a database with the same name. Default value is `postgres`. |
+| POSTGRES_DB | (Optional) Defines the name of the default database to be created. Default value is same as `POSTGRES_USER`. |
+| POSTGRES_INITDB_ARGS | (Optional) Specifies arguments to send to `postgres initdb`. For example. `--data-checksums --encoding=UTF8`. |
+| POSTGRES_INITDB_WALDIR | (Optional) Defines a location for the Postgres transaction log. Default value is a subdirectory of the main Postgres data folder (`PGDATA`). |
+| POSTGRES_HOST_AUTH_METHOD | (Optional) Defines `auth-method` for host connections for all databases, all users, and all addresses. Default value is md5 passsword authentication. |
+| PGDATA | (Optional) Defines the directory location of the database files. Defaults value is `/var/lib/postgresql/data`. |
 
----
+**PGDATA**
 
--	[![build status badge](https://img.shields.io/github/workflow/status/docker-library/postgres/GitHub%20CI/master?label=GitHub%20CI)](https://github.com/docker-library/postgres/actions?query=workflow%3A%22GitHub+CI%22+branch%3Amaster)
--	[![build status badge](https://img.shields.io/jenkins/s/https/doi-janky.infosiftr.net/job/update.sh/job/postgres.svg?label=Automated%20update.sh)](https://doi-janky.infosiftr.net/job/update.sh/job/postgres/)
+If the data volume you're using is a filesystem mountpoint (like with GCE persistent disks) or remote folder that cannot be chowned to the postgres user (like some NFS mounts), Postgres initdb recommends a subdirectory be created to contain the data.
 
-| Build | Status | Badges | (per-arch) |
-|:-:|:-:|:-:|:-:|
-| [![amd64 build status badge](https://img.shields.io/jenkins/s/https/doi-janky.infosiftr.net/job/multiarch/job/amd64/job/postgres.svg?label=amd64)](https://doi-janky.infosiftr.net/job/multiarch/job/amd64/job/postgres/) | [![arm32v5 build status badge](https://img.shields.io/jenkins/s/https/doi-janky.infosiftr.net/job/multiarch/job/arm32v5/job/postgres.svg?label=arm32v5)](https://doi-janky.infosiftr.net/job/multiarch/job/arm32v5/job/postgres/) | [![arm32v6 build status badge](https://img.shields.io/jenkins/s/https/doi-janky.infosiftr.net/job/multiarch/job/arm32v6/job/postgres.svg?label=arm32v6)](https://doi-janky.infosiftr.net/job/multiarch/job/arm32v6/job/postgres/) | [![arm32v7 build status badge](https://img.shields.io/jenkins/s/https/doi-janky.infosiftr.net/job/multiarch/job/arm32v7/job/postgres.svg?label=arm32v7)](https://doi-janky.infosiftr.net/job/multiarch/job/arm32v7/job/postgres/) |
-| [![arm64v8 build status badge](https://img.shields.io/jenkins/s/https/doi-janky.infosiftr.net/job/multiarch/job/arm64v8/job/postgres.svg?label=arm64v8)](https://doi-janky.infosiftr.net/job/multiarch/job/arm64v8/job/postgres/) | [![i386 build status badge](https://img.shields.io/jenkins/s/https/doi-janky.infosiftr.net/job/multiarch/job/i386/job/postgres.svg?label=i386)](https://doi-janky.infosiftr.net/job/multiarch/job/i386/job/postgres/) | [![mips64le build status badge](https://img.shields.io/jenkins/s/https/doi-janky.infosiftr.net/job/multiarch/job/mips64le/job/postgres.svg?label=mips64le)](https://doi-janky.infosiftr.net/job/multiarch/job/mips64le/job/postgres/) | [![ppc64le build status badge](https://img.shields.io/jenkins/s/https/doi-janky.infosiftr.net/job/multiarch/job/ppc64le/job/postgres.svg?label=ppc64le)](https://doi-janky.infosiftr.net/job/multiarch/job/ppc64le/job/postgres/) |
-| [![s390x build status badge](https://img.shields.io/jenkins/s/https/doi-janky.infosiftr.net/job/multiarch/job/s390x/job/postgres.svg?label=s390x)](https://doi-janky.infosiftr.net/job/multiarch/job/s390x/job/postgres/) | [![put-shared build status badge](https://img.shields.io/jenkins/s/https/doi-janky.infosiftr.net/job/put-shared/job/light/job/postgres.svg?label=put-shared)](https://doi-janky.infosiftr.net/job/put-shared/job/light/job/postgres/) |
-
-<!-- THIS FILE IS GENERATED BY https://github.com/docker-library/docs/blob/master/generate-repo-stub-readme.sh -->
+``` shell
+$ docker run -d \
+    --name some-postgres \
+    -e POSTGRES_PASSWORD=mysecretpassword \
+    -e PGDATA=/var/lib/postgresql/data/pgdata \
+    -v /custom/mount:/var/lib/postgresql/data \
+    postgres
+```
