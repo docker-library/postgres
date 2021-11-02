@@ -8,8 +8,6 @@ RUN set -eux; \
 	mkdir -p /var/lib/postgresql; \
 	chown -R postgres:postgres /var/lib/postgresql
 
-# su-exec (gosu-compatible) is installed further down
-
 # make the "en_US.UTF-8" locale so postgres will be utf-8 enabled by default
 # alpine doesn't require explicit locale-file generation
 ENV LANG en_US.utf8

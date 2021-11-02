@@ -61,8 +61,5 @@ for version; do
 		if [ "$major" = '9' ]; then
 			sed -i -e 's/WALDIR/XLOGDIR/g' -e 's/waldir/xlogdir/g' "$dir/docker-entrypoint.sh"
 		fi
-		if [ "$variant" = 'alpine' ]; then
-			sed -i -e 's/gosu/su-exec/g' "$dir/docker-entrypoint.sh"
-		fi
 	done
 done

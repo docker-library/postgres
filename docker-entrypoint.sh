@@ -32,6 +32,14 @@ _is_sourced() {
 		&& [ "${FUNCNAME[1]}" = 'source' ]
 }
 
+_su_tool() {
+	local cmd=
+    : "${cmd:="$(command -v su-exec)"}"
+    : "${cmd:="$(command -v gosu)"}"
+    : "${cmd:?"did not find a suitable tool for user substitution"}"
+	echo "$cmd"
+}
+
 # used to create initial postgres directories and if run as root, ensure ownership to the "postgres" user
 docker_create_db_directories() {
 	local user; user="$(id -u)"
@@ -307,7 +315,7 @@ _main() {
 		docker_create_db_directories
 		if [ "$(id -u)" = '0' ]; then
 			# then restart script as postgres user
-			exec gosu postgres "$BASH_SOURCE" "$@"
+			exec $(_su_tool) postgres "$BASH_SOURCE" "$@"
 		fi
 
 		# only run initialization on an empty data directory
