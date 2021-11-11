@@ -7,7 +7,7 @@
         "arm64",
         "ppc64el"
       ],
-      "version": "10.18-1.pgdg110+1"
+      "version": "10.19-1.pgdg110+1"
     },
     "debian": "stretch",
     "debianSuites": [
@@ -15,16 +15,16 @@
       "stretch"
     ],
     "major": 10,
-    "sha256": "57477c2edc82c3f86a74747707b3babc1f301f389315ae14e819e025c0ba3801",
+    "sha256": "6eb830b428b60e84ae87e20436bce679c4d9d0202be7aec0e41b0c67d9134239",
     "stretch": {
       "arches": [
         "amd64",
         "i386",
         "ppc64el"
       ],
-      "version": "10.18-1.pgdg90+1"
+      "version": "10.19-1.pgdg90+1"
     },
-    "version": "10.18"
+    "version": "10.19"
   },
   "11": {
     "alpine": "3.14",
