@@ -45,7 +45,7 @@ RUN set -eux; \
 		dpkg-dev dpkg \
 		flex \
 		gcc \
-#		krb5-dev \
+		krb5-dev \
 		libc-dev \
 		libedit-dev \
 		libxml2-dev \
@@ -53,7 +53,7 @@ RUN set -eux; \
 		linux-headers \
 		llvm11-dev clang g++ \
 		make \
-#		openldap-dev \
+		openldap-dev \
 		openssl-dev \
 # configure: error: prove not found
 		perl-utils \
@@ -97,9 +97,9 @@ RUN set -eux; \
 		--prefix=/usr/local \
 		--with-includes=/usr/local/include \
 		--with-libraries=/usr/local/lib \
-#		--with-krb5 \
-#		--with-gssapi \
-#		--with-ldap \
+		--with-krb5 \
+		--with-gssapi \
+		--with-ldap \
 		--with-tcl \
 		--with-perl \
 		--with-python \
