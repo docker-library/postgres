@@ -45,23 +45,22 @@ RUN set -eux; \
 		dpkg-dev dpkg \
 		flex \
 		gcc \
-#		krb5-dev \
+		krb5-dev \
 		libc-dev \
 		libedit-dev \
 		libxml2-dev \
 		libxslt-dev \
 		linux-headers \
 		make \
-#		openldap-dev \
+		openldap-dev \
 		openssl-dev \
 # configure: error: prove not found
 		perl-utils \
 # configure: error: Perl module IPC::Run is required to run TAP tests
 		perl-ipc-run \
-#		perl-dev \
-#		python-dev \
-#		python3-dev \
-#		tcl-dev \
+		perl-dev \
+		python3-dev \
+		tcl-dev \
 		util-linux-dev \
 		zlib-dev \
 # https://www.postgresql.org/docs/10/static/release-10.html#id-1.11.6.9.5.13
@@ -97,14 +96,12 @@ RUN set -eux; \
 		--prefix=/usr/local \
 		--with-includes=/usr/local/include \
 		--with-libraries=/usr/local/lib \
-		\
-# these make our image abnormally large (at least 100MB larger), which seems uncouth for an "Alpine" (ie, "small") variant :)
-#		--with-krb5 \
-#		--with-gssapi \
-#		--with-ldap \
-#		--with-tcl \
-#		--with-perl \
-#		--with-python \
+		--with-krb5 \
+		--with-gssapi \
+		--with-ldap \
+		--with-tcl \
+		--with-perl \
+		--with-python \
 #		--with-pam \
 		--with-openssl \
 		--with-libxml \
@@ -120,6 +117,9 @@ RUN set -eux; \
 			| tr ',' '\n' \
 			| sort -u \
 			| awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
+# Remove plperl, plpython and pltcl dependencies by default to save image size
+# To use the pl extensions, those have to be installed in a derived image
+			| grep -v -e perl -e python -e tcl \
 	)"; \
 	apk add --no-cache --virtual .postgresql-rundeps \
 		$runDeps \
