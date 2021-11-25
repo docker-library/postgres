@@ -46,7 +46,7 @@ RUN set -eux; \
 		libxslt-dev \
 		linux-headers \
 {{ if .major >= 11 then ( -}}
-		llvm11-dev clang g++ \
+		llvm-dev clang g++ \
 {{ ) else "" end -}}
 		make \
 		openldap-dev \

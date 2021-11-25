@@ -12,7 +12,7 @@ allDebianSuites=(
 	bullseye
 	stretch
 )
-defaultAlpineVersion='3.14'
+defaultAlpineVersion='3.15'
 declare -A alpineVersions=(
 	#[9.6]='3.5'
 )
