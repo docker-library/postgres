@@ -192,7 +192,7 @@ docker_process_sql() {
 		query_runner+=( --dbname "$POSTGRES_DB" )
 	fi
 
-	PGHOST= PGHOSTADDR= "${query_runner[@]}" "$@"
+	PGHOST= PGPORT="${PGINITPORT:-65432}" PGHOSTADDR= "${query_runner[@]}" "$@"
 }
 
 # create initial database
@@ -264,7 +264,7 @@ docker_temp_server_start() {
 
 	# internal start of server in order to allow setup using psql client
 	# does not listen on external TCP/IP and waits until start finishes
-	set -- "$@" -c listen_addresses='' -p "${PGPORT:-5432}"
+	set -- "$@" -c listen_addresses='' -p "${PGINITPORT:-65432}"
 
 	PGUSER="${PGUSER:-$POSTGRES_USER}" \
 	pg_ctl -D "$PGDATA" \
