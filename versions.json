@@ -34,7 +34,7 @@
         "arm64",
         "ppc64el"
       ],
-      "version": "11.14-1.pgdg110+1"
+      "version": "11.15-1.pgdg110+1"
     },
     "debian": "stretch",
     "debianSuites": [
@@ -42,16 +42,16 @@
       "stretch"
     ],
     "major": 11,
-    "sha256": "965c7f4be96fb64f9581852c58c4f05c3812d4ad823c0f3e2bdfe777c162f999",
+    "sha256": "c8f58e8ebd4f4567f4f9ba1032eb3e99e0251d87cbe3e564b485590e37a879e3",
     "stretch": {
       "arches": [
         "amd64",
         "i386",
         "ppc64el"
       ],
-      "version": "11.14-1.pgdg90+1"
+      "version": "11.15-1.pgdg90+1"
     },
-    "version": "11.14"
+    "version": "11.15"
   },
   "12": {
     "alpine": "3.15",
