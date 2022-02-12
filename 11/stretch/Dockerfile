@@ -110,13 +110,16 @@ RUN set -ex; \
 # let's build binaries from their published source packages
 			echo "deb-src $aptRepo" > /etc/apt/sources.list.d/pgdg.list; \
 			\
+			savedAptMark="$(apt-mark showmanual)"; \
+			\
 # https://github.com/docker-library/postgres/issues/484 (clang-6.0 required, only available in stretch-backports)
 			echo 'deb http://deb.debian.org/debian stretch-backports main' >> /etc/apt/sources.list.d/pgdg.list; \
+# ... and thanks to https://salsa.debian.org/postgresql/postgresql/-/commit/e914bb060a9b58dae661f1c3439de5ffe4ba62d0 it doesn't get pulled in automatically any more (but if we install it manually it gets used by the build appropriately 🙈)
+			apt-get update; \
+			apt-get install -y --no-install-recommends clang-6.0; \
 			\
 			tempDir="$(mktemp -d)"; \
 			cd "$tempDir"; \
-			\
-			savedAptMark="$(apt-mark showmanual)"; \
 			\
 # create a temporary local APT repo to install from (so that dependency resolution can be handled by APT, as it should be)
 			apt-get update; \

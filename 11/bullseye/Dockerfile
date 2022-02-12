@@ -110,10 +110,10 @@ RUN set -ex; \
 # let's build binaries from their published source packages
 			echo "deb-src $aptRepo" > /etc/apt/sources.list.d/pgdg.list; \
 			\
+			savedAptMark="$(apt-mark showmanual)"; \
+			\
 			tempDir="$(mktemp -d)"; \
 			cd "$tempDir"; \
-			\
-			savedAptMark="$(apt-mark showmanual)"; \
 			\
 # create a temporary local APT repo to install from (so that dependency resolution can be handled by APT, as it should be)
 			apt-get update; \
