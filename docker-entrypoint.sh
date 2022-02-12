@@ -240,10 +240,6 @@ pg_setup_hba_conf() {
 	local auth
 	# check the default/configured encryption and use that as the auth method
 	auth="$(postgres -C password_encryption "$@")"
-	# postgres 9 only reports "on" and not "md5"
-	if [ "$auth" = 'on' ]; then
-		auth='md5'
-	fi
 	: "${POSTGRES_HOST_AUTH_METHOD:=$auth}"
 	{
 		echo

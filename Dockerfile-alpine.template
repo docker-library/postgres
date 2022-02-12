@@ -60,10 +60,8 @@ RUN set -eux; \
 		tcl-dev \
 		util-linux-dev \
 		zlib-dev \
-{{ if .major >= 10 then ( -}}
 # https://www.postgresql.org/docs/10/static/release-10.html#id-1.11.6.9.5.13
 		icu-dev \
-{{ ) else "" end -}}
 {{ if .major >= 14 then ( -}}
 # https://www.postgresql.org/docs/14/release-14.html#id-1.11.6.5.5.3.7
 		lz4-dev \
@@ -109,9 +107,7 @@ RUN set -eux; \
 		--with-openssl \
 		--with-libxml \
 		--with-libxslt \
-{{ if .major >= 10 then ( -}}
 		--with-icu \
-{{ ) else "" end -}}
 {{ if .major >= 11 then ( -}}
 		--with-llvm \
 {{ ) else "" end -}}

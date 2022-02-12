@@ -106,32 +106,5 @@
     "major": 14,
     "sha256": "2cf78b2e468912f8101d695db5340cf313c2e9f68a612fb71427524e8c9a977a",
     "version": "14.2"
-  },
-  "9.6": {
-    "alpine": "3.15",
-    "bullseye": {
-      "arches": [
-        "amd64",
-        "arm64",
-        "ppc64el"
-      ],
-      "version": "9.6.24-1.pgdg110+1"
-    },
-    "debian": "stretch",
-    "debianSuites": [
-      "bullseye",
-      "stretch"
-    ],
-    "major": 9,
-    "sha256": "aeb7a196be3ebed1a7476ef565f39722187c108dd47da7489be9c4fcae982ace",
-    "stretch": {
-      "arches": [
-        "amd64",
-        "i386",
-        "ppc64el"
-      ],
-      "version": "9.6.24-1.pgdg90+1"
-    },
-    "version": "9.6.24"
   }
 }
