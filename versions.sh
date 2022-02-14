@@ -4,7 +4,6 @@ set -Eeuo pipefail
 # https://github.com/docker-library/postgres/issues/582 😬
 defaultDebianSuite='bullseye'
 declare -A debianSuites=(
-	[9.6]='stretch'
 	[10]='stretch'
 	[11]='stretch'
 )
@@ -14,7 +13,7 @@ allDebianSuites=(
 )
 defaultAlpineVersion='3.15'
 declare -A alpineVersions=(
-	#[9.6]='3.5'
+	#[14]='3.15'
 )
 
 cd "$(dirname "$(readlink -f "$BASH_SOURCE")")"
