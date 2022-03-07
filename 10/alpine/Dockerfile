@@ -54,15 +54,14 @@ RUN set -eux; \
 		make \
 		openldap-dev \
 		openssl-dev \
-# configure: error: prove not found
-		perl-utils \
-# configure: error: Perl module IPC::Run is required to run TAP tests
-		perl-ipc-run \
 		perl-dev \
+		perl-ipc-run \
+		perl-utils \
 		python3-dev \
 		tcl-dev \
 		util-linux-dev \
 		zlib-dev \
+		zstd \
 # https://www.postgresql.org/docs/10/static/release-10.html#id-1.11.6.9.5.13
 		icu-dev \
 	; \

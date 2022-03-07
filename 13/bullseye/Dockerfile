@@ -64,12 +64,9 @@ ENV LANG en_US.utf8
 RUN set -eux; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends \
-# install "nss_wrapper" in case we need to fake "/etc/passwd" and "/etc/group" (especially for OpenShift)
-# https://github.com/docker-library/postgres/issues/359
-# https://cwrap.org/nss_wrapper.html
 		libnss-wrapper \
-# install "xz-utils" for .sql.xz docker-entrypoint-initdb.d files
 		xz-utils \
+		zstd \
 	; \
 	rm -rf /var/lib/apt/lists/*
 
