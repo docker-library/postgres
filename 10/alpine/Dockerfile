@@ -61,7 +61,6 @@ RUN set -eux; \
 		tcl-dev \
 		util-linux-dev \
 		zlib-dev \
-		zstd \
 # https://www.postgresql.org/docs/10/static/release-10.html#id-1.11.6.9.5.13
 		icu-dev \
 	; \
@@ -127,6 +126,7 @@ RUN set -eux; \
 # tzdata is optional, but only adds around 1Mb to image size and is recommended by Django documentation:
 # https://docs.djangoproject.com/en/1.10/ref/databases/#optimizing-postgresql-s-configuration
 		tzdata \
+		zstd \
 	; \
 	apk del --no-network .build-deps; \
 	cd /; \
