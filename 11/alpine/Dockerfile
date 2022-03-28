@@ -125,8 +125,6 @@ RUN set -eux; \
 		$runDeps \
 		bash \
 		su-exec \
-# tzdata is optional, but only adds around 1Mb to image size and is recommended by Django documentation:
-# https://docs.djangoproject.com/en/1.10/ref/databases/#optimizing-postgresql-s-configuration
 		tzdata \
 		zstd \
 	; \
