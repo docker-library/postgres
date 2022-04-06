@@ -211,6 +211,10 @@ docker_setup_db() {
 		EOSQL
 		echo
 	fi
+
+	if [ -n "${DOCKER_INITDB_EXTRA_SQL:-}" ]; then
+		docker_process_sql <<<"$DOCKER_INITDB_EXTRA_SQL"
+	fi
 }
 
 # Loads various settings that are used elsewhere in the script
