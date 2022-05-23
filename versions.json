@@ -106,5 +106,23 @@
     "major": 14,
     "sha256": "279057368bf59a919c05ada8f95c5e04abb43e74b9a2a69c3d46a20e07a9af38",
     "version": "14.3"
+  },
+  "15": {
+    "alpine": "3.15",
+    "bullseye": {
+      "arches": [
+        "amd64",
+        "arm64",
+        "ppc64el"
+      ],
+      "version": "15~beta1-1.pgdg110+1"
+    },
+    "debian": "bullseye",
+    "debianSuites": [
+      "bullseye"
+    ],
+    "major": 15,
+    "sha256": "5dd8a466fb0c9eca11f10b1275524fc8f38d1699cac6a689780b49eac878f7af",
+    "version": "15beta1"
   }
 }
