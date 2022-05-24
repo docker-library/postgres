@@ -11,9 +11,9 @@ allDebianSuites=(
 	bullseye
 	stretch
 )
-defaultAlpineVersion='3.15'
+defaultAlpineVersion='3.16'
 declare -A alpineVersions=(
-	#[14]='3.15'
+	#[14]='3.16'
 )
 
 cd "$(dirname "$(readlink -f "$BASH_SOURCE")")"
