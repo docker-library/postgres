@@ -127,6 +127,8 @@ RUN set -eux; \
 		su-exec \
 		tzdata \
 		zstd \
+# https://wiki.alpinelinux.org/wiki/Release_Notes_for_Alpine_3.16.0#ICU_data_split
+		icu-data-full \
 	; \
 	apk del --no-network .build-deps; \
 	cd /; \
