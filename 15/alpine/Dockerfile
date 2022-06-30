@@ -66,6 +66,8 @@ RUN set -eux; \
 		icu-dev \
 # https://www.postgresql.org/docs/14/release-14.html#id-1.11.6.5.5.3.7
 		lz4-dev \
+# https://www.postgresql.org/docs/15/release-15.html "--with-zstd to enable Zstandard builds"
+		zstd-dev \
 	; \
 	\
 	cd /usr/src/postgresql; \
@@ -110,6 +112,7 @@ RUN set -eux; \
 		--with-icu \
 		--with-llvm \
 		--with-lz4 \
+		--with-zstd \
 	; \
 	make -j "$(nproc)" world; \
 	make install-world; \
