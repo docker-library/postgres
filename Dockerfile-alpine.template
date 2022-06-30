@@ -64,6 +64,10 @@ RUN set -eux; \
 # https://www.postgresql.org/docs/14/release-14.html#id-1.11.6.5.5.3.7
 		lz4-dev \
 {{ ) else "" end -}}
+{{ if .major >= 15 then ( -}}
+# https://www.postgresql.org/docs/15/release-15.html "--with-zstd to enable Zstandard builds"
+		zstd-dev \
+{{ ) else "" end -}}
 	; \
 	\
 	cd /usr/src/postgresql; \
@@ -111,6 +115,9 @@ RUN set -eux; \
 {{ ) else "" end -}}
 {{ if .major >= 14 then ( -}}
 		--with-lz4 \
+{{ ) else "" end -}}
+{{ if .major >= 15 then ( -}}
+		--with-zstd \
 {{ ) else "" end -}}
 	; \
 	make -j "$(nproc)" world; \
