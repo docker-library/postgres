@@ -9,21 +9,12 @@
       ],
       "version": "10.21-1.pgdg110+1"
     },
-    "debian": "stretch",
+    "debian": "",
     "debianSuites": [
-      "bullseye",
-      "stretch"
+      "bullseye"
     ],
     "major": 10,
     "sha256": "d32198856d52a9a6f5d50642ef86687ac058bd6efca5c9ed57be7808496f45d1",
-    "stretch": {
-      "arches": [
-        "amd64",
-        "i386",
-        "ppc64el"
-      ],
-      "version": "10.21-1.pgdg90+1"
-    },
     "version": "10.21"
   },
   "11": {
@@ -36,21 +27,12 @@
       ],
       "version": "11.16-1.pgdg110+1"
     },
-    "debian": "stretch",
+    "debian": "",
     "debianSuites": [
-      "bullseye",
-      "stretch"
+      "bullseye"
     ],
     "major": 11,
     "sha256": "2dd9e111f0a5949ee7cacc065cea0fb21092929bae310ce05bf01b4ffc5103a5",
-    "stretch": {
-      "arches": [
-        "amd64",
-        "i386",
-        "ppc64el"
-      ],
-      "version": "11.16-1.pgdg90+1"
-    },
     "version": "11.16"
   },
   "12": {
