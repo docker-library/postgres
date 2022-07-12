@@ -336,6 +336,9 @@ _main() {
 			echo 'PostgreSQL Database directory appears to contain a database; Skipping initialization'
 			echo
 		fi
+		docker_temp_server_start "$@"
+		docker_process_init_files /always-initdb.d/*
+		docker_temp_server_stop
 	fi
 
 	exec "$@"
