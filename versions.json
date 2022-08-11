@@ -97,14 +97,14 @@
         "arm64",
         "ppc64el"
       ],
-      "version": "15~beta2-1.pgdg110+1"
+      "version": "15~beta3-1.pgdg110+1"
     },
     "debian": "bullseye",
     "debianSuites": [
       "bullseye"
     ],
     "major": 15,
-    "sha256": "2fedbc58b370f30e5f59fb0dcc8128a2ef9a922b50fa931b442e4fa27ca98830",
-    "version": "15beta2"
+    "sha256": "1a6e2a454b6bcdf76aa4e50573d2fa1ea8db2cdfaa3282a7538830bd285b27bf",
+    "version": "15beta3"
   }
 }
