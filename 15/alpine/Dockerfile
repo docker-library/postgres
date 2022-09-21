@@ -128,8 +128,11 @@ RUN set -eux; \
 			| grep -v -e perl -e python -e tcl \
 	)"; \
 	apk add --no-cache --virtual .postgresql-rundeps \
+		# nss_wrapper is currently only available in testing
+		--repository https://dl-cdn.alpinelinux.org/alpine/edge/testing \
 		$runDeps \
 		bash \
+		nss_wrapper \
 		su-exec \
 		tzdata \
 		zstd \
