@@ -124,6 +124,7 @@ RUN set -eux; \
 	apk add --no-cache --virtual .postgresql-rundeps \
 		$runDeps \
 		bash \
+		nss_wrapper \
 		su-exec \
 		tzdata \
 		zstd \
