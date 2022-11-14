@@ -4,7 +4,6 @@ set -Eeuo pipefail
 # https://github.com/docker-library/postgres/issues/582 😬
 defaultDebianSuite='bullseye'
 declare -A debianSuites=(
-	[10]=''
 	[11]=''
 )
 allDebianSuites=(
