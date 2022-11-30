@@ -9,7 +9,7 @@ declare -A debianSuites=(
 allDebianSuites=(
 	bullseye
 )
-defaultAlpineVersion='3.16'
+defaultAlpineVersion='3.17'
 declare -A alpineVersions=(
 	#[14]='3.16'
 )

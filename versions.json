@@ -1,6 +1,6 @@
 {
   "11": {
-    "alpine": "3.16",
+    "alpine": "3.17",
     "bullseye": {
       "arches": [
         "amd64",
@@ -18,7 +18,7 @@
     "version": "11.18"
   },
   "12": {
-    "alpine": "3.16",
+    "alpine": "3.17",
     "bullseye": {
       "arches": [
         "amd64",
@@ -36,7 +36,7 @@
     "version": "12.13"
   },
   "13": {
-    "alpine": "3.16",
+    "alpine": "3.17",
     "bullseye": {
       "arches": [
         "amd64",
@@ -54,7 +54,7 @@
     "version": "13.9"
   },
   "14": {
-    "alpine": "3.16",
+    "alpine": "3.17",
     "bullseye": {
       "arches": [
         "amd64",
@@ -72,7 +72,7 @@
     "version": "14.6"
   },
   "15": {
-    "alpine": "3.16",
+    "alpine": "3.17",
     "bullseye": {
       "arches": [
         "amd64",
