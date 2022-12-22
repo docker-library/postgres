@@ -136,12 +136,14 @@ RUN set -eux; \
 	apk add --no-cache --virtual .postgresql-rundeps \
 		$runDeps \
 		bash \
-		nss_wrapper \
 		su-exec \
 		tzdata \
 		zstd \
 # https://wiki.alpinelinux.org/wiki/Release_Notes_for_Alpine_3.16.0#ICU_data_split
 		icu-data-full \
+# nss_wrapper is not availble on ppc64le: "test case segfaults in ppc64le"
+# https://git.alpinelinux.org/aports/commit/testing/nss_wrapper/APKBUILD?h=3.17-stable&id=94d81ceeb58cff448d489bbcbe9a6d40c9991663
+		$([ "$(apk --print-arch)" != 'ppc64le' ] && echo 'nss_wrapper') \
 	; \
 	apk del --no-network .build-deps; \
 	cd /; \
