@@ -1,4 +1,4 @@
-FROM alpine:{{ .alpine }}
+FROM alpine
 
 # 70 is the standard uid/gid for "postgres" in Alpine
 # https://git.alpinelinux.org/aports/tree/main/postgresql/postgresql.pre-install?h=3.12-stable
@@ -45,9 +45,11 @@ RUN set -eux; \
 		libxml2-dev \
 		libxslt-dev \
 		linux-headers \
-{{ if .major >= 11 then ( -}}
-		llvm-dev clang g++ \
-{{ ) else "" end -}}
+RUN if [ .major >= 11 ]; then \
+RUN apt-get	install llvm-dev \
+RUN apt-get	install	clang \
+RUN apt-get	install	g++ \
+RUN else [ "" end ]; \
 		make \
 		openldap-dev \
 		openssl-dev \
@@ -60,16 +62,14 @@ RUN set -eux; \
 		zlib-dev \
 # https://www.postgresql.org/docs/10/static/release-10.html#id-1.11.6.9.5.13
 		icu-dev \
-{{ if .major >= 14 then ( -}}
+RUN if [ .major >= 14 ]; then \
 # https://www.postgresql.org/docs/14/release-14.html#id-1.11.6.5.5.3.7
-		lz4-dev \
-{{ ) else "" end -}}
-{{ if .major >= 15 then ( -}}
+apt-get	install	lz4-dev \
+RUN else "" end \
+RUN if [ .major >= 15 ]; then \
 # https://www.postgresql.org/docs/15/release-15.html "--with-zstd to enable Zstandard builds"
-		zstd-dev \
-{{ ) else "" end -}}
-	; \
-	\
+RUN apt-get	install	zstd-dev \
+RUN else [ "" end ]; \
 	cd /usr/src/postgresql; \
 # update "DEFAULT_PGSOCKET_DIR" to "/var/run/postgresql" (matching Debian)
 # see https://anonscm.debian.org/git/pkg-postgresql/postgresql.git/tree/debian/patches/51-default-sockets-in-var.patch?id=8b539fcb3e093a521c095e70bdfa76887217b89f
@@ -110,15 +110,15 @@ RUN set -eux; \
 		--with-libxml \
 		--with-libxslt \
 		--with-icu \
-{{ if .major >= 11 then ( -}}
-		--with-llvm \
-{{ ) else "" end -}}
-{{ if .major >= 14 then ( -}}
-		--with-lz4 \
-{{ ) else "" end -}}
-{{ if .major >= 15 then ( -}}
-		--with-zstd \
-{{ ) else "" end -}}
+RUN if [ .major >= 11 ]; then \
+		--with-llvm; \
+RUN else end \
+RUN if [ .major >= 14 ]; then \
+		--with-lz4; \
+else end \
+RUN if [ .major >= 15 ]; then \
+		--with-zstd; \
+else end ; \
 	; \
 	make -j "$(nproc)" world; \
 	make install-world; \
@@ -151,8 +151,7 @@ RUN set -eux; \
 		/usr/local/share/man \
 	; \
 	\
-	postgres --version
-
+RUN postgres --version \
 # make the sample config easier to munge (and "correct by default")
 RUN set -eux; \
 	cp -v /usr/local/share/postgresql/postgresql.conf.sample /usr/local/share/postgresql/postgresql.conf.sample.orig; \
@@ -167,9 +166,9 @@ RUN mkdir -p "$PGDATA" && chown -R postgres:postgres "$PGDATA" && chmod 777 "$PG
 VOLUME /var/lib/postgresql/data
 
 COPY docker-entrypoint.sh /usr/local/bin/
-{{ if .major >= 11 then "" else ( -}}
+RUN if [ .major >= 11 ]; then \
 RUN ln -s usr/local/bin/docker-entrypoint.sh / # backwards compat
-{{ ) end -}}
+RUN end
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 # We set the default STOPSIGNAL to SIGINT, which corresponds to what PostgreSQL
