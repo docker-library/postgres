@@ -249,8 +249,9 @@ pg_setup_hba_conf() {
 			printf '# warning trust is enabled for all connections\n'
 			printf '# see https://www.postgresql.org/docs/12/auth-trust.html\n'
 		fi
+		printf 'local all all %s\n' "$POSTGRES_HOST_AUTH_METHOD"
 		printf 'host all all all %s\n' "$POSTGRES_HOST_AUTH_METHOD"
-	} >> "$PGDATA/pg_hba.conf"
+	} > "$PGDATA/pg_hba.conf"
 }
 
 # start socket-only postgresql server for setting up or running scripts
