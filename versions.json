@@ -7,15 +7,15 @@
         "arm64",
         "ppc64el"
       ],
-      "version": "11.18-1.pgdg110+1"
+      "version": "11.19-1.pgdg110+1"
     },
     "debian": "",
     "debianSuites": [
       "bullseye"
     ],
     "major": 11,
-    "sha256": "d24f20efc52e918acfbcca21e9cea28e0e263b846a0c408fcfac3b3c4a0f7504",
-    "version": "11.18"
+    "sha256": "13109e2b71f1139405c27201da3733a61ace72ee1c228d9c9f0320e06aee14c2",
+    "version": "11.19"
   },
   "12": {
     "alpine": "3.17",
