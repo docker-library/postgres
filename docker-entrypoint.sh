@@ -207,8 +207,8 @@ docker_setup_db() {
 		EOSQL
 	)"
 	if [ -z "$dbAlreadyExists" ]; then
-		POSTGRES_DB= docker_process_sql --dbname postgres --set db="$POSTGRES_DB" <<-'EOSQL'
-			CREATE DATABASE :"db" ;
+		POSTGRES_DB= docker_process_sql --dbname postgres --set db="$POSTGRES_DB" --set template="${POSTGRES_TEMPLATE-template1}" <<-'EOSQL'
+			CREATE DATABASE :"db" TEMPLATE :"template" ;
 		EOSQL
 		printf '\n'
 	fi
