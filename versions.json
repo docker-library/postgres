@@ -5,7 +5,8 @@
       "arches": [
         "amd64",
         "arm64",
-        "ppc64el"
+        "ppc64el",
+        "s390x"
       ],
       "version": "11.19-1.pgdg110+1"
     },

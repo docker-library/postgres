@@ -97,7 +97,7 @@ RUN set -ex; \
 	dpkgArch="$(dpkg --print-architecture)"; \
 	aptRepo="[ signed-by=/usr/local/share/keyrings/postgres.gpg.asc ] http://apt.postgresql.org/pub/repos/apt/ bullseye-pgdg main $PG_MAJOR"; \
 	case "$dpkgArch" in \
-		amd64 | arm64 | ppc64el) \
+		amd64 | arm64 | ppc64el | s390x) \
 # arches officialy built by upstream
 			echo "deb $aptRepo" > /etc/apt/sources.list.d/pgdg.list; \
 			apt-get update; \
