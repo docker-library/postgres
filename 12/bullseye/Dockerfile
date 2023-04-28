@@ -6,16 +6,6 @@
 
 FROM debian:bullseye-slim
 
-RUN set -ex; \
-	if ! command -v gpg > /dev/null; then \
-		apt-get update; \
-		apt-get install -y --no-install-recommends \
-			gnupg \
-			dirmngr \
-		; \
-		rm -rf /var/lib/apt/lists/*; \
-	fi
-
 # explicitly set user/group IDs
 RUN set -eux; \
 	groupadd -r postgres --gid=999; \
@@ -25,6 +15,13 @@ RUN set -eux; \
 # see https://github.com/docker-library/postgres/issues/274
 	mkdir -p /var/lib/postgresql; \
 	chown -R postgres:postgres /var/lib/postgresql
+
+RUN set -ex; \
+	apt-get update; \
+	apt-get install -y --no-install-recommends \
+		gnupg \
+	; \
+	rm -rf /var/lib/apt/lists/*
 
 # grab gosu for easy step-down from root
 # https://github.com/tianon/gosu/releases
@@ -81,7 +78,7 @@ RUN set -ex; \
 	mkdir -p /usr/local/share/keyrings/; \
 	gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
 	gpg --batch --export --armor "$key" > /usr/local/share/keyrings/postgres.gpg.asc; \
-	command -v gpgconf > /dev/null && gpgconf --kill all; \
+	gpgconf --kill all; \
 	rm -rf "$GNUPGHOME"
 
 ENV PG_MAJOR 12
