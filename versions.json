@@ -8,15 +8,15 @@
         "ppc64el",
         "s390x"
       ],
-      "version": "11.19-1.pgdg110+1"
+      "version": "11.20-1.pgdg110+1"
     },
     "debian": "",
     "debianSuites": [
       "bullseye"
     ],
     "major": 11,
-    "sha256": "13109e2b71f1139405c27201da3733a61ace72ee1c228d9c9f0320e06aee14c2",
-    "version": "11.19"
+    "sha256": "3d7c8882f64a7e98534a044257dfee7abad77a5b7da12508d85d722b98b5acce",
+    "version": "11.20"
   },
   "12": {
     "alpine": "3.18",
