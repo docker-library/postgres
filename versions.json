@@ -24,17 +24,18 @@
       "arches": [
         "amd64",
         "arm64",
-        "ppc64el"
+        "ppc64el",
+        "s390x"
       ],
-      "version": "12.14-1.pgdg110+1"
+      "version": "12.15-1.pgdg110+1"
     },
     "debian": "bullseye",
     "debianSuites": [
       "bullseye"
     ],
     "major": 12,
-    "sha256": "785610237d382c842d356e347138e58c06ffeae240e6cc0b52ac5ebcc30d043e",
-    "version": "12.14"
+    "sha256": "bb5206e2864c1c4579938b96ea6096d155f22abf2d2cc2aa57571e3c4cb12b36",
+    "version": "12.15"
   },
   "13": {
     "alpine": "3.18",
