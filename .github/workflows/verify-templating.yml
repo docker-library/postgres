@@ -3,6 +3,7 @@ name: Verify Templating
 on:
   pull_request:
   push:
+  workflow_dispatch:
 
 defaults:
   run:
