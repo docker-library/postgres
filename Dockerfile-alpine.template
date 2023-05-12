@@ -20,6 +20,11 @@ ENV PG_MAJOR {{ env.version }}
 ENV PG_VERSION {{ .version }}
 ENV PG_SHA256 {{ .sha256 }}
 
+{{ def llvmver: "15" -}}
+ENV DOCKER_PG_LLVM_DEPS \
+		llvm{{ llvmver }}-dev \
+		clang{{ llvmver }}
+
 RUN set -eux; \
 	\
 	wget -O postgresql.tar.bz2 "https://ftp.postgresql.org/pub/source/v$PG_VERSION/postgresql-$PG_VERSION.tar.bz2"; \
@@ -34,10 +39,12 @@ RUN set -eux; \
 	rm postgresql.tar.bz2; \
 	\
 	apk add --no-cache --virtual .build-deps \
+		$DOCKER_PG_LLVM_DEPS \
 		bison \
 		coreutils \
 		dpkg-dev dpkg \
 		flex \
+		g++ \
 		gcc \
 		krb5-dev \
 		libc-dev \
@@ -45,9 +52,6 @@ RUN set -eux; \
 		libxml2-dev \
 		libxslt-dev \
 		linux-headers \
-{{ if .major >= 11 then ( -}}
-		llvm-dev clang g++ \
-{{ ) else "" end -}}
 		make \
 		openldap-dev \
 		openssl-dev \
@@ -80,6 +84,12 @@ RUN set -eux; \
 # explicitly update autoconf config.guess and config.sub so they support more arches/libcs
 	wget -O config/config.guess 'https://git.savannah.gnu.org/cgit/config.git/plain/config.guess?id=7d3d27baf8107b630586c962c057e22149653deb'; \
 	wget -O config/config.sub 'https://git.savannah.gnu.org/cgit/config.git/plain/config.sub?id=7d3d27baf8107b630586c962c057e22149653deb'; \
+	\
+# https://git.alpinelinux.org/aports/tree/community/postgresql12/APKBUILD?h=3.18-stable&id=a470294e6d6ca7059e41c54769b7c3c26ec901d4#n158
+	export LLVM_CONFIG="/usr/lib/llvm{{ llvmver }}/bin/llvm-config"; \
+# https://git.alpinelinux.org/aports/tree/community/postgresql12/APKBUILD?h=3.18-stable&id=a470294e6d6ca7059e41c54769b7c3c26ec901d4#n163
+	export CLANG=clang-{{ llvmver }}; \
+	\
 # configure options taken from:
 # https://anonscm.debian.org/cgit/pkg-postgresql/postgresql.git/tree/debian/rules?h=9.5
 	./configure \
@@ -110,9 +120,7 @@ RUN set -eux; \
 		--with-libxml \
 		--with-libxslt \
 		--with-icu \
-{{ if .major >= 11 then ( -}}
 		--with-llvm \
-{{ ) else "" end -}}
 {{ if .major >= 14 then ( -}}
 		--with-lz4 \
 {{ ) else "" end -}}
@@ -169,9 +177,6 @@ RUN mkdir -p "$PGDATA" && chown -R postgres:postgres "$PGDATA" && chmod 1777 "$P
 VOLUME /var/lib/postgresql/data
 
 COPY docker-entrypoint.sh /usr/local/bin/
-{{ if .major >= 11 then "" else ( -}}
-RUN ln -s usr/local/bin/docker-entrypoint.sh / # backwards compat
-{{ ) end -}}
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 # We set the default STOPSIGNAL to SIGINT, which corresponds to what PostgreSQL

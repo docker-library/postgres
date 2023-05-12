@@ -26,6 +26,10 @@ ENV PG_MAJOR 12
 ENV PG_VERSION 12.15
 ENV PG_SHA256 bb5206e2864c1c4579938b96ea6096d155f22abf2d2cc2aa57571e3c4cb12b36
 
+ENV DOCKER_PG_LLVM_DEPS \
+		llvm15-dev \
+		clang15
+
 RUN set -eux; \
 	\
 	wget -O postgresql.tar.bz2 "https://ftp.postgresql.org/pub/source/v$PG_VERSION/postgresql-$PG_VERSION.tar.bz2"; \
@@ -40,10 +44,12 @@ RUN set -eux; \
 	rm postgresql.tar.bz2; \
 	\
 	apk add --no-cache --virtual .build-deps \
+		$DOCKER_PG_LLVM_DEPS \
 		bison \
 		coreutils \
 		dpkg-dev dpkg \
 		flex \
+		g++ \
 		gcc \
 		krb5-dev \
 		libc-dev \
@@ -51,7 +57,6 @@ RUN set -eux; \
 		libxml2-dev \
 		libxslt-dev \
 		linux-headers \
-		llvm-dev clang g++ \
 		make \
 		openldap-dev \
 		openssl-dev \
@@ -76,6 +81,12 @@ RUN set -eux; \
 # explicitly update autoconf config.guess and config.sub so they support more arches/libcs
 	wget -O config/config.guess 'https://git.savannah.gnu.org/cgit/config.git/plain/config.guess?id=7d3d27baf8107b630586c962c057e22149653deb'; \
 	wget -O config/config.sub 'https://git.savannah.gnu.org/cgit/config.git/plain/config.sub?id=7d3d27baf8107b630586c962c057e22149653deb'; \
+	\
+# https://git.alpinelinux.org/aports/tree/community/postgresql12/APKBUILD?h=3.18-stable&id=a470294e6d6ca7059e41c54769b7c3c26ec901d4#n158
+	export LLVM_CONFIG="/usr/lib/llvm15/bin/llvm-config"; \
+# https://git.alpinelinux.org/aports/tree/community/postgresql12/APKBUILD?h=3.18-stable&id=a470294e6d6ca7059e41c54769b7c3c26ec901d4#n163
+	export CLANG=clang-15; \
+	\
 # configure options taken from:
 # https://anonscm.debian.org/cgit/pkg-postgresql/postgresql.git/tree/debian/rules?h=9.5
 	./configure \
