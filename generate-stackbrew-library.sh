@@ -76,9 +76,10 @@ join() {
 for version; do
 	export version
 
-	variants="$(jq -r '.[env.version].debianSuites + ["alpine"] | map(@sh) | join(" ")' versions.json)"
+	variants="$(jq -r '.[env.version].variants | map(@sh) | join(" ")' versions.json)"
 	eval "variants=( $variants )"
 
+	alpine="$(jq -r '.[env.version].alpine' versions.json)"
 	debian="$(jq -r '.[env.version].debian' versions.json)"
 
 	fullVersion="$(jq -r '.[env.version].version' versions.json)"
@@ -115,9 +116,8 @@ for version; do
 					"${variantAliases[@]}"
 				)
 				;;
-			alpine)
-				alpine="alpine${parent#*:}"
-				variantAliases+=( "${versionAliases[@]/%/-$alpine}" )
+			alpine"$alpine")
+				variantAliases+=( "${versionAliases[@]/%/-alpine}" )
 				variantAliases=( "${variantAliases[@]//latest-/}" )
 				;;
 		esac

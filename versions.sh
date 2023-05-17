@@ -1,15 +1,19 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-# https://github.com/docker-library/postgres/issues/582 😬
-defaultDebianSuite='bullseye'
-declare -A debianSuites=(
-	[11]=''
-)
-allDebianSuites=(
+# we will support at most two entries in each of these lists, and both should be in descending order
+supportedDebianSuites=(
 	bullseye
 )
-defaultAlpineVersion='3.18'
+supportedAlpineVersions=(
+	3.18
+	3.17
+)
+defaultDebianSuite="${supportedDebianSuites[0]}"
+declare -A debianSuites=(
+	[11]='' # https://github.com/docker-library/postgres/issues/582 😬
+)
+defaultAlpineVersion="${supportedAlpineVersions[0]}"
 declare -A alpineVersions=(
 	#[14]='3.16'
 )
@@ -35,6 +39,8 @@ _raw_package_list() {
 	curl -fsSL "$packagesBase/$suite-pgdg/$component/binary-$arch/Packages.bz2" | bunzip2
 }
 fetch_suite_package_list() {
+	local -; set +x # make sure running with "set -x" doesn't spam the terminal with the raw package lists
+
 	local suite="$1"; shift
 	local version="$1"; shift
 	local arch="$1"; shift
@@ -82,24 +88,20 @@ for version in "${versions[@]}"; do
 		debian: env.versionDebianSuite,
 	}')"
 
-	versionDebianSuites=()
-	for suite in "${allDebianSuites[@]}"; do
-		versionDebianSuites+=( "$suite" )
-	done
-
 	fullVersion=
-	for suite in "${versionDebianSuites[@]}"; do
+	for suite in "${supportedDebianSuites[@]}"; do
 		fetch_suite_package_list "$suite" "$version" 'amd64'
-		suiteVersion="$(awk_package_list "$suite" "$version" 'amd64' '
+		suiteVersions="$(awk_package_list "$suite" "$version" 'amd64' '
 			$1 == "Package" { pkg = $2 }
-			$1 == "Version" && pkg == "postgresql-" version { print $2; exit }
-		')"
-		srcVersion="${suiteVersion%%-*}"
+			$1 == "Version" && pkg == "postgresql-" version { print $2 }
+		' | sort -V)"
+		suiteVersion="$(tail -1 <<<"$suiteVersions")" # "15~beta4-1.pgdg110+1"
+		srcVersion="${suiteVersion%%-*}" # "15~beta4"
 		tilde='~'
-		srcVersion="${srcVersion//$tilde/}"
+		srcVersion="${srcVersion//$tilde/}" # "15beta4"
 		[ -n "$fullVersion" ] || fullVersion="$srcVersion"
 		if [ "$fullVersion" != "$srcVersion" ]; then
-			echo >&2 "warning: $version should be '$fullVersion' but $suite is '$srcVersion'"
+			echo >&2 "warning: $version should be '$fullVersion' but $suite has '$srcVersion' ($suiteVersion)"
 			continue
 		fi
 
@@ -122,7 +124,13 @@ for version in "${versions[@]}"; do
 				version: env.suiteVersion,
 				arches: $arches,
 			}
-			| .debianSuites += [ env.suite ]
+			| .variants += [ env.suite ]
+		')"
+	done
+
+	for alpineVersion in "${supportedAlpineVersions[@]}"; do
+		doc="$(jq <<<"$doc" -c --arg v "$alpineVersion" '
+			.variants += [ "alpine" + $v ]
 		')"
 	done
 
