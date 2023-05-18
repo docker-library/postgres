@@ -34,7 +34,7 @@ for version; do
 
 	major="$(jq -r '.[env.version].major' versions.json)"
 
-	variants="$(jq -r '.[env.version].debianSuites + ["alpine"] | map(@sh) | join(" ")' versions.json)"
+	variants="$(jq -r '.[env.version].variants | map(@sh) | join(" ")' versions.json)"
 	eval "variants=( $variants )"
 
 	rm -rf "$version"
@@ -47,19 +47,21 @@ for version; do
 
 		echo "processing $dir ..."
 
-		if [ "$variant" = 'alpine' ]; then
-			template='Dockerfile-alpine.template'
-		else
-			template='Dockerfile-debian.template'
-		fi
+		cp -a docker-entrypoint.sh "$dir/"
+
+		case "$variant" in
+			alpine*)
+				template='Dockerfile-alpine.template'
+				sed -i -e 's/gosu/su-exec/g' "$dir/docker-entrypoint.sh"
+				;;
+			*)
+				template='Dockerfile-debian.template'
+				;;
+		esac
+
 		{
 			generated_warning
 			gawk -f "$jqt" "$template"
 		} > "$dir/Dockerfile"
-
-		cp -a docker-entrypoint.sh "$dir/"
-		if [ "$variant" = 'alpine' ]; then
-			sed -i -e 's/gosu/su-exec/g' "$dir/docker-entrypoint.sh"
-		fi
 	done
 done

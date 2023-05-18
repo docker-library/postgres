@@ -11,11 +11,13 @@
       "version": "11.20-1.pgdg110+1"
     },
     "debian": "",
-    "debianSuites": [
-      "bullseye"
-    ],
     "major": 11,
     "sha256": "3d7c8882f64a7e98534a044257dfee7abad77a5b7da12508d85d722b98b5acce",
+    "variants": [
+      "bullseye",
+      "alpine3.18",
+      "alpine3.17"
+    ],
     "version": "11.20"
   },
   "12": {
@@ -30,11 +32,13 @@
       "version": "12.15-1.pgdg110+1"
     },
     "debian": "bullseye",
-    "debianSuites": [
-      "bullseye"
-    ],
     "major": 12,
     "sha256": "bb5206e2864c1c4579938b96ea6096d155f22abf2d2cc2aa57571e3c4cb12b36",
+    "variants": [
+      "bullseye",
+      "alpine3.18",
+      "alpine3.17"
+    ],
     "version": "12.15"
   },
   "13": {
@@ -49,11 +53,13 @@
       "version": "13.11-1.pgdg110+1"
     },
     "debian": "bullseye",
-    "debianSuites": [
-      "bullseye"
-    ],
     "major": 13,
     "sha256": "4992ff647203566b670d4e54dc5317499a26856c93576d0ea951bdf6bee50bfb",
+    "variants": [
+      "bullseye",
+      "alpine3.18",
+      "alpine3.17"
+    ],
     "version": "13.11"
   },
   "14": {
@@ -68,11 +74,13 @@
       "version": "14.8-1.pgdg110+1"
     },
     "debian": "bullseye",
-    "debianSuites": [
-      "bullseye"
-    ],
     "major": 14,
     "sha256": "39d38f0030737ed03835debeefee3b37d335462ce4995e2497bc38d621ebe45a",
+    "variants": [
+      "bullseye",
+      "alpine3.18",
+      "alpine3.17"
+    ],
     "version": "14.8"
   },
   "15": {
@@ -87,11 +95,13 @@
       "version": "15.3-1.pgdg110+1"
     },
     "debian": "bullseye",
-    "debianSuites": [
-      "bullseye"
-    ],
     "major": 15,
     "sha256": "ffc7d4891f00ffbf5c3f4eab7fbbced8460b8c0ee63c5a5167133b9e6599d932",
+    "variants": [
+      "bullseye",
+      "alpine3.18",
+      "alpine3.17"
+    ],
     "version": "15.3"
   }
 }
