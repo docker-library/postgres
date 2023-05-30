@@ -103,5 +103,26 @@
       "alpine3.17"
     ],
     "version": "15.3"
+  },
+  "16": {
+    "alpine": "3.18",
+    "bullseye": {
+      "arches": [
+        "amd64",
+        "arm64",
+        "ppc64el",
+        "s390x"
+      ],
+      "version": "16~beta1-2.pgdg110+1"
+    },
+    "debian": "bullseye",
+    "major": 16,
+    "sha256": "59e248d434aa515fa2d31c0d161c4148f30d511dcde91f6e888684823b6849a8",
+    "variants": [
+      "bullseye",
+      "alpine3.18",
+      "alpine3.17"
+    ],
+    "version": "16beta1"
   }
 }
