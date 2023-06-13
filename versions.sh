@@ -3,6 +3,7 @@ set -Eeuo pipefail
 
 # we will support at most two entries in each of these lists, and both should be in descending order
 supportedDebianSuites=(
+	bookworm
 	bullseye
 )
 supportedAlpineVersions=(
