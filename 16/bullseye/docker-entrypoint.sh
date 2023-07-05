@@ -39,6 +39,7 @@ docker_create_db_directories() {
 	mkdir -p "$PGDATA"
 	# ignore failure since there are cases where we can't chmod (and PostgreSQL might fail later anyhow - it's picky about permissions of this directory)
 	chmod 00700 "$PGDATA" || :
+	chown -R postgres:postgres "$PGDATA" || :
 
 	# ignore failure since it will be fine when using the image provided directory; see also https://github.com/docker-library/postgres/pull/289
 	mkdir -p /var/run/postgresql || :
