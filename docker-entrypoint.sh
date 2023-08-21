@@ -196,6 +196,7 @@ docker_process_sql() {
 
 	PGHOST= PGHOSTADDR= "${query_runner[@]}" "$@"
 }
+export -f docker_process_sql
 
 # create initial database
 # uses environment variables for input: POSTGRES_DB
