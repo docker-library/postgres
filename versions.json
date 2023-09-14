@@ -132,7 +132,7 @@
         "ppc64el",
         "s390x"
       ],
-      "version": "15.4-1.pgdg120+1"
+      "version": "15.4-2.pgdg120+1"
     },
     "bullseye": {
       "arches": [
@@ -141,7 +141,7 @@
         "ppc64el",
         "s390x"
       ],
-      "version": "15.4-1.pgdg110+1"
+      "version": "15.4-2.pgdg110+1"
     },
     "debian": "bookworm",
     "major": 15,
