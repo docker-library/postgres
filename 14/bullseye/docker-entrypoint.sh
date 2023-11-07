@@ -299,13 +299,22 @@ _main() {
 		set -- postgres "$@"
 	fi
 
-	if [ "$1" = 'postgres' ] && ! _pg_want_help "$@"; then
+	init=false
+	if [ "$1" = 'init' ]; then
+		init=true
+	fi
+
+	if $init || ( [ "$1" = 'postgres' ] && ! _pg_want_help "$@" ); then
 		docker_setup_env
 		# setup data directories and permissions (when run as root)
 		docker_create_db_directories
 		if [ "$(id -u)" = '0' ]; then
 			# then restart script as postgres user
 			exec gosu postgres "$BASH_SOURCE" "$@"
+		fi
+
+		if [ "$1" = 'init' ]; then
+			shift
 		fi
 
 		# only run initialization on an empty data directory
@@ -343,7 +352,9 @@ _main() {
 		fi
 	fi
 
-	exec "$@"
+	if ! $init; then
+		exec "$@"
+	fi
 }
 
 if ! _is_sourced; then
