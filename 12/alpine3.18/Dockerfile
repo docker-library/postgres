@@ -24,8 +24,8 @@ ENV LANG en_US.utf8
 RUN mkdir /docker-entrypoint-initdb.d
 
 ENV PG_MAJOR 12
-ENV PG_VERSION 12.16
-ENV PG_SHA256 c5f1fff7a0f93e1ec3746417b0594290ece617b4995ed95b8d527af0ba0e38f3
+ENV PG_VERSION 12.17
+ENV PG_SHA256 93e8e1b23981d5f03c6c5763f77b28184c1ce4db7194fa466e2edb65d9c1c5f6
 
 ENV DOCKER_PG_LLVM_DEPS \
 		llvm15-dev \
@@ -152,7 +152,7 @@ RUN set -eux; \
 		/usr/local/share/doc \
 		/usr/local/share/man \
 	; \
-	echo '{"spdxVersion":"SPDX-2.3","SPDXID":"SPDXRef-DOCUMENT","name":"postgres-sbom","packages":[{"name":"postgres","versionInfo":"12.16","SPDXID":"SPDXRef-Package--postgres","externalRefs":[{"referenceCategory":"PACKAGE-MANAGER","referenceType":"purl","referenceLocator":"pkg:generic/postgres@12.16?os_name=alpine&os_version=3.18"}],"licenseDeclared":"PostgreSQL"}]}' > /usr/local/postgres.spdx.json \
+	echo '{"spdxVersion":"SPDX-2.3","SPDXID":"SPDXRef-DOCUMENT","name":"postgres-sbom","packages":[{"name":"postgres","versionInfo":"12.17","SPDXID":"SPDXRef-Package--postgres","externalRefs":[{"referenceCategory":"PACKAGE-MANAGER","referenceType":"purl","referenceLocator":"pkg:generic/postgres@12.17?os_name=alpine&os_version=3.18"}],"licenseDeclared":"PostgreSQL"}]}' > /usr/local/postgres.spdx.json \
 	; \
 	postgres --version
 
