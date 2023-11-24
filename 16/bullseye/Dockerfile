@@ -215,5 +215,8 @@ STOPSIGNAL SIGINT
 # documentation at https://www.postgresql.org/docs/12/server-start.html notes
 # that even 90 seconds may not be long enough in many instances.
 
+HEALTHCHECK --interval=1s --timeout=1s --retries=60 \
+	CMD test -f /dev/shm/ready
+
 EXPOSE 5432
 CMD ["postgres"]

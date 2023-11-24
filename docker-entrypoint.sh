@@ -343,7 +343,11 @@ _main() {
 		fi
 	fi
 
+	touch /dev/shm/ready
+
 	exec "$@"
+
+	rm /dev/shm/ready
 }
 
 if ! _is_sourced; then
