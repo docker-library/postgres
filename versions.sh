@@ -12,7 +12,6 @@ supportedAlpineVersions=(
 )
 defaultDebianSuite="${supportedDebianSuites[0]}"
 declare -A debianSuites=(
-	[11]='' # https://github.com/docker-library/postgres/issues/582 😬
 )
 defaultAlpineVersion="${supportedAlpineVersions[0]}"
 declare -A alpineVersions=(
@@ -81,7 +80,7 @@ for version in "${versions[@]}"; do
 	export version
 
 	versionAlpineVersion="${alpineVersions[$version]:-$defaultAlpineVersion}"
-	versionDebianSuite="${debianSuites[$version]-$defaultDebianSuite}" # intentionally missing ":" so it can be empty (again, https://github.com/docker-library/postgres/issues/582 😭)
+	versionDebianSuite="${debianSuites[$version]:-$defaultDebianSuite}"
 	export versionAlpineVersion versionDebianSuite
 
 	doc="$(jq -nc '{
