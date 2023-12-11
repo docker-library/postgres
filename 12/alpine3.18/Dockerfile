@@ -4,7 +4,6 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-
 FROM alpine:3.18
 
 # 70 is the standard uid/gid for "postgres" in Alpine
@@ -152,8 +151,7 @@ RUN set -eux; \
 		/usr/local/share/doc \
 		/usr/local/share/man \
 	; \
-	echo '{"spdxVersion":"SPDX-2.3","SPDXID":"SPDXRef-DOCUMENT","name":"postgres-sbom","packages":[{"name":"postgres","versionInfo":"12.17","SPDXID":"SPDXRef-Package--postgres","externalRefs":[{"referenceCategory":"PACKAGE-MANAGER","referenceType":"purl","referenceLocator":"pkg:generic/postgres@12.17?os_name=alpine&os_version=3.18"}],"licenseDeclared":"PostgreSQL"}]}' > /usr/local/postgres.spdx.json \
-	; \
+	\
 	postgres --version
 
 # make the sample config easier to munge (and "correct by default")
