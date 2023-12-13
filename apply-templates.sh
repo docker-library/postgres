@@ -47,12 +47,12 @@ for version; do
 
 		echo "processing $dir ..."
 
-		cp -a docker-entrypoint.sh "$dir/"
+		cp -a docker-entrypoint.sh docker-ensure-initdb.sh "$dir/"
 
 		case "$variant" in
 			alpine*)
 				template='Dockerfile-alpine.template'
-				sed -i -e 's/gosu/su-exec/g' "$dir/docker-entrypoint.sh"
+				sed -i -e 's/gosu/su-exec/g' "$dir/docker-entrypoint.sh" "$dir/docker-ensure-initdb.sh"
 				;;
 			*)
 				template='Dockerfile-debian.template'
