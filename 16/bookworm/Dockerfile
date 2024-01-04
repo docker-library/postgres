@@ -20,6 +20,10 @@ RUN set -ex; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends \
 		gnupg \
+# https://www.postgresql.org/docs/16/app-psql.html#APP-PSQL-META-COMMAND-PSET-PAGER
+# https://github.com/postgres/postgres/blob/REL_16_1/src/include/fe_utils/print.h#L25
+# (if "less" is available, it gets used as the default pager for psql, and it only adds ~1.5MiB to our image size)
+		less \
 	; \
 	rm -rf /var/lib/apt/lists/*
 
