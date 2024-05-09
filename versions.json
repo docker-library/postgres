@@ -39,7 +39,7 @@
         "ppc64el",
         "s390x"
       ],
-      "version": "13.14-1.pgdg120+2"
+      "version": "13.15-1.pgdg120+1"
     },
     "bullseye": {
       "arches": [
@@ -48,18 +48,18 @@
         "ppc64el",
         "s390x"
       ],
-      "version": "13.14-1.pgdg110+2"
+      "version": "13.15-1.pgdg110+1"
     },
     "debian": "bookworm",
     "major": 13,
-    "sha256": "b8df078551898960bd500dc5d38a177e9905376df81fe7f2b660a1407fa6a5ed",
+    "sha256": "42edd415446d33b8c242be76d1ad057531b2264b2e86939339b7075c6e4ec925",
     "variants": [
       "bookworm",
       "bullseye",
       "alpine3.19",
       "alpine3.18"
     ],
-    "version": "13.14"
+    "version": "13.15"
   },
   "14": {
     "alpine": "3.19",
