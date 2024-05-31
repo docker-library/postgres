@@ -135,13 +135,8 @@ RUN set -eux; \
 		--with-zstd \
 {{ ) else "" end -}}
 	; \
-{{ if .major >= 17 then ( -}}
-	make -j "$(nproc)" all; \
-	make install; \
-{{ ) else ( -}}
-	make -j "$(nproc)" world; \
-	make install-world; \
-{{ ) end -}}
+	make -j "$(nproc)" world-bin; \
+	make install-world-bin; \
 	make -C contrib install; \
 	\
 	runDeps="$( \

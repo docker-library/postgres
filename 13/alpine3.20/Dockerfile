@@ -119,8 +119,8 @@ RUN set -eux; \
 		--with-icu \
 		--with-llvm \
 	; \
-	make -j "$(nproc)" world; \
-	make install-world; \
+	make -j "$(nproc)" world-bin; \
+	make install-world-bin; \
 	make -C contrib install; \
 	\
 	runDeps="$( \

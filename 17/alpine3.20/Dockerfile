@@ -123,8 +123,8 @@ RUN set -eux; \
 		--with-lz4 \
 		--with-zstd \
 	; \
-	make -j "$(nproc)" all; \
-	make install; \
+	make -j "$(nproc)" world-bin; \
+	make install-world-bin; \
 	make -C contrib install; \
 	\
 	runDeps="$( \
