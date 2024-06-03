@@ -153,5 +153,36 @@
       "alpine3.19"
     ],
     "version": "16.3"
+  },
+  "17": {
+    "alpine": "3.20",
+    "bookworm": {
+      "arches": [
+        "amd64",
+        "arm64",
+        "ppc64el",
+        "s390x"
+      ],
+      "version": "17~beta1-1.pgdg120+1"
+    },
+    "bullseye": {
+      "arches": [
+        "amd64",
+        "arm64",
+        "ppc64el",
+        "s390x"
+      ],
+      "version": "17~beta1-1.pgdg110+1"
+    },
+    "debian": "bookworm",
+    "major": 17,
+    "sha256": "089e8854fecd0ca1ec5cd8b29526938f9ef5e91cc331f5d6e118d13468f08f50",
+    "variants": [
+      "bookworm",
+      "bullseye",
+      "alpine3.20",
+      "alpine3.19"
+    ],
+    "version": "17beta1"
   }
 }

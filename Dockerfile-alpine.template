@@ -98,7 +98,10 @@ RUN set -eux; \
 # "/usr/src/postgresql/src/backend/access/common/tupconvert.c:105: undefined reference to `libintl_gettext'"
 #		--enable-nls \
 		--enable-integer-datetimes \
+{{ if .major <= 16 then ( -}}
+{{ # in 17: this option is reversed. you need to disable it -}}
 		--enable-thread-safety \
+{{ ) else "" end -}}
 		--enable-tap-tests \
 # skip debugging info -- we want tiny size instead
 #		--enable-debug \
@@ -132,8 +135,8 @@ RUN set -eux; \
 		--with-zstd \
 {{ ) else "" end -}}
 	; \
-	make -j "$(nproc)" world; \
-	make install-world; \
+	make -j "$(nproc)" world-bin; \
+	make install-world-bin; \
 	make -C contrib install; \
 	\
 	runDeps="$( \
