@@ -52,8 +52,8 @@ ENV LANG en_US.utf8
 RUN mkdir /docker-entrypoint-initdb.d
 
 ENV PG_MAJOR 17
-ENV PG_VERSION 17beta2
-ENV PG_SHA256 157af3af2cbc40364990835f518aea0711703e1c48f204b54dfd49b46cd8716c
+ENV PG_VERSION 17beta3
+ENV PG_SHA256 010dfaff9fcca6afa2fd576eea89cdabcefc262aa0ba89a6845eaab4d4b08f71
 
 ENV DOCKER_PG_LLVM_DEPS \
 		llvm15-dev \
