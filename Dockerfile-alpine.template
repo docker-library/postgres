@@ -203,9 +203,11 @@ RUN set -eux; \
 
 # make the sample config easier to munge (and "correct by default")
 RUN set -eux; \
-	cp -v /usr/local/share/postgresql/postgresql.conf.sample /usr/local/share/postgresql/postgresql.conf.sample.orig; \
+	mkdir -p /etc/postgresql/conf.d; \
+	mv -v /usr/local/share/postgresql/postgresql.conf.sample /usr/local/share/postgresql/postgresql.conf.sample.orig; \
+    awk '/# CONFIG FILE INCLUDES/ {print; getline; print; print "\ninclude_dir = '\''/etc/postgresql/conf.d'\''"; next} 1' /usr/local/share/postgresql/postgresql.conf.sample.orig > /usr/local/share/postgresql/postgresql.conf.sample; \
 	sed -ri "s!^#?(listen_addresses)\s*=\s*\S+.*!\1 = '*'!" /usr/local/share/postgresql/postgresql.conf.sample; \
-	grep -F "listen_addresses = '*'" /usr/local/share/postgresql/postgresql.conf.sample
+	grep -F "listen_addresses = '*'" /usr/local/share/postgresql/postgresql.conf.samplee
 
 RUN install --verbose --directory --owner postgres --group postgres --mode 3777 /var/run/postgresql
 
