@@ -238,3 +238,5 @@ STOPSIGNAL SIGINT
 
 EXPOSE 5432
 CMD ["postgres"]
+
+HEALTHCHECK --start-period=1s CMD pg_isready || exit 1
