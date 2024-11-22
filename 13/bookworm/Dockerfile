@@ -204,10 +204,10 @@ ENTRYPOINT ["docker-entrypoint.sh"]
 # Shutdown mode" in which any existing sessions are allowed to finish and the
 # server stops when all sessions are terminated.
 #
-# See https://www.postgresql.org/docs/12/server-shutdown.html for more details
+# See https://www.postgresql.org/docs/13/server-shutdown.html for more details
 # about available PostgreSQL server shutdown signals.
 #
-# See also https://www.postgresql.org/docs/12/server-start.html for further
+# See also https://www.postgresql.org/docs/13/server-start.html for further
 # justification of this as the default value, namely that the example (and
 # shipped) systemd service files use the "Fast Shutdown mode" for service
 # termination.
@@ -220,7 +220,7 @@ STOPSIGNAL SIGINT
 # STOPSIGNAL and sending SIGKILL (which is likely to cause data corruption).
 #
 # The default in most runtimes (such as Docker) is 10 seconds, and the
-# documentation at https://www.postgresql.org/docs/12/server-start.html notes
+# documentation at https://www.postgresql.org/docs/13/server-start.html notes
 # that even 90 seconds may not be long enough in many instances.
 
 EXPOSE 5432
