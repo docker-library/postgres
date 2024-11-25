@@ -161,6 +161,14 @@ RUN set -ex; \
 		"postgresql-$PG_MAJOR=$PG_VERSION" \
 	; \
 	\
+	apt-get install -y --no-install-recommends wget make gcc libicu-dev postgresql-server-dev-all; \
+	cd "$tempDir"; \
+	wget --no-check-certificate -O /$tempDir/v1.2-20240606.tar.gz "https://github.com/pgbigm/pg_bigm/archive/refs/tags/v1.2-20240606.tar.gz"; \
+	tar xf /$tempDir/v1.2-20240606.tar.gz; \
+	cd pg_bigm-1.2-20240606; \
+	make USE_PGXS=1; \
+	make USE_PGXS=1 install; \
+	\
 	rm -rf /var/lib/apt/lists/*; \
 	\
 	if [ -n "$tempDir" ]; then \
