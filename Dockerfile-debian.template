@@ -164,9 +164,6 @@ RUN set -ex; \
 	cd pg_bigm-1.2-20240606; \
 	make USE_PGXS=1; \
 	make USE_PGXS=1 install; \
-    cp pg_bigm.control /usr/share/postgresql/13/extension/; \
-    cp pg_bigm*.sql /usr/share/postgresql/13/extension/; \
-    echo "shared_preload_libraries = 'pg_bigm'" >> /var/lib/postgresql/data/postgresql.conf;
 	\
 	rm -rf /var/lib/apt/lists/*; \
 	\
@@ -187,8 +184,7 @@ RUN set -eux; \
 	cp -v /usr/share/postgresql/postgresql.conf.sample.dpkg /usr/share/postgresql/postgresql.conf.sample; \
 	ln -sv ../postgresql.conf.sample "/usr/share/postgresql/$PG_MAJOR/"; \
 	sed -ri "s!^#?(listen_addresses)\s*=\s*\S+.*!\1 = '*'!" /usr/share/postgresql/postgresql.conf.sample; \
-	grep -F "listen_addresses = '*'" /usr/share/postgresql/postgresql.conf.sample; \
-    echo "shared_preload_libraries = 'pg_bigm'" >> /usr/local/share/postgresql/postgresql.conf.sample; \
+	grep -F "listen_addresses = '*'" /usr/share/postgresql/postgresql.conf.sample
 
 RUN install --verbose --directory --owner postgres --group postgres --mode 3777 /var/run/postgresql
 
