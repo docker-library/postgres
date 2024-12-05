@@ -1,6 +1,6 @@
 {
   "12": {
-    "alpine": "3.20",
+    "alpine": "3.21",
     "bookworm": {
       "arches": [
         "amd64",
@@ -25,13 +25,13 @@
     "variants": [
       "bookworm",
       "bullseye",
-      "alpine3.20",
-      "alpine3.19"
+      "alpine3.21",
+      "alpine3.20"
     ],
     "version": "12.22"
   },
   "13": {
-    "alpine": "3.20",
+    "alpine": "3.21",
     "bookworm": {
       "arches": [
         "amd64",
@@ -56,13 +56,13 @@
     "variants": [
       "bookworm",
       "bullseye",
-      "alpine3.20",
-      "alpine3.19"
+      "alpine3.21",
+      "alpine3.20"
     ],
     "version": "13.18"
   },
   "14": {
-    "alpine": "3.20",
+    "alpine": "3.21",
     "bookworm": {
       "arches": [
         "amd64",
@@ -87,13 +87,13 @@
     "variants": [
       "bookworm",
       "bullseye",
-      "alpine3.20",
-      "alpine3.19"
+      "alpine3.21",
+      "alpine3.20"
     ],
     "version": "14.15"
   },
   "15": {
-    "alpine": "3.20",
+    "alpine": "3.21",
     "bookworm": {
       "arches": [
         "amd64",
@@ -118,13 +118,13 @@
     "variants": [
       "bookworm",
       "bullseye",
-      "alpine3.20",
-      "alpine3.19"
+      "alpine3.21",
+      "alpine3.20"
     ],
     "version": "15.10"
   },
   "16": {
-    "alpine": "3.20",
+    "alpine": "3.21",
     "bookworm": {
       "arches": [
         "amd64",
@@ -149,13 +149,13 @@
     "variants": [
       "bookworm",
       "bullseye",
-      "alpine3.20",
-      "alpine3.19"
+      "alpine3.21",
+      "alpine3.20"
     ],
     "version": "16.6"
   },
   "17": {
-    "alpine": "3.20",
+    "alpine": "3.21",
     "bookworm": {
       "arches": [
         "amd64",
@@ -180,8 +180,8 @@
     "variants": [
       "bookworm",
       "bullseye",
-      "alpine3.20",
-      "alpine3.19"
+      "alpine3.21",
+      "alpine3.20"
     ],
     "version": "17.2"
   }
