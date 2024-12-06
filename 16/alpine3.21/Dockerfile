@@ -57,8 +57,8 @@ ENV PG_VERSION 16.6
 ENV PG_SHA256 23369cdaccd45270ac5dcc30fa9da205d5be33fa505e1f17a0418d2caeca477b
 
 ENV DOCKER_PG_LLVM_DEPS \
-		llvm15-dev \
-		clang15
+		llvm19-dev \
+		clang19
 
 RUN set -eux; \
 	\
@@ -116,10 +116,10 @@ RUN set -eux; \
 	wget -O config/config.guess 'https://git.savannah.gnu.org/cgit/config.git/plain/config.guess?id=7d3d27baf8107b630586c962c057e22149653deb'; \
 	wget -O config/config.sub 'https://git.savannah.gnu.org/cgit/config.git/plain/config.sub?id=7d3d27baf8107b630586c962c057e22149653deb'; \
 	\
-# https://git.alpinelinux.org/aports/tree/community/postgresql12/APKBUILD?h=3.18-stable&id=a470294e6d6ca7059e41c54769b7c3c26ec901d4#n158
-	export LLVM_CONFIG="/usr/lib/llvm15/bin/llvm-config"; \
-# https://git.alpinelinux.org/aports/tree/community/postgresql12/APKBUILD?h=3.18-stable&id=a470294e6d6ca7059e41c54769b7c3c26ec901d4#n163
-	export CLANG=clang-15; \
+# https://git.alpinelinux.org/aports/tree/community/postgresql15/APKBUILD?h=3.21-stable&id=40544ade947bec1798edb0f749f4e967e842624b#n172
+	export LLVM_CONFIG="/usr/lib/llvm19/bin/llvm-config"; \
+# https://git.alpinelinux.org/aports/tree/community/postgresql15/APKBUILD?h=3.21-stable&id=40544ade947bec1798edb0f749f4e967e842624b#n177
+	export CLANG=clang-19; \
 	\
 # configure options taken from:
 # https://anonscm.debian.org/cgit/pkg-postgresql/postgresql.git/tree/debian/rules?h=9.5
