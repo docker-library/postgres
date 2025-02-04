@@ -1,35 +1,4 @@
 {
-  "12": {
-    "alpine": "3.21",
-    "bookworm": {
-      "arches": [
-        "amd64",
-        "arm64",
-        "ppc64el",
-        "s390x"
-      ],
-      "version": "12.22-2.pgdg120+1"
-    },
-    "bullseye": {
-      "arches": [
-        "amd64",
-        "arm64",
-        "ppc64el",
-        "s390x"
-      ],
-      "version": "12.22-2.pgdg110+1"
-    },
-    "debian": "bookworm",
-    "major": 12,
-    "sha256": "8df3c0474782589d3c6f374b5133b1bd14d168086edbc13c6e72e67dd4527a3b",
-    "variants": [
-      "bookworm",
-      "bullseye",
-      "alpine3.21",
-      "alpine3.20"
-    ],
-    "version": "12.22"
-  },
   "13": {
     "alpine": "3.21",
     "bookworm": {
