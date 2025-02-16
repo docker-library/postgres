@@ -132,7 +132,7 @@
         "ppc64el",
         "s390x"
       ],
-      "version": "17.3-1.pgdg120+1"
+      "version": "17.3-3.pgdg120+1"
     },
     "bullseye": {
       "arches": [
@@ -141,7 +141,7 @@
         "ppc64el",
         "s390x"
       ],
-      "version": "17.3-1.pgdg110+1"
+      "version": "17.3-3.pgdg110+1"
     },
     "debian": "bookworm",
     "major": 17,
