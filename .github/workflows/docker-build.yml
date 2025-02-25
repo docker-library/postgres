@@ -1,9 +1,12 @@
 name: Build and Push PostgreSQL Image
 
 on:
-  push:
-    branches:
-      - feature-add-http
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch to run the workflow on"
+        required: true
+        default: "feature-add-http"
 
 jobs:
   build:
