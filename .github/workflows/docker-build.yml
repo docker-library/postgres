@@ -6,7 +6,7 @@ on:
       branch:
         description: "Branch to run the workflow on"
         required: true
-        default: "feature-add-http"
+        default: main
 
 jobs:
   build:
