@@ -269,14 +269,13 @@ docker_temp_server_start() {
 	# does not listen on external TCP/IP and waits until start finishes
 	set -- "$@" -c listen_addresses='' -p "${PGPORT:-5432}"
 
-	# Unset NOTIFY_SOCKET so the temporary server doesn't prematurely notify
+	# unset NOTIFY_SOCKET so the temporary server doesn't prematurely notify
 	# any process supervisor.
-	env \
-		--unset NOTIFY_SOCKET \
-		PGUSER="${PGUSER:-$POSTGRES_USER}" \
-		pg_ctl -D "$PGDATA" \
-			-o "$(printf '%q ' "$@")" \
-			-w start
+	NOTIFY_SOCKET= \
+	PGUSER="${PGUSER:-$POSTGRES_USER}" \
+	pg_ctl -D "$PGDATA" \
+		-o "$(printf '%q ' "$@")" \
+		-w start
 }
 
 # stop postgresql server after done setting up user and running scripts
