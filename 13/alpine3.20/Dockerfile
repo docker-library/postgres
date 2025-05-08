@@ -53,8 +53,8 @@ ENV LANG en_US.utf8
 RUN mkdir /docker-entrypoint-initdb.d
 
 ENV PG_MAJOR 13
-ENV PG_VERSION 13.20
-ENV PG_SHA256 8134b685724d15e60d93bea206fbe0f14c8295e84f1cc91d5a3928163e4fb288
+ENV PG_VERSION 13.21
+ENV PG_SHA256 dcda1294df45f033b0656cf7a8e4afbbc624c25e1b144aec79530f74d7ef4ab4
 
 ENV DOCKER_PG_LLVM_DEPS \
 		llvm15-dev \
@@ -108,9 +108,6 @@ RUN set -eux; \
 	grep '/var/run/postgresql' src/include/pg_config_manual.h.new; \
 	mv src/include/pg_config_manual.h.new src/include/pg_config_manual.h; \
 	gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
-# explicitly update autoconf config.guess and config.sub so they support more arches/libcs
-	wget -O config/config.guess 'https://git.savannah.gnu.org/cgit/config.git/plain/config.guess?id=7d3d27baf8107b630586c962c057e22149653deb'; \
-	wget -O config/config.sub 'https://git.savannah.gnu.org/cgit/config.git/plain/config.sub?id=7d3d27baf8107b630586c962c057e22149653deb'; \
 	\
 # https://git.alpinelinux.org/aports/tree/community/postgresql15/APKBUILD?h=3.21-stable&id=40544ade947bec1798edb0f749f4e967e842624b#n172
 	export LLVM_CONFIG="/usr/lib/llvm15/bin/llvm-config"; \

@@ -89,7 +89,7 @@ RUN set -ex; \
 ENV PG_MAJOR 15
 ENV PATH $PATH:/usr/lib/postgresql/$PG_MAJOR/bin
 
-ENV PG_VERSION 15.12-1.pgdg120+1
+ENV PG_VERSION 15.13-1.pgdg120+1
 
 RUN set -ex; \
 	\
@@ -99,7 +99,7 @@ RUN set -ex; \
 	dpkgArch="$(dpkg --print-architecture)"; \
 	aptRepo="[ signed-by=/usr/local/share/keyrings/postgres.gpg.asc ] http://apt.postgresql.org/pub/repos/apt/ bookworm-pgdg main $PG_MAJOR"; \
 	case "$dpkgArch" in \
-		amd64 | arm64 | ppc64el | s390x) \
+		amd64 | arm64 | ppc64el) \
 # arches officialy built by upstream
 			echo "deb $aptRepo" > /etc/apt/sources.list.d/pgdg.list; \
 			apt-get update; \
