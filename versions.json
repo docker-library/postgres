@@ -5,30 +5,28 @@
       "arches": [
         "amd64",
         "arm64",
-        "ppc64el",
-        "s390x"
+        "ppc64el"
       ],
-      "version": "13.20-1.pgdg120+1"
+      "version": "13.21-1.pgdg120+1"
     },
     "bullseye": {
       "arches": [
         "amd64",
         "arm64",
-        "ppc64el",
-        "s390x"
+        "ppc64el"
       ],
-      "version": "13.20-1.pgdg110+1"
+      "version": "13.21-1.pgdg110+1"
     },
     "debian": "bookworm",
     "major": 13,
-    "sha256": "8134b685724d15e60d93bea206fbe0f14c8295e84f1cc91d5a3928163e4fb288",
+    "sha256": "dcda1294df45f033b0656cf7a8e4afbbc624c25e1b144aec79530f74d7ef4ab4",
     "variants": [
       "bookworm",
       "bullseye",
       "alpine3.21",
       "alpine3.20"
     ],
-    "version": "13.20"
+    "version": "13.21"
   },
   "14": {
     "alpine": "3.21",
@@ -36,30 +34,28 @@
       "arches": [
         "amd64",
         "arm64",
-        "ppc64el",
-        "s390x"
+        "ppc64el"
       ],
-      "version": "14.17-1.pgdg120+1"
+      "version": "14.18-1.pgdg120+1"
     },
     "bullseye": {
       "arches": [
         "amd64",
         "arm64",
-        "ppc64el",
-        "s390x"
+        "ppc64el"
       ],
-      "version": "14.17-1.pgdg110+1"
+      "version": "14.18-1.pgdg110+1"
     },
     "debian": "bookworm",
     "major": 14,
-    "sha256": "6ce0ccd6403bf7f0f2eddd333e2ee9ba02edfa977c66660ed9b4b1057e7630a1",
+    "sha256": "83ab29d6bfc3dc58b2ed3c664114fdfbeb6a0450c4b8d7fa69aee91e3ca14f8e",
     "variants": [
       "bookworm",
       "bullseye",
       "alpine3.21",
       "alpine3.20"
     ],
-    "version": "14.17"
+    "version": "14.18"
   },
   "15": {
     "alpine": "3.21",
@@ -67,30 +63,28 @@
       "arches": [
         "amd64",
         "arm64",
-        "ppc64el",
-        "s390x"
+        "ppc64el"
       ],
-      "version": "15.12-1.pgdg120+1"
+      "version": "15.13-1.pgdg120+1"
     },
     "bullseye": {
       "arches": [
         "amd64",
         "arm64",
-        "ppc64el",
-        "s390x"
+        "ppc64el"
       ],
-      "version": "15.12-1.pgdg110+1"
+      "version": "15.13-1.pgdg110+1"
     },
     "debian": "bookworm",
     "major": 15,
-    "sha256": "3bc8462a38ca0857270cc88b949a3f6659f0d5c44c029c482355835b61a0f6f7",
+    "sha256": "4f62e133d22ea08a0401b0840920e26698644d01a80c34341fb732dd0a90ca5d",
     "variants": [
       "bookworm",
       "bullseye",
       "alpine3.21",
       "alpine3.20"
     ],
-    "version": "15.12"
+    "version": "15.13"
   },
   "16": {
     "alpine": "3.21",
@@ -98,30 +92,28 @@
       "arches": [
         "amd64",
         "arm64",
-        "ppc64el",
-        "s390x"
+        "ppc64el"
       ],
-      "version": "16.8-1.pgdg120+1"
+      "version": "16.9-1.pgdg120+1"
     },
     "bullseye": {
       "arches": [
         "amd64",
         "arm64",
-        "ppc64el",
-        "s390x"
+        "ppc64el"
       ],
-      "version": "16.8-1.pgdg110+1"
+      "version": "16.9-1.pgdg110+1"
     },
     "debian": "bookworm",
     "major": 16,
-    "sha256": "9468083a56ce0ee7d294601b74dad3dd9fc69d87aff61f0a9fb63c813ff7efd8",
+    "sha256": "07c00fb824df0a0c295f249f44691b86e3266753b380c96f633c3311e10bd005",
     "variants": [
       "bookworm",
       "bullseye",
       "alpine3.21",
       "alpine3.20"
     ],
-    "version": "16.8"
+    "version": "16.9"
   },
   "17": {
     "alpine": "3.21",
@@ -129,29 +121,27 @@
       "arches": [
         "amd64",
         "arm64",
-        "ppc64el",
-        "s390x"
+        "ppc64el"
       ],
-      "version": "17.4-1.pgdg120+2"
+      "version": "17.5-1.pgdg120+1"
     },
     "bullseye": {
       "arches": [
         "amd64",
         "arm64",
-        "ppc64el",
-        "s390x"
+        "ppc64el"
       ],
-      "version": "17.4-1.pgdg110+2"
+      "version": "17.5-1.pgdg110+1"
     },
     "debian": "bookworm",
     "major": 17,
-    "sha256": "c4605b73fea11963406699f949b966e5d173a7ee0ccaef8938dec0ca8a995fe7",
+    "sha256": "fcb7ab38e23b264d1902cb25e6adafb4525a6ebcbd015434aeef9eda80f528d8",
     "variants": [
       "bookworm",
       "bullseye",
       "alpine3.21",
       "alpine3.20"
     ],
-    "version": "17.4"
+    "version": "17.5"
   }
 }
