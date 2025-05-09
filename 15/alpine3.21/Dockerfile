@@ -4,6 +4,14 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
+FROM golang:1.23.6 AS gosubuilder
+ENV GOSU_VERSION=1.17
+WORKDIR /go/src/github.com/tianon
+RUN git clone https://github.com/tianon/gosu.git --branch $GOSU_VERSION
+WORKDIR /go/src/github.com/tianon/gosu
+RUN go mod download
+RUN go build
+
 FROM alpine:3.21
 
 # 70 is the standard uid/gid for "postgres" in Alpine
@@ -16,29 +24,17 @@ RUN set -eux; \
 	install --verbose --directory --owner postgres --group postgres --mode 1777 /var/lib/postgresql
 
 # grab gosu for easy step-down from root
-# https://github.com/tianon/gosu/releases
-ENV GOSU_VERSION 1.17
+COPY --from=gosubuilder /go/src/github.com/tianon/gosu/gosu /usr/local/bin/gosu
+
 RUN set -eux; \
 	\
-	apk add --no-cache --virtual .gosu-deps \
+	apk add --no-cache --virtual \
 		ca-certificates \
 		dpkg \
 		gnupg \
 	; \
 	\
-	dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
-	wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch"; \
-	wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch.asc"; \
-	\
-# verify the signature
-	export GNUPGHOME="$(mktemp -d)"; \
-	gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4; \
-	gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu; \
-	gpgconf --kill all; \
-	rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc; \
-	\
 # clean up fetch dependencies
-	apk del --no-network .gosu-deps; \
 	\
 	chmod +x /usr/local/bin/gosu; \
 # verify that the binary works
