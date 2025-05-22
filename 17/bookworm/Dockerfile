@@ -131,10 +131,9 @@ RUN set -ex; \
 # build .deb files from upstream's source packages (which are verified by apt-get)
 			nproc="$(nproc)"; \
 			export DEB_BUILD_OPTIONS="nocheck parallel=$nproc"; \
-# we have to build postgresql-common first because postgresql-$PG_MAJOR shares "debian/rules" logic with it: https://salsa.debian.org/postgresql/postgresql/-/commit/99f44476e258cae6bf9e919219fa2c5414fa2876
-# (and it "Depends: pgdg-keyring")
-			apt-get build-dep -y postgresql-common pgdg-keyring; \
-			apt-get source --compile postgresql-common pgdg-keyring; \
+# we have to build postgresql-common-dev first because postgresql-$PG_MAJOR shares "debian/rules" logic with it: https://salsa.debian.org/postgresql/postgresql/-/commit/f4338a0d28cf4541956bddb0f4e444ba9dba81b9
+			apt-get build-dep -y postgresql-common-dev; \
+			apt-get source --compile postgresql-common-dev; \
 			_update_repo; \
 			apt-get build-dep -y "postgresql-$PG_MAJOR=$PG_VERSION"; \
 			apt-get source --compile "postgresql-$PG_MAJOR=$PG_VERSION"; \
