@@ -7,7 +7,7 @@
 FROM alpine:3.21
 
 # 70 is the standard uid/gid for "postgres" in Alpine
-# https://git.alpinelinux.org/aports/tree/main/postgresql-common/postgresql-common.pre-install?h=3.21-stable
+# https://git.alpinelinux.org/aports/tree/main/postgresql-common/postgresql-common.pre-install?h=3.22-stable
 RUN set -eux; \
 	addgroup -g 70 -S postgres; \
 	adduser -u 70 -S -D -G postgres -H -h /var/lib/postgresql -s /bin/sh postgres; \
@@ -113,9 +113,9 @@ RUN set -eux; \
 	mv src/include/pg_config_manual.h.new src/include/pg_config_manual.h; \
 	gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
 	\
-# https://git.alpinelinux.org/aports/tree/community/postgresql15/APKBUILD?h=3.21-stable&id=40544ade947bec1798edb0f749f4e967e842624b#n172
+# https://git.alpinelinux.org/aports/tree/community/postgresql15/APKBUILD?h=3.22-stable#n176 ("export LLVM_CONFIG")
 	export LLVM_CONFIG="/usr/lib/llvm19/bin/llvm-config"; \
-# https://git.alpinelinux.org/aports/tree/community/postgresql15/APKBUILD?h=3.21-stable&id=40544ade947bec1798edb0f749f4e967e842624b#n177
+# https://git.alpinelinux.org/aports/tree/community/postgresql15/APKBUILD?h=3.22-stable#n180 ("older clang versions don't have a 'clang' exe anymore.")
 	export CLANG=clang-19; \
 	\
 # configure options taken from:
@@ -171,8 +171,7 @@ RUN set -eux; \
 		zstd \
 # https://wiki.alpinelinux.org/wiki/Release_Notes_for_Alpine_3.16.0#ICU_data_split
 		icu-data-full \
-# nss_wrapper is not availble on ppc64le: "test case segfaults in ppc64le"
-# https://git.alpinelinux.org/aports/commit/testing/nss_wrapper/APKBUILD?h=3.17-stable&id=94d81ceeb58cff448d489bbcbe9a6d40c9991663
+# https://git.alpinelinux.org/aports/tree/community/nss_wrapper/APKBUILD?h=3.22-stable#n7 ("ppc64le: test case segfaults")
 		$([ "$(apk --print-arch)" != 'ppc64le' ] && echo 'nss_wrapper') \
 	; \
 	apk del --no-network .build-deps; \

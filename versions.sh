@@ -7,8 +7,8 @@ supportedDebianSuites=(
 	bullseye
 )
 supportedAlpineVersions=(
+	3.22
 	3.21
-	3.20
 )
 defaultDebianSuite="${supportedDebianSuites[0]}"
 declare -A debianSuites=(
