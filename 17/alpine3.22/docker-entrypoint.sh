@@ -154,6 +154,29 @@ docker_verify_minimum_env() {
 		EOWARN
 	fi
 }
+# similar to the above, but errors if there are any "old" databases detected (usually due to upgrades without pg_upgrade)
+docker_error_old_databases() {
+	if [ -n "${OLD_DATABASES[0]:-}" ]; then
+		cat >&2 <<-EOE
+			Error: in 18+, these Docker images are configured to store database data in a
+			       format which is compatible with "pg_ctlcluster" (specifically, using
+			       major-version-specific directory names).  This better reflects how
+			       PostgreSQL itself works, and how upgrades are to be performed.
+
+			       See also https://github.com/docker-library/postgres/pull/1259
+
+			       Counter to that, there appears to be PostgreSQL data in:
+			         ${OLD_DATABASES[*]}
+
+			       This is usually the result of upgrading the Docker image without upgrading
+			       the underlying database using "pg_upgrade" (which requires both versions).
+
+			       See https://github.com/docker-library/postgres/issues/37 for a (long)
+			       discussion around this process, and suggestions for how to do so.
+		EOE
+		exit 1
+	fi
+}
 
 # usage: docker_process_init_files [file [file [...]]]
 #    ie: docker_process_init_files /always-initdb.d/*
@@ -230,9 +253,17 @@ docker_setup_env() {
 
 	declare -g DATABASE_ALREADY_EXISTS
 	: "${DATABASE_ALREADY_EXISTS:=}"
+	declare -ag OLD_DATABASES=()
 	# look specifically for PG_VERSION, as it is expected in the DB dir
 	if [ -s "$PGDATA/PG_VERSION" ]; then
 		DATABASE_ALREADY_EXISTS='true'
+	elif [ "$PGDATA" = "/var/lib/postgresql/$PG_MAJOR/docker" ]; then
+		# https://github.com/docker-library/postgres/pull/1259
+		for d in /var/lib/postgresql /var/lib/postgresql/data /var/lib/postgresql/*/docker; do
+			if [ -s "$d/PG_VERSION" ]; then
+				OLD_DATABASES+=( "$d" )
+			fi
+		done
 	fi
 }
 
@@ -319,6 +350,7 @@ _main() {
 		# only run initialization on an empty data directory
 		if [ -z "$DATABASE_ALREADY_EXISTS" ]; then
 			docker_verify_minimum_env
+			docker_error_old_databases
 
 			# check dir permissions to reduce likelihood of half-initialized database
 			ls /docker-entrypoint-initdb.d/ > /dev/null
