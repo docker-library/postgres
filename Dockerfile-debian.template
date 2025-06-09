@@ -154,11 +154,13 @@ RUN set -ex; \
 	sed -ri 's/#(create_main_cluster) .*$/\1 = false/' /etc/postgresql-common/createcluster.conf; \
 	apt-get install -y --no-install-recommends \
 		"postgresql-$PG_MAJOR=$PG_VERSION" \
-{{ if .major >= 18 then ( -}}
-# https://github.com/docker-library/postgres/pull/1344#issuecomment-2936578203 (JIT is a separate package in 18+)
-		"postgresql-$PG_MAJOR-jit=$PG_VERSION" \
-{{ ) else "" end -}}
 	; \
+{{ if .major >= 18 then ( -}}
+# https://github.com/docker-library/postgres/pull/1344#issuecomment-2936578203 (JIT is a separate package in 18+, but only supported for a subset of architectures)
+	if apt-get install -s "postgresql-$PG_MAJOR-jit" > /dev/null 2>&1; then \
+		apt-get install -y --no-install-recommends "postgresql-$PG_MAJOR-jit=$PG_VERSION"; \
+	fi; \
+{{ ) else "" end -}}
 	\
 	rm -rf /var/lib/apt/lists/*; \
 	\
