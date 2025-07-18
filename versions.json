@@ -152,7 +152,7 @@
         "arm64",
         "ppc64el"
       ],
-      "version": "18~beta1-1.pgdg120+1"
+      "version": "18~beta2-1.pgdg120+1"
     },
     "bullseye": {
       "arches": [
@@ -160,17 +160,17 @@
         "arm64",
         "ppc64el"
       ],
-      "version": "18~beta1-1.pgdg110+1"
+      "version": "18~beta2-1.pgdg110+1"
     },
     "debian": "bookworm",
     "major": 18,
-    "sha256": "0b7c83df6195398aa67dbf5c002e7fa4082be393aae99aa69926d483f98eb885",
+    "sha256": "1d16b58244b630194432b88d9ff25f5fea85a001ff2c715a157d4be6787f3075",
     "variants": [
       "bookworm",
       "bullseye",
       "alpine3.22",
       "alpine3.21"
     ],
-    "version": "18beta1"
+    "version": "18beta2"
   }
 }
