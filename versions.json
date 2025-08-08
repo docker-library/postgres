@@ -1,176 +1,176 @@
 {
-  "13": {
+  "18": {
     "alpine": "3.22",
-    "bookworm": {
+    "debian": "trixie",
+    "trixie": {
+      "version": "18~beta2-1.pgdg130+1",
       "arches": [
         "amd64",
         "arm64",
         "ppc64el"
-      ],
-      "version": "13.21-1.pgdg120+1"
+      ]
     },
-    "bullseye": {
-      "arches": [
-        "amd64",
-        "arm64",
-        "ppc64el"
-      ],
-      "version": "13.21-1.pgdg110+1"
-    },
-    "debian": "bookworm",
-    "major": 13,
-    "sha256": "dcda1294df45f033b0656cf7a8e4afbbc624c25e1b144aec79530f74d7ef4ab4",
     "variants": [
+      "trixie",
       "bookworm",
-      "bullseye",
       "alpine3.22",
       "alpine3.21"
     ],
-    "version": "13.21"
-  },
-  "14": {
-    "alpine": "3.22",
     "bookworm": {
+      "version": "18~beta2-1.pgdg120+1",
       "arches": [
         "amd64",
         "arm64",
         "ppc64el"
-      ],
-      "version": "14.18-1.pgdg120+1"
+      ]
     },
-    "bullseye": {
-      "arches": [
-        "amd64",
-        "arm64",
-        "ppc64el"
-      ],
-      "version": "14.18-1.pgdg110+1"
-    },
-    "debian": "bookworm",
-    "major": 14,
-    "sha256": "83ab29d6bfc3dc58b2ed3c664114fdfbeb6a0450c4b8d7fa69aee91e3ca14f8e",
-    "variants": [
-      "bookworm",
-      "bullseye",
-      "alpine3.22",
-      "alpine3.21"
-    ],
-    "version": "14.18"
-  },
-  "15": {
-    "alpine": "3.22",
-    "bookworm": {
-      "arches": [
-        "amd64",
-        "arm64",
-        "ppc64el"
-      ],
-      "version": "15.13-1.pgdg120+1"
-    },
-    "bullseye": {
-      "arches": [
-        "amd64",
-        "arm64",
-        "ppc64el"
-      ],
-      "version": "15.13-1.pgdg110+1"
-    },
-    "debian": "bookworm",
-    "major": 15,
-    "sha256": "4f62e133d22ea08a0401b0840920e26698644d01a80c34341fb732dd0a90ca5d",
-    "variants": [
-      "bookworm",
-      "bullseye",
-      "alpine3.22",
-      "alpine3.21"
-    ],
-    "version": "15.13"
-  },
-  "16": {
-    "alpine": "3.22",
-    "bookworm": {
-      "arches": [
-        "amd64",
-        "arm64",
-        "ppc64el"
-      ],
-      "version": "16.9-1.pgdg120+1"
-    },
-    "bullseye": {
-      "arches": [
-        "amd64",
-        "arm64",
-        "ppc64el"
-      ],
-      "version": "16.9-1.pgdg110+1"
-    },
-    "debian": "bookworm",
-    "major": 16,
-    "sha256": "07c00fb824df0a0c295f249f44691b86e3266753b380c96f633c3311e10bd005",
-    "variants": [
-      "bookworm",
-      "bullseye",
-      "alpine3.22",
-      "alpine3.21"
-    ],
-    "version": "16.9"
+    "version": "18beta2",
+    "sha256": "1d16b58244b630194432b88d9ff25f5fea85a001ff2c715a157d4be6787f3075",
+    "major": 18
   },
   "17": {
     "alpine": "3.22",
+    "debian": "trixie",
+    "trixie": {
+      "version": "17.5-1.pgdg130+1",
+      "arches": [
+        "amd64",
+        "arm64",
+        "ppc64el"
+      ]
+    },
+    "variants": [
+      "trixie",
+      "bookworm",
+      "alpine3.22",
+      "alpine3.21"
+    ],
     "bookworm": {
+      "version": "17.5-1.pgdg120+1",
       "arches": [
         "amd64",
         "arm64",
         "ppc64el"
-      ],
-      "version": "17.5-1.pgdg120+1"
+      ]
     },
-    "bullseye": {
-      "arches": [
-        "amd64",
-        "arm64",
-        "ppc64el"
-      ],
-      "version": "17.5-1.pgdg110+1"
-    },
-    "debian": "bookworm",
-    "major": 17,
+    "version": "17.5",
     "sha256": "fcb7ab38e23b264d1902cb25e6adafb4525a6ebcbd015434aeef9eda80f528d8",
-    "variants": [
-      "bookworm",
-      "bullseye",
-      "alpine3.22",
-      "alpine3.21"
-    ],
-    "version": "17.5"
+    "major": 17
   },
-  "18": {
+  "16": {
     "alpine": "3.22",
-    "bookworm": {
+    "debian": "trixie",
+    "trixie": {
+      "version": "16.9-1.pgdg130+1",
       "arches": [
         "amd64",
         "arm64",
         "ppc64el"
-      ],
-      "version": "18~beta2-1.pgdg120+1"
+      ]
     },
-    "bullseye": {
-      "arches": [
-        "amd64",
-        "arm64",
-        "ppc64el"
-      ],
-      "version": "18~beta2-1.pgdg110+1"
-    },
-    "debian": "bookworm",
-    "major": 18,
-    "sha256": "1d16b58244b630194432b88d9ff25f5fea85a001ff2c715a157d4be6787f3075",
     "variants": [
+      "trixie",
       "bookworm",
-      "bullseye",
       "alpine3.22",
       "alpine3.21"
     ],
-    "version": "18beta2"
+    "bookworm": {
+      "version": "16.9-1.pgdg120+1",
+      "arches": [
+        "amd64",
+        "arm64",
+        "ppc64el"
+      ]
+    },
+    "version": "16.9",
+    "sha256": "07c00fb824df0a0c295f249f44691b86e3266753b380c96f633c3311e10bd005",
+    "major": 16
+  },
+  "15": {
+    "alpine": "3.22",
+    "debian": "trixie",
+    "trixie": {
+      "version": "15.13-1.pgdg130+1",
+      "arches": [
+        "amd64",
+        "arm64",
+        "ppc64el"
+      ]
+    },
+    "variants": [
+      "trixie",
+      "bookworm",
+      "alpine3.22",
+      "alpine3.21"
+    ],
+    "bookworm": {
+      "version": "15.13-1.pgdg120+1",
+      "arches": [
+        "amd64",
+        "arm64",
+        "ppc64el"
+      ]
+    },
+    "version": "15.13",
+    "sha256": "4f62e133d22ea08a0401b0840920e26698644d01a80c34341fb732dd0a90ca5d",
+    "major": 15
+  },
+  "14": {
+    "alpine": "3.22",
+    "debian": "trixie",
+    "trixie": {
+      "version": "14.18-1.pgdg130+1",
+      "arches": [
+        "amd64",
+        "arm64",
+        "ppc64el"
+      ]
+    },
+    "variants": [
+      "trixie",
+      "bookworm",
+      "alpine3.22",
+      "alpine3.21"
+    ],
+    "bookworm": {
+      "version": "14.18-1.pgdg120+1",
+      "arches": [
+        "amd64",
+        "arm64",
+        "ppc64el"
+      ]
+    },
+    "version": "14.18",
+    "sha256": "83ab29d6bfc3dc58b2ed3c664114fdfbeb6a0450c4b8d7fa69aee91e3ca14f8e",
+    "major": 14
+  },
+  "13": {
+    "alpine": "3.22",
+    "debian": "trixie",
+    "trixie": {
+      "version": "13.21-1.pgdg130+1",
+      "arches": [
+        "amd64",
+        "arm64",
+        "ppc64el"
+      ]
+    },
+    "variants": [
+      "trixie",
+      "bookworm",
+      "alpine3.22",
+      "alpine3.21"
+    ],
+    "bookworm": {
+      "version": "13.21-1.pgdg120+1",
+      "arches": [
+        "amd64",
+        "arm64",
+        "ppc64el"
+      ]
+    },
+    "version": "13.21",
+    "sha256": "dcda1294df45f033b0656cf7a8e4afbbc624c25e1b144aec79530f74d7ef4ab4",
+    "major": 13
   }
 }
