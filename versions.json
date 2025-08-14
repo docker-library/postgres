@@ -119,7 +119,7 @@
     "alpine": "3.22",
     "debian": "trixie",
     "trixie": {
-      "version": "14.18-1.pgdg130+1",
+      "version": "14.19-1.pgdg13+1",
       "arches": [
         "amd64",
         "arm64",
@@ -133,15 +133,15 @@
       "alpine3.21"
     ],
     "bookworm": {
-      "version": "14.18-1.pgdg120+1",
+      "version": "14.19-1.pgdg12+1",
       "arches": [
         "amd64",
         "arm64",
         "ppc64el"
       ]
     },
-    "version": "14.18",
-    "sha256": "83ab29d6bfc3dc58b2ed3c664114fdfbeb6a0450c4b8d7fa69aee91e3ca14f8e",
+    "version": "14.19",
+    "sha256": "727e9e334bc1a31940df808259f69fe47a59f6d42174b22ae62d67fe7a01ad80",
     "major": 14
   },
   "13": {
