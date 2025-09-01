@@ -251,6 +251,35 @@ docker_setup_env() {
 	file_env 'POSTGRES_INITDB_ARGS'
 	: "${POSTGRES_HOST_AUTH_METHOD:=}"
 
+	# ----------------------------
+	# pgBackRest environment helpers (opt-in)
+	# Default: disabled. Set ENABLE_PGBACKREST=true to opt in.
+	file_env 'ENABLE_PGBACKREST' 'false'        # true/false - global opt-in for pgBackRest operations at init
+	# Whether the init script should automatically ALTER SYSTEM to enable archive settings
+	# In production, prefer to manage Postgres config externally (GitOps). Default false.
+	file_env 'ENABLE_PG_ALTER_SYSTEM' 'false'
+	# pgBackRest runtime configuration (only used if ENABLE_PGBACKREST=true)
+	file_env 'PGBACKREST_REPO_PATH' '/var/lib/pgbackrest'
+	file_env 'PGBACKREST_LOG_PATH' '/var/log/pgbackrest'
+	file_env 'PGBACKREST_CONF_PATH' '/etc/pgbackrest/pgbackrest.conf'
+	file_env 'PGBACKREST_REPO_TYPE' 'local'     # local | s3
+	file_env 'PGBACKREST_STANZA' 'main'
+	file_env 'PGBACKREST_REPO1_RETENTION_FULL' ''
+	file_env 'PGBACKREST_LOG_LEVEL' 'info'
+	# S3 secrets (prefer *_FILE)
+	file_env 'PGBACKREST_S3_BUCKET' ''
+	file_env 'PGBACKREST_S3_REGION' ''
+	file_env 'PGBACKREST_S3_ENDPOINT' ''
+	file_env 'PGBACKREST_S3_KEY' ''
+	file_env 'PGBACKREST_S3_KEY_FILE' ''
+	file_env 'PGBACKREST_S3_KEY_SECRET' ''
+	file_env 'PGBACKREST_S3_KEY_SECRET_FILE' ''
+	# archive-related defaults
+	file_env 'PG_WAL_LEVEL' 'replica'
+	file_env 'PG_ARCHIVE_MODE' 'on'
+	file_env 'PG_ARCHIVE_TIMEOUT' '60'
+	# ----------------------------
+
 	declare -g DATABASE_ALREADY_EXISTS
 	: "${DATABASE_ALREADY_EXISTS:=}"
 	declare -ag OLD_DATABASES=()
@@ -265,6 +294,10 @@ docker_setup_env() {
 			fi
 		done
 	fi
+
+	# export a default PGBACKREST_CONFIG so manual pgbackrest commands inside the container pick it up
+	# override at runtime if you want a different path
+	export PGBACKREST_CONFIG="${PGBACKREST_CONF_PATH:-/etc/pgbackrest/pgbackrest.conf}"
 }
 
 # append POSTGRES_HOST_AUTH_METHOD to pg_hba.conf for "host" connections

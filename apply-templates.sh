@@ -61,6 +61,7 @@ for version; do
 			gawk -f "$jqt" "$template"
 		} > "$dir/Dockerfile"
 
-		cp -a docker-entrypoint.sh docker-ensure-initdb.sh "$dir/"
+		cp -a docker-entrypoint.sh docker-ensure-initdb.sh zz-pgbackrest-env.sh "$dir/"
+		chmod a+x "$dir/zz-pgbackrest-env.sh" || :
 	done
 done

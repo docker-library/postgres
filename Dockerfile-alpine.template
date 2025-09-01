@@ -227,7 +227,29 @@ RUN install --verbose --directory --owner postgres --group postgres --mode 1777 
 VOLUME /var/lib/postgresql/data
 {{ ) end -}}
 
+# ---------- pgBackRest (Alpine) - build-time opt-in ----------
+# Set INSTALL_PGBACKREST to "true" (default) to include pgBackRest in the image.
+ARG INSTALL_PGBACKREST=true
+
+RUN set -eux; \
+	if [ "${INSTALL_PGBACKREST}" = "true" ]; then \
+		# pgBackRest is packaged in Alpine community for many branches (edge, v3.18+).
+		# If apk fails, ensure the 'community' repository is enabled for your Alpine release.
+		apk update; \
+		apk add --no-cache pgbackrest || ( echo "pgBackRest package not available for this Alpine release; enable community repo or build from source" >&2 && exit 1 ); \
+		# create repo/log/config dirs (runtime init script will write config); set ownership
+		install --directory --owner postgres --group postgres --mode 0700 /var/lib/pgbackrest; \
+		install --directory --owner postgres --group postgres --mode 0755 /var/log/pgbackrest; \
+		mkdir -p /etc/pgbackrest; \
+		chown -R postgres:postgres /var/lib/pgbackrest /var/log/pgbackrest /etc/pgbackrest; \
+	else \
+		echo "Skipping pgBackRest package installation (INSTALL_PGBACKREST=false)"; \
+	fi
+
+# copy entrypoint + pgBackRest init helper; make helper executable
 COPY docker-entrypoint.sh docker-ensure-initdb.sh /usr/local/bin/
+COPY zz-pgbackrest-env.sh /docker-entrypoint-initdb.d/zz-pgbackrest-env.sh
+RUN chmod +x /docker-entrypoint-initdb.d/zz-pgbackrest-env.sh
 RUN ln -sT docker-ensure-initdb.sh /usr/local/bin/docker-enforce-initdb.sh
 ENTRYPOINT ["docker-entrypoint.sh"]
 
