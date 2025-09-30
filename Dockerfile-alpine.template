@@ -111,6 +111,11 @@ RUN set -eux; \
 # https://www.postgresql.org/docs/15/release-15.html "--with-zstd to enable Zstandard builds"
 		zstd-dev \
 {{ ) else "" end -}}
+{{ if .major >= 18 then ( -}}
+# https://salsa.debian.org/postgresql/postgresql-common/-/commit/89c384273f4c4092483598c292b1b1b188816cce
+# https://www.postgresql.org/docs/18/install-make.html#CONFIGURE-OPTION-WITH-LIBURING
+		liburing-dev \
+{{ ) else "" end -}}
 	; \
 	\
 	cd /usr/src/postgresql; \
@@ -126,8 +131,8 @@ RUN set -eux; \
 # https://git.alpinelinux.org/aports/tree/community/postgresql15/APKBUILD?h=3.22-stable#n180 ("older clang versions don't have a 'clang' exe anymore.")
 	export CLANG=clang-{{ llvmver }}; \
 	\
-# configure options taken from:
-# https://anonscm.debian.org/cgit/pkg-postgresql/postgresql.git/tree/debian/rules?h=9.5
+# configure options mostly copying Debian:
+# https://salsa.debian.org/postgresql/postgresql-common/-/blob/6e26b5107295170cc8731a3acbf13228ea15941e/server/postgresql.mk#L32
 	./configure \
 		--enable-option-checking=fatal \
 		--build="$gnuArch" \
@@ -154,19 +159,22 @@ RUN set -eux; \
 		--with-includes=/usr/local/include \
 		--with-libraries=/usr/local/lib \
 		--with-gssapi \
+		--with-icu \
 		--with-ldap \
-		--with-tcl \
-		--with-perl \
-		--with-python \
-#		--with-pam \
-		--with-openssl \
+{{ if .major >= 18 then ( -}}
+		--with-liburing \
+{{ ) else "" end -}}
 		--with-libxml \
 		--with-libxslt \
-		--with-icu \
 		--with-llvm \
 {{ if .major >= 14 then ( -}}
 		--with-lz4 \
 {{ ) else "" end -}}
+		--with-openssl \
+#		--with-pam \
+		--with-perl \
+		--with-python \
+		--with-tcl \
 {{ if .major >= 15 then ( -}}
 		--with-zstd \
 {{ ) else "" end -}}
