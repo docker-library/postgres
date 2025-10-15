@@ -189,7 +189,6 @@ RUN install --verbose --directory --owner postgres --group postgres --mode 3777 
 # NOTE: in 18+, PGDATA has changed to match the pg_ctlcluster standard directory structure, and the VOLUME has moved from /var/lib/postgresql/data to /var/lib/postgresql
 #
 ENV PGDATA /var/lib/postgresql/18/docker
-RUN ln -svT . /var/lib/postgresql/data # https://github.com/docker-library/postgres/pull/1259#issuecomment-2215477494
 VOLUME /var/lib/postgresql
 # ("/var/lib/postgresql" is already pre-created with suitably usable permissions above)
 

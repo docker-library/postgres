@@ -168,8 +168,14 @@ docker_error_old_databases() {
 			       Counter to that, there appears to be PostgreSQL data in:
 			         ${OLD_DATABASES[*]}
 
-			       This is usually the result of upgrading the Docker image without upgrading
-			       the underlying database using "pg_upgrade" (which requires both versions).
+			       This is usually the result of upgrading the Docker image without
+			       upgrading the underlying database using "pg_upgrade" (which requires both
+			       versions).
+
+			       The suggested container configuration for 18+ is to place a single mount
+			       at /var/lib/postgresql which will then place PostgreSQL data in a
+			       subdirectory, allowing usage of "pg_upgrade --link" without mount point
+			       boundary issues.
 
 			       See https://github.com/docker-library/postgres/issues/37 for a (long)
 			       discussion around this process, and suggestions for how to do so.
@@ -264,6 +270,9 @@ docker_setup_env() {
 				OLD_DATABASES+=( "$d" )
 			fi
 		done
+		if [ "${#OLD_DATABASES[@]}" -eq 0 ] && [ "$PG_MAJOR" -ge 18 ] && mountpoint -q /var/lib/postgresql/data; then
+			OLD_DATABASES+=( '/var/lib/postgresql/data (unused mount/volume)' )
+		fi
 	fi
 }
 
