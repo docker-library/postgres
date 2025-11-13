@@ -42,7 +42,7 @@ RUN set -eux; \
 # verify that the binary works
 	gosu --version; \
 	gosu nobody true
-{{ if env.version | IN("13", "14", "15", "16") then ( -}}
+{{ if env.version | IN("14", "15", "16") then ( -}}
 RUN set -eux; ln -svf gosu /usr/local/bin/su-exec; su-exec nobody true # backwards compatibility (removed in PostgreSQL 17+)
 {{ ) else "" end -}}
 
@@ -103,10 +103,8 @@ RUN set -eux; \
 		zlib-dev \
 # https://www.postgresql.org/docs/10/static/release-10.html#id-1.11.6.9.5.13
 		icu-dev \
-{{ if .major >= 14 then ( -}}
 # https://www.postgresql.org/docs/14/release-14.html#id-1.11.6.5.5.3.7
 		lz4-dev \
-{{ ) else "" end -}}
 {{ if .major >= 15 then ( -}}
 # https://www.postgresql.org/docs/15/release-15.html "--with-zstd to enable Zstandard builds"
 		zstd-dev \
@@ -167,9 +165,7 @@ RUN set -eux; \
 		--with-libxml \
 		--with-libxslt \
 		--with-llvm \
-{{ if .major >= 14 then ( -}}
 		--with-lz4 \
-{{ ) else "" end -}}
 		--with-openssl \
 #		--with-pam \
 		--with-perl \
