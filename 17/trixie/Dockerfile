@@ -89,7 +89,7 @@ RUN set -ex; \
 ENV PG_MAJOR 17
 ENV PATH $PATH:/usr/lib/postgresql/$PG_MAJOR/bin
 
-ENV PG_VERSION 17.6-2.pgdg13+1
+ENV PG_VERSION 17.7-3.pgdg13+1
 
 RUN set -ex; \
 	\
