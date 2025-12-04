@@ -4,7 +4,7 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-FROM alpine:3.21
+FROM alpine:3.23
 
 # 70 is the standard uid/gid for "postgres" in Alpine
 # https://git.alpinelinux.org/aports/tree/main/postgresql-common/postgresql-common.pre-install?h=3.22-stable
@@ -44,6 +44,7 @@ RUN set -eux; \
 # verify that the binary works
 	gosu --version; \
 	gosu nobody true
+RUN set -eux; ln -svf gosu /usr/local/bin/su-exec; su-exec nobody true # backwards compatibility (removed in PostgreSQL 17+)
 
 # make the "en_US.UTF-8" locale so postgres will be utf-8 enabled by default
 # alpine doesn't require explicit locale-file generation
@@ -51,9 +52,9 @@ ENV LANG en_US.utf8
 
 RUN mkdir /docker-entrypoint-initdb.d
 
-ENV PG_MAJOR 17
-ENV PG_VERSION 17.7
-ENV PG_SHA256 ef9e343302eccd33112f1b2f0247be493cb5768313adeb558b02de8797a2e9b5
+ENV PG_MAJOR 14
+ENV PG_VERSION 14.20
+ENV PG_SHA256 7527f10f1640761bc280ad97d105d286d0cf72e54d36d78cf68e5e5f752b646b
 
 ENV DOCKER_PG_LLVM_DEPS \
 		llvm19-dev \
@@ -100,8 +101,6 @@ RUN set -eux; \
 		icu-dev \
 # https://www.postgresql.org/docs/14/release-14.html#id-1.11.6.5.5.3.7
 		lz4-dev \
-# https://www.postgresql.org/docs/15/release-15.html "--with-zstd to enable Zstandard builds"
-		zstd-dev \
 	; \
 	\
 	cd /usr/src/postgresql; \
@@ -125,11 +124,13 @@ RUN set -eux; \
 # "/usr/src/postgresql/src/backend/access/common/tupconvert.c:105: undefined reference to `libintl_gettext'"
 #		--enable-nls \
 		--enable-integer-datetimes \
+		--enable-thread-safety \
 		--enable-tap-tests \
 # skip debugging info -- we want tiny size instead
 #		--enable-debug \
 		--disable-rpath \
 		--with-uuid=e2fs \
+		--with-gnu-ld \
 		--with-pgport=5432 \
 		--with-system-tzdata=/usr/share/zoneinfo \
 		--prefix=/usr/local \
@@ -147,7 +148,6 @@ RUN set -eux; \
 		--with-perl \
 		--with-python \
 		--with-tcl \
-		--with-zstd \
 	; \
 	make -j "$(nproc)" world-bin; \
 	make install-world-bin; \

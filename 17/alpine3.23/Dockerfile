@@ -4,7 +4,7 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-FROM alpine:3.21
+FROM alpine:3.23
 
 # 70 is the standard uid/gid for "postgres" in Alpine
 # https://git.alpinelinux.org/aports/tree/main/postgresql-common/postgresql-common.pre-install?h=3.22-stable
@@ -44,7 +44,6 @@ RUN set -eux; \
 # verify that the binary works
 	gosu --version; \
 	gosu nobody true
-RUN set -eux; ln -svf gosu /usr/local/bin/su-exec; su-exec nobody true # backwards compatibility (removed in PostgreSQL 17+)
 
 # make the "en_US.UTF-8" locale so postgres will be utf-8 enabled by default
 # alpine doesn't require explicit locale-file generation
@@ -52,9 +51,9 @@ ENV LANG en_US.utf8
 
 RUN mkdir /docker-entrypoint-initdb.d
 
-ENV PG_MAJOR 16
-ENV PG_VERSION 16.11
-ENV PG_SHA256 6deb08c23d03d77d8f8bd1c14049eeef64aef8968fd8891df2dfc0b42f178eac
+ENV PG_MAJOR 17
+ENV PG_VERSION 17.7
+ENV PG_SHA256 ef9e343302eccd33112f1b2f0247be493cb5768313adeb558b02de8797a2e9b5
 
 ENV DOCKER_PG_LLVM_DEPS \
 		llvm19-dev \
@@ -126,7 +125,6 @@ RUN set -eux; \
 # "/usr/src/postgresql/src/backend/access/common/tupconvert.c:105: undefined reference to `libintl_gettext'"
 #		--enable-nls \
 		--enable-integer-datetimes \
-		--enable-thread-safety \
 		--enable-tap-tests \
 # skip debugging info -- we want tiny size instead
 #		--enable-debug \
