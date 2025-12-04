@@ -4,7 +4,7 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-FROM alpine:3.21
+FROM alpine:3.23
 
 # 70 is the standard uid/gid for "postgres" in Alpine
 # https://git.alpinelinux.org/aports/tree/main/postgresql-common/postgresql-common.pre-install?h=3.22-stable
@@ -52,9 +52,9 @@ ENV LANG en_US.utf8
 
 RUN mkdir /docker-entrypoint-initdb.d
 
-ENV PG_MAJOR 14
-ENV PG_VERSION 14.20
-ENV PG_SHA256 7527f10f1640761bc280ad97d105d286d0cf72e54d36d78cf68e5e5f752b646b
+ENV PG_MAJOR 16
+ENV PG_VERSION 16.11
+ENV PG_SHA256 6deb08c23d03d77d8f8bd1c14049eeef64aef8968fd8891df2dfc0b42f178eac
 
 ENV DOCKER_PG_LLVM_DEPS \
 		llvm19-dev \
@@ -101,6 +101,8 @@ RUN set -eux; \
 		icu-dev \
 # https://www.postgresql.org/docs/14/release-14.html#id-1.11.6.5.5.3.7
 		lz4-dev \
+# https://www.postgresql.org/docs/15/release-15.html "--with-zstd to enable Zstandard builds"
+		zstd-dev \
 	; \
 	\
 	cd /usr/src/postgresql; \
@@ -130,7 +132,6 @@ RUN set -eux; \
 #		--enable-debug \
 		--disable-rpath \
 		--with-uuid=e2fs \
-		--with-gnu-ld \
 		--with-pgport=5432 \
 		--with-system-tzdata=/usr/share/zoneinfo \
 		--prefix=/usr/local \
@@ -148,6 +149,7 @@ RUN set -eux; \
 		--with-perl \
 		--with-python \
 		--with-tcl \
+		--with-zstd \
 	; \
 	make -j "$(nproc)" world-bin; \
 	make install-world-bin; \
