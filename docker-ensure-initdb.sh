@@ -27,7 +27,7 @@ docker_setup_env
 docker_create_db_directories
 if [ "$(id -u)" = '0' ]; then
 	# then restart script as postgres user
-	exec gosu postgres "$BASH_SOURCE" "$@"
+	exec setpriv --reuid=postgres --regid=postgres --clear-groups "$BASH_SOURCE" "$@"
 fi
 
 # only run initialization on an empty data directory
