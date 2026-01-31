@@ -378,5 +378,6 @@ _main() {
 }
 
 if ! _is_sourced; then
+	test -n "${ENTRYPOINT_XTRACE:-}" && set -x
 	_main "$@"
 fi
