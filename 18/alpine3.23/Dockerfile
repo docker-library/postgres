@@ -102,6 +102,8 @@ RUN set -eux; \
 		lz4-dev \
 # https://www.postgresql.org/docs/15/release-15.html "--with-zstd to enable Zstandard builds"
 		zstd-dev \
+# https://salsa.debian.org/postgresql/postgresql-common/-/commit/a31ce5b893c11e0f17a016e38c1882fbe1820081
+# https://www.postgresql.org/docs/18/install-make.html#CONFIGURE-OPTION-WITH-LIBCURL
 		libcurl \
 # https://salsa.debian.org/postgresql/postgresql-common/-/commit/89c384273f4c4092483598c292b1b1b188816cce
 # https://www.postgresql.org/docs/18/install-make.html#CONFIGURE-OPTION-WITH-LIBURING
