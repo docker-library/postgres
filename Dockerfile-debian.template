@@ -85,7 +85,7 @@ ENV PATH $PATH:/usr/lib/postgresql/$PG_MAJOR/bin
 
 ENV PG_VERSION {{ .[env.variant].version }}
 
-RUN set -ex; \
+RUN set -eux; \
 	\
 # see note below about "*.pyc" files
 	export PYTHONDONTWRITEBYTECODE=1; \
@@ -160,7 +160,7 @@ RUN set -ex; \
 	\
 	rm -rf /var/lib/apt/lists/*; \
 	\
-	if [ -n "$tempDir" ]; then \
+	if [ -v "tempDir" ]; then \
 # if we have leftovers from building, let's purge them (including extra, unnecessary build deps)
 		apt-get purge -y --auto-remove; \
 		rm -rf "$tempDir" /etc/apt/sources.list.d/temp.list; \
