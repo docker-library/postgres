@@ -377,6 +377,8 @@ _main() {
 
 			EOM
 		fi
+
+		unset "${!POSTGRES_@}"
 	fi
 
 	exec "$@"
