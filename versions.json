@@ -148,35 +148,5 @@
     "version": "15.20",
     "sha256": "30e65cbbb771a39b553ed2df7e65622e65647aed55dbc19bd0fe853ff0a08442",
     "major": 15
-  },
-  "14": {
-    "alpine": "3.24",
-    "debian": "trixie",
-    "trixie": {
-      "version": "14.25-1.pgdg13+1",
-      "arches": [
-        "amd64",
-        "arm64",
-        "loong64",
-        "ppc64el"
-      ]
-    },
-    "variants": [
-      "trixie",
-      "bookworm",
-      "alpine3.24",
-      "alpine3.23"
-    ],
-    "bookworm": {
-      "version": "14.25-1.pgdg12+1",
-      "arches": [
-        "amd64",
-        "arm64",
-        "ppc64el"
-      ]
-    },
-    "version": "14.25",
-    "sha256": "09af980eb3a5d0a8ad7a34b95031b1988bbcd430c87700a62d6234c0ed97ae4c",
-    "major": 14
   }
 }

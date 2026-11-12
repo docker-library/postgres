@@ -15,7 +15,7 @@ declare -A debianSuites=(
 )
 defaultAlpineVersion="${supportedAlpineVersions[0]}"
 declare -A alpineVersions=(
-	#[14]='3.16'
+	#[19]='3.24'
 )
 
 cd "$(dirname "$(readlink -f "$BASH_SOURCE")")"

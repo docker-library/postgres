@@ -42,7 +42,7 @@ RUN set -eux; \
 # verify that the binary works
 	gosu --version; \
 	gosu nobody true
-{{ if env.version | IN("14", "15", "16") then ( -}}
+{{ if env.version | IN("15", "16") then ( -}}
 RUN set -eux; ln -svf gosu /usr/local/bin/su-exec; su-exec nobody true # backwards compatibility (removed in PostgreSQL 17+)
 {{ ) else "" end -}}
 
@@ -101,14 +101,13 @@ RUN set -eux; \
 		tcl-dev \
 		util-linux-dev \
 		zlib-dev \
-# https://www.postgresql.org/docs/10/static/release-10.html#id-1.11.6.9.5.13
+# https://www.postgresql.org/docs/15/install-procedure.html#CONFIGURE-OPTIONS-FEATURES
+# https://www.postgresql.org/docs/16/install-make.html#CONFIGURE-OPTION-WITHOUT-ICU
 		icu-dev \
-# https://www.postgresql.org/docs/14/release-14.html#id-1.11.6.5.5.3.7
+# https://www.postgresql.org/docs/18/install-make.html#CONFIGURE-OPTION-WITH-LZ4
 		lz4-dev \
-{{ if .major >= 15 then ( -}}
-# https://www.postgresql.org/docs/15/release-15.html "--with-zstd to enable Zstandard builds"
+# https://www.postgresql.org/docs/18/install-make.html#CONFIGURE-OPTION-WITH-ZSTD
 		zstd-dev \
-{{ ) else "" end -}}
 {{ if .major >= 18 then ( -}}
 # https://salsa.debian.org/postgresql/postgresql-common/-/commit/a31ce5b893c11e0f17a016e38c1882fbe1820081
 # https://www.postgresql.org/docs/18/install-make.html#CONFIGURE-OPTION-WITH-LIBCURL
@@ -175,9 +174,7 @@ RUN set -eux; \
 		--with-perl \
 		--with-python \
 		--with-tcl \
-{{ if .major >= 15 then ( -}}
 		--with-zstd \
-{{ ) else "" end -}}
 	; \
 	make -j "$(nproc)" world-bin; \
 	make install-world-bin; \

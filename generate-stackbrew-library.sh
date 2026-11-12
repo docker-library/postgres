@@ -86,17 +86,17 @@ for version; do
 
 	fullVersion="$(jq -r '.[env.version].version' versions.json)"
 
-	# ex: 9.6.22, 13.3, or 14beta2
+	# ex: 18.7, or 19beta2
 	versionAliases=(
 		$fullVersion
 	)
 	# skip unadorned "version" on prereleases: https://www.postgresql.org/developer/beta/
-	# ex: 9.6, 13, or 14
+	# ex: 16, or 19
 	case "$fullVersion" in
 		*alpha* | *beta* | *rc*) ;;
 		*) versionAliases+=( $version ) ;;
 	esac
-	# ex: 9 or latest
+	# ex: 19 or latest
 	versionAliases+=(
 		${aliases[$version]:-}
 	)
