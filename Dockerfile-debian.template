@@ -18,6 +18,12 @@ RUN set -ex; \
 # (if "less" is available, it gets used as the default pager for psql, and it only adds ~1.5MiB to our image size)
 		less \
 	; \
+# Install tzdata-legacy on trixie and newer to maintain compatibility with
+# deprecated timezones.
+# https://github.com/docker-library/postgres/issues/1355
+	if apt-get install -s tzdata-legacy > /dev/null 2>&1; then \
+		apt-get install -y --no-install-recommends tzdata-legacy; \
+	fi; \
 	rm -rf /var/lib/apt/lists/*
 
 # grab gosu for easy step-down from root
