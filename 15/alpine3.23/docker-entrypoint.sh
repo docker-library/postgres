@@ -41,8 +41,8 @@ docker_create_db_directories() {
 	chmod 00700 "$PGDATA" || :
 
 	# ignore failure since it will be fine when using the image provided directory; see also https://github.com/docker-library/postgres/pull/289
-	mkdir -p /var/run/postgresql || :
-	chmod 03775 /var/run/postgresql || :
+	mkdir -p /run/postgresql || :
+	chmod 03775 /run/postgresql || :
 
 	# Create the transaction log directory before initdb is run so the directory is owned by the correct user
 	if [ -n "${POSTGRES_INITDB_WALDIR:-}" ]; then
@@ -56,7 +56,7 @@ docker_create_db_directories() {
 	# allow the container to be started with `--user`
 	if [ "$user" = '0' ]; then
 		find "$PGDATA" \! -user postgres -exec chown postgres '{}' +
-		find /var/run/postgresql \! -user postgres -exec chown postgres '{}' +
+		find /run/postgresql \! -user postgres -exec chown postgres '{}' +
 	fi
 }
 
