@@ -6,14 +6,18 @@
 
 FROM alpine:3.23
 
+# explicitly set user/group IDs
+RUN set -eux; \
 # 70 is the standard uid/gid for "postgres" in Alpine
 # https://git.alpinelinux.org/aports/tree/main/postgresql-common/postgresql-common.pre-install?h=3.22-stable
-RUN set -eux; \
 	addgroup -g 70 -S postgres; \
 	adduser -u 70 -S -D -G postgres -H -h /var/lib/postgresql -s /bin/sh postgres; \
+	\
 # also create the postgres user's home directory with appropriate permissions
 # see https://github.com/docker-library/postgres/issues/274
-	install --verbose --directory --owner postgres --group postgres --mode 1777 /var/lib/postgresql
+	install --verbose --directory --owner postgres --group postgres --mode 1777 /var/lib/postgresql; \
+	\
+	install --verbose --directory --owner postgres --group postgres --mode 3777 /run/postgresql
 
 # grab gosu for easy step-down from root
 # https://github.com/tianon/gosu/releases
@@ -111,10 +115,10 @@ RUN set -eux; \
 	; \
 	\
 	cd /usr/src/postgresql; \
-# update "DEFAULT_PGSOCKET_DIR" to "/var/run/postgresql" (matching Debian)
+# update "DEFAULT_PGSOCKET_DIR" to "/run/postgresql" (matching Debian)
 # see https://anonscm.debian.org/git/pkg-postgresql/postgresql.git/tree/debian/patches/51-default-sockets-in-var.patch?id=8b539fcb3e093a521c095e70bdfa76887217b89f
-	awk '$1 == "#define" && $2 == "DEFAULT_PGSOCKET_DIR" && $3 == "\"/tmp\"" { $3 = "\"/var/run/postgresql\""; print; next } { print }' src/include/pg_config_manual.h > src/include/pg_config_manual.h.new; \
-	grep '/var/run/postgresql' src/include/pg_config_manual.h.new; \
+	awk '$1 == "#define" && $2 == "DEFAULT_PGSOCKET_DIR" && $3 == "\"/tmp\"" { $3 = "\"/run/postgresql\""; print; next } { print }' src/include/pg_config_manual.h > src/include/pg_config_manual.h.new; \
+	grep '/run/postgresql' src/include/pg_config_manual.h.new; \
 	mv src/include/pg_config_manual.h.new src/include/pg_config_manual.h; \
 	gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
 	\
@@ -195,8 +199,6 @@ RUN set -eux; \
 	cp -v /usr/local/share/postgresql/postgresql.conf.sample /usr/local/share/postgresql/postgresql.conf.sample.orig; \
 	sed -ri "s!^#?(listen_addresses)\s*=\s*\S+.*!\1 = '*'!" /usr/local/share/postgresql/postgresql.conf.sample; \
 	grep -F "listen_addresses = '*'" /usr/local/share/postgresql/postgresql.conf.sample
-
-RUN install --verbose --directory --owner postgres --group postgres --mode 3777 /var/run/postgresql
 
 #
 # NOTE: in 18+, PGDATA has changed to match the pg_ctlcluster standard directory structure, and the VOLUME has moved from /var/lib/postgresql/data to /var/lib/postgresql
