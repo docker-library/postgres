@@ -96,11 +96,12 @@ RUN set -eux; \
 		tcl-dev \
 		util-linux-dev \
 		zlib-dev \
-# https://www.postgresql.org/docs/10/static/release-10.html#id-1.11.6.9.5.13
+# https://www.postgresql.org/docs/15/install-procedure.html#CONFIGURE-OPTIONS-FEATURES
+# https://www.postgresql.org/docs/16/install-make.html#CONFIGURE-OPTION-WITHOUT-ICU
 		icu-dev \
-# https://www.postgresql.org/docs/14/release-14.html#id-1.11.6.5.5.3.7
+# https://www.postgresql.org/docs/18/install-make.html#CONFIGURE-OPTION-WITH-LZ4
 		lz4-dev \
-# https://www.postgresql.org/docs/15/release-15.html "--with-zstd to enable Zstandard builds"
+# https://www.postgresql.org/docs/18/install-make.html#CONFIGURE-OPTION-WITH-ZSTD
 		zstd-dev \
 # https://salsa.debian.org/postgresql/postgresql-common/-/commit/a31ce5b893c11e0f17a016e38c1882fbe1820081
 # https://www.postgresql.org/docs/18/install-make.html#CONFIGURE-OPTION-WITH-LIBCURL
