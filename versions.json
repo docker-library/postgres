@@ -33,7 +33,7 @@
     "alpine": "3.24",
     "debian": "trixie",
     "trixie": {
-      "version": "18.7-1.pgdg13+2",
+      "version": "18.7-1.pgdg13+5",
       "arches": [
         "amd64",
         "arm64",
@@ -48,7 +48,7 @@
       "alpine3.23"
     ],
     "bookworm": {
-      "version": "18.7-1.pgdg12+2",
+      "version": "18.7-1.pgdg12+5",
       "arches": [
         "amd64",
         "arm64",
