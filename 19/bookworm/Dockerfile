@@ -99,7 +99,7 @@ RUN set -ex; \
 ENV PG_MAJOR 19
 ENV PATH $PATH:/usr/lib/postgresql/$PG_MAJOR/bin
 
-ENV PG_VERSION 19.0-1.pgdg12+1
+ENV PG_VERSION 19.0-2.pgdg12+1
 
 RUN set -ex; \
 	\
